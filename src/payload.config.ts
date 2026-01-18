@@ -24,6 +24,7 @@ export default buildConfig({
           Component: './components/LoginView.tsx',
         },
       },
+      actions: ['./components/ThemeToggle', './components/LogoutButton'],
     },
   },
   collections: [Users, Media],
