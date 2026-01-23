@@ -10,6 +10,9 @@ import { OAuth2Plugin } from 'payload-oauth2'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
+import { CategoriaPiatti } from './collections/CategoriaPiatti'
+import { Allergene } from './collections/Allergene'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,7 +36,7 @@ export default buildConfig({
       ],
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, CategoriaMenuFisso, CategoriaPiatti, Allergene],
   editor: lexicalEditor(),
   i18n: {
     supportedLanguages: { en, it },

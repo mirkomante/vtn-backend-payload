@@ -68,6 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    'categoria-menu-fisso': CategoriaMenuFisso;
+    'categoria-piatti': CategoriaPiatti;
+    allergeni: Allergeni;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +80,9 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    'categoria-menu-fisso': CategoriaMenuFissoSelect<false> | CategoriaMenuFissoSelect<true>;
+    'categoria-piatti': CategoriaPiattiSelect<false> | CategoriaPiattiSelect<true>;
+    allergeni: AllergeniSelect<false> | AllergeniSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -137,6 +143,62 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categoria-menu-fisso".
+ */
+export interface CategoriaMenuFisso {
+  id: number;
+  nome: string;
+  /**
+   * Descrizione opzionale della categoria
+   */
+  descrizione?: string | null;
+  /**
+   * Se la categoria è visibile nel menu
+   */
+  inLista?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categoria-piatti".
+ */
+export interface CategoriaPiatti {
+  id: number;
+  nome: string;
+  /**
+   * Descrizione opzionale della categoria
+   */
+  descrizione?: string | null;
+  /**
+   * Se la categoria è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allergeni".
+ */
+export interface Allergeni {
+  id: number;
+  /**
+   * Nome dell'allergene (es. 'Glutine', 'Latte', 'Uova')
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale dell'allergene
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -174,6 +236,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categoria-menu-fisso';
+        value: number | CategoriaMenuFisso;
+      } | null)
+    | ({
+        relationTo: 'categoria-piatti';
+        value: number | CategoriaPiatti;
+      } | null)
+    | ({
+        relationTo: 'allergeni';
+        value: number | Allergeni;
       } | null)
     | ({
         relationTo: 'users';
@@ -238,6 +312,41 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categoria-menu-fisso_select".
+ */
+export interface CategoriaMenuFissoSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  inLista?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categoria-piatti_select".
+ */
+export interface CategoriaPiattiSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  inLista?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allergeni_select".
+ */
+export interface AllergeniSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
