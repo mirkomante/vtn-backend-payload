@@ -1,5 +1,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { en } from '@payloadcms/translations/languages/en'
+import { it } from '@payloadcms/translations/languages/it'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -24,11 +26,19 @@ export default buildConfig({
           Component: './components/LoginView.tsx',
         },
       },
-      actions: ['./components/ThemeToggle', './components/LogoutButton'],
+      actions: [
+        './components/ThemeToggle',
+        './components/LanguageToggle',
+        './components/LogoutButton',
+      ],
     },
   },
   collections: [Users, Media],
   editor: lexicalEditor(),
+  i18n: {
+    supportedLanguages: { en, it },
+    fallbackLanguage: 'en',
+  },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

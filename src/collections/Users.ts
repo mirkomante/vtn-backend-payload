@@ -4,6 +4,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
+    group: 'Admin',
   },
   auth: {
     disableLocalStrategy: true, // Disabilita login con email/password
