@@ -1,0 +1,114 @@
+import type { CollectionConfig } from 'payload'
+import {
+  menuRistoranteReadAccess,
+  menuRistoranteUpdateAccess,
+  menuRistoranteDeleteAccess,
+} from '../access/menuRistoranteAccess'
+import { nomeField, descrizioneField, inListaField, prezzoField } from './fields/commonFields'
+
+export const Piatti: CollectionConfig = {
+  slug: 'piatti',
+  labels: {
+    singular: 'Piatto',
+    plural: 'Piatti',
+  },
+  admin: {
+    useAsTitle: 'nome',
+    group: 'Menu ristorante',
+    defaultColumns: ['nome', 'categoria', 'prezzo', 'inLista', '_status', 'createdAt'],
+  },
+  fields: [
+    nomeField({ description: 'Nome del piatto' }),
+    descrizioneField({ description: 'Descrizione opzionale del piatto' }),
+    prezzoField({ description: 'Prezzo del piatto (max 10 cifre, 2 decimali)' }),
+    inListaField({
+      description: 'Se il piatto è visibile nel menu pubblico',
+      defaultValue: true,
+    }),
+    {
+      name: 'glutenFree',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Senza Glutine',
+      admin: {
+        description: 'Se il piatto è senza glutine',
+      },
+    },
+    {
+      name: 'noUovo',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'No Uovo',
+      admin: {
+        description: 'Se il piatto non contiene uova',
+      },
+    },
+    {
+      name: 'noLatticini',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'No Latticini',
+      admin: {
+        description: 'Se il piatto non contiene latticini',
+      },
+    },
+    {
+      name: 'vegan',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Vegano',
+      admin: {
+        description: 'Se il piatto è vegano',
+      },
+    },
+    {
+      name: 'soloMenuFissi',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Solo Menu Fissi',
+      admin: {
+        description: 'Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)',
+      },
+    },
+    {
+      name: 'categoria',
+      type: 'relationship',
+      relationTo: 'categoria-piatti',
+      required: true,
+      label: 'Categoria',
+      admin: {
+        description: 'Categoria del piatto',
+      },
+    },
+    {
+      name: 'allergeni',
+      type: 'relationship',
+      relationTo: 'allergeni',
+      hasMany: true,
+      label: 'Allergeni',
+      admin: {
+        description: 'Allergeni presenti nel piatto',
+      },
+    },
+    // TODO: Aggiungere campo menuFissi quando la collection menu-fisso sarà creata
+    // {
+    //   name: 'menuFissi',
+    //   type: 'relationship',
+    //   relationTo: 'menu-fisso',
+    //   hasMany: true,
+    //   label: 'Menu Fissi',
+    //   admin: {
+    //     description: 'Menu fissi che includono questo piatto',
+    //   },
+    // },
+  ],
+  versions: {
+    drafts: true,
+  },
+  timestamps: true,
+  access: {
+    read: menuRistoranteReadAccess,
+    update: menuRistoranteUpdateAccess,
+    delete: menuRistoranteDeleteAccess,
+  },
+}

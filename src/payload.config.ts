@@ -13,6 +13,7 @@ import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
+import { Piatti } from './collections/Piatti'
 import { Allergene } from './collections/Allergene'
 import { Nazione } from './collections/Nazione'
 import { Regione } from './collections/Regione'
@@ -40,27 +41,24 @@ export default buildConfig({
           Component: './components/LoginView.tsx',
         },
       },
-      actions: [
-        './components/ThemeToggle',
-        './components/LanguageToggle',
-        './components/LogoutButton',
-      ],
+      afterNavLinks: ['./components/NavFooter'],
     },
   },
   collections: [
     Users,
     Media,
+    Piatti,
+    Allergene,
     CategoriaMenuFisso,
     CategoriaPiatti,
-    Allergene,
-    Nazione,
-    Regione,
-    Zona,
     TipologiaVino,
     TipologiaBirra,
     TipologiaLiquore,
     TipologiaCocktail,
     TipologiaBevanda,
+    Nazione,
+    Regione,
+    Zona,
   ],
   editor: lexicalEditor(),
   i18n: {

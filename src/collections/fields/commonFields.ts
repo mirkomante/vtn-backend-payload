@@ -50,3 +50,39 @@ export const inListaField = (options?: {
     },
   },
 })
+
+/**
+ * Campo prezzo comune per i piatti
+ * Max 10 cifre totali, 2 decimali (es. 99999999.99)
+ */
+export const prezzoField = (options?: {
+  description?: string
+}): Field => ({
+  name: 'prezzo',
+  type: 'number',
+  required: true,
+  label: 'Prezzo',
+  min: 0,
+  max: 99999999.99,
+  admin: {
+    description: options?.description || 'Prezzo del piatto (max 10 cifre, 2 decimali)',
+    step: 0.01,
+  },
+  validate: (value) => {
+    if (value === undefined || value === null) {
+      return 'Il prezzo è obbligatorio'
+    }
+    if (value < 0) {
+      return 'Il prezzo non può essere negativo'
+    }
+    if (value > 99999999.99) {
+      return 'Il prezzo non può superare 99999999.99'
+    }
+    // Verifica che non ci siano più di 2 decimali
+    const decimalPart = value.toString().split('.')[1]
+    if (decimalPart && decimalPart.length > 2) {
+      return 'Il prezzo può avere massimo 2 decimali'
+    }
+    return true
+  },
+})

@@ -68,17 +68,18 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    piatti: Piatti;
+    allergeni: Allergeni;
     'categoria-menu-fisso': CategoriaMenuFisso;
     'categoria-piatti': CategoriaPiatti;
-    allergeni: Allergeni;
-    nazioni: Nazioni;
-    regioni: Regioni;
-    zone: Zone;
     'tipologie-vino': TipologieVino;
     'tipologie-birra': TipologieBirra;
     'tipologie-liquore': TipologieLiquore;
     'tipologie-cocktail': TipologieCocktail;
     'tipologie-bevanda': TipologieBevanda;
+    nazioni: Nazioni;
+    regioni: Regioni;
+    zone: Zone;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -88,17 +89,18 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    piatti: PiattiSelect<false> | PiattiSelect<true>;
+    allergeni: AllergeniSelect<false> | AllergeniSelect<true>;
     'categoria-menu-fisso': CategoriaMenuFissoSelect<false> | CategoriaMenuFissoSelect<true>;
     'categoria-piatti': CategoriaPiattiSelect<false> | CategoriaPiattiSelect<true>;
-    allergeni: AllergeniSelect<false> | AllergeniSelect<true>;
-    nazioni: NazioniSelect<false> | NazioniSelect<true>;
-    regioni: RegioniSelect<false> | RegioniSelect<true>;
-    zone: ZoneSelect<false> | ZoneSelect<true>;
     'tipologie-vino': TipologieVinoSelect<false> | TipologieVinoSelect<true>;
     'tipologie-birra': TipologieBirraSelect<false> | TipologieBirraSelect<true>;
     'tipologie-liquore': TipologieLiquoreSelect<false> | TipologieLiquoreSelect<true>;
     'tipologie-cocktail': TipologieCocktailSelect<false> | TipologieCocktailSelect<true>;
     'tipologie-bevanda': TipologieBevandaSelect<false> | TipologieBevandaSelect<true>;
+    nazioni: NazioniSelect<false> | NazioniSelect<true>;
+    regioni: RegioniSelect<false> | RegioniSelect<true>;
+    zone: ZoneSelect<false> | ZoneSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -159,19 +161,54 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categoria-menu-fisso".
+ * via the `definition` "piatti".
  */
-export interface CategoriaMenuFisso {
+export interface Piatti {
   id: number;
+  /**
+   * Nome del piatto
+   */
   nome: string;
   /**
-   * Descrizione opzionale della categoria
+   * Descrizione opzionale del piatto
    */
   descrizione?: string | null;
   /**
-   * Se la categoria è visibile nel menu
+   * Prezzo del piatto (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il piatto è visibile nel menu pubblico
    */
   inLista?: boolean | null;
+  /**
+   * Se il piatto è senza glutine
+   */
+  glutenFree?: boolean | null;
+  /**
+   * Se il piatto non contiene uova
+   */
+  noUovo?: boolean | null;
+  /**
+   * Se il piatto non contiene latticini
+   */
+  noLatticini?: boolean | null;
+  /**
+   * Se il piatto è vegano
+   */
+  vegan?: boolean | null;
+  /**
+   * Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)
+   */
+  soloMenuFissi?: boolean | null;
+  /**
+   * Categoria del piatto
+   */
+  categoria: number | CategoriaPiatti;
+  /**
+   * Allergeni presenti nel piatto
+   */
+  allergeni?: (number | Allergeni)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -215,52 +252,19 @@ export interface Allergeni {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nazioni".
+ * via the `definition` "categoria-menu-fisso".
  */
-export interface Nazioni {
+export interface CategoriaMenuFisso {
   id: number;
-  /**
-   * Nome della nazione (es. 'Italia', 'Francia')
-   */
   nome: string;
   /**
-   * Sigla ISO alpha-3 (es. ITA, FRA)
+   * Descrizione opzionale della categoria
    */
-  sigla: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "regioni".
- */
-export interface Regioni {
-  id: number;
+  descrizione?: string | null;
   /**
-   * Nome della regione (es. 'Toscana', 'Piemonte')
+   * Se la categoria è visibile nel menu
    */
-  nome: string;
-  nazione: number | Nazioni;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "zone".
- */
-export interface Zone {
-  id: number;
-  /**
-   * Nome della zona (es. 'Chianti', 'Barolo')
-   */
-  nome: string;
-  regione: number | Regioni;
-  /**
-   * Per facilitare le query
-   */
-  nazione: number | Nazioni;
+  inLista?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -342,6 +346,58 @@ export interface TipologieBevanda {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nazioni".
+ */
+export interface Nazioni {
+  id: number;
+  /**
+   * Nome della nazione (es. 'Italia', 'Francia')
+   */
+  nome: string;
+  /**
+   * Sigla ISO alpha-3 (es. ITA, FRA)
+   */
+  sigla: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regioni".
+ */
+export interface Regioni {
+  id: number;
+  /**
+   * Nome della regione (es. 'Toscana', 'Piemonte')
+   */
+  nome: string;
+  nazione: number | Nazioni;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zone".
+ */
+export interface Zone {
+  id: number;
+  /**
+   * Nome della zona (es. 'Chianti', 'Barolo')
+   */
+  nome: string;
+  regione: number | Regioni;
+  /**
+   * Per facilitare le query
+   */
+  nazione: number | Nazioni;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -381,28 +437,20 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'categoria-menu-fisso';
-        value: number | CategoriaMenuFisso;
-      } | null)
-    | ({
-        relationTo: 'categoria-piatti';
-        value: number | CategoriaPiatti;
+        relationTo: 'piatti';
+        value: number | Piatti;
       } | null)
     | ({
         relationTo: 'allergeni';
         value: number | Allergeni;
       } | null)
     | ({
-        relationTo: 'nazioni';
-        value: number | Nazioni;
+        relationTo: 'categoria-menu-fisso';
+        value: number | CategoriaMenuFisso;
       } | null)
     | ({
-        relationTo: 'regioni';
-        value: number | Regioni;
-      } | null)
-    | ({
-        relationTo: 'zone';
-        value: number | Zone;
+        relationTo: 'categoria-piatti';
+        value: number | CategoriaPiatti;
       } | null)
     | ({
         relationTo: 'tipologie-vino';
@@ -423,6 +471,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tipologie-bevanda';
         value: number | TipologieBevanda;
+      } | null)
+    | ({
+        relationTo: 'nazioni';
+        value: number | Nazioni;
+      } | null)
+    | ({
+        relationTo: 'regioni';
+        value: number | Regioni;
+      } | null)
+    | ({
+        relationTo: 'zone';
+        value: number | Zone;
       } | null)
     | ({
         relationTo: 'users';
@@ -490,6 +550,37 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "piatti_select".
+ */
+export interface PiattiSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  prezzo?: T;
+  inLista?: T;
+  glutenFree?: T;
+  noUovo?: T;
+  noLatticini?: T;
+  vegan?: T;
+  soloMenuFissi?: T;
+  categoria?: T;
+  allergeni?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allergeni_select".
+ */
+export interface AllergeniSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categoria-menu-fisso_select".
  */
 export interface CategoriaMenuFissoSelect<T extends boolean = true> {
@@ -508,51 +599,6 @@ export interface CategoriaPiattiSelect<T extends boolean = true> {
   nome?: T;
   descrizione?: T;
   inLista?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "allergeni_select".
- */
-export interface AllergeniSelect<T extends boolean = true> {
-  nome?: T;
-  descrizione?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nazioni_select".
- */
-export interface NazioniSelect<T extends boolean = true> {
-  nome?: T;
-  sigla?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "regioni_select".
- */
-export interface RegioniSelect<T extends boolean = true> {
-  nome?: T;
-  nazione?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "zone_select".
- */
-export interface ZoneSelect<T extends boolean = true> {
-  nome?: T;
-  regione?: T;
-  nazione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -608,6 +654,40 @@ export interface TipologieCocktailSelect<T extends boolean = true> {
 export interface TipologieBevandaSelect<T extends boolean = true> {
   nome?: T;
   descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nazioni_select".
+ */
+export interface NazioniSelect<T extends boolean = true> {
+  nome?: T;
+  sigla?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regioni_select".
+ */
+export interface RegioniSelect<T extends boolean = true> {
+  nome?: T;
+  nazione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zone_select".
+ */
+export interface ZoneSelect<T extends boolean = true> {
+  nome?: T;
+  regione?: T;
+  nazione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
