@@ -13,6 +13,16 @@ import { Media } from './collections/Media'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
 import { Allergene } from './collections/Allergene'
+import { Nazione } from './collections/Nazione'
+import { Regione } from './collections/Regione'
+import { Zona } from './collections/Zona'
+import {
+  TipologiaVino,
+  TipologiaBirra,
+  TipologiaLiquore,
+  TipologiaCocktail,
+  TipologiaBevanda,
+} from './collections/Tipologie'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,7 +46,21 @@ export default buildConfig({
       ],
     },
   },
-  collections: [Users, Media, CategoriaMenuFisso, CategoriaPiatti, Allergene],
+  collections: [
+    Users,
+    Media,
+    CategoriaMenuFisso,
+    CategoriaPiatti,
+    Allergene,
+    Nazione,
+    Regione,
+    Zona,
+    TipologiaVino,
+    TipologiaBirra,
+    TipologiaLiquore,
+    TipologiaCocktail,
+    TipologiaBevanda,
+  ],
   editor: lexicalEditor(),
   i18n: {
     supportedLanguages: { en, it },

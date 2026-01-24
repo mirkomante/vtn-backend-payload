@@ -71,6 +71,14 @@ export interface Config {
     'categoria-menu-fisso': CategoriaMenuFisso;
     'categoria-piatti': CategoriaPiatti;
     allergeni: Allergeni;
+    nazioni: Nazioni;
+    regioni: Regioni;
+    zone: Zone;
+    'tipologie-vino': TipologieVino;
+    'tipologie-birra': TipologieBirra;
+    'tipologie-liquore': TipologieLiquore;
+    'tipologie-cocktail': TipologieCocktail;
+    'tipologie-bevanda': TipologieBevanda;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +91,14 @@ export interface Config {
     'categoria-menu-fisso': CategoriaMenuFissoSelect<false> | CategoriaMenuFissoSelect<true>;
     'categoria-piatti': CategoriaPiattiSelect<false> | CategoriaPiattiSelect<true>;
     allergeni: AllergeniSelect<false> | AllergeniSelect<true>;
+    nazioni: NazioniSelect<false> | NazioniSelect<true>;
+    regioni: RegioniSelect<false> | RegioniSelect<true>;
+    zone: ZoneSelect<false> | ZoneSelect<true>;
+    'tipologie-vino': TipologieVinoSelect<false> | TipologieVinoSelect<true>;
+    'tipologie-birra': TipologieBirraSelect<false> | TipologieBirraSelect<true>;
+    'tipologie-liquore': TipologieLiquoreSelect<false> | TipologieLiquoreSelect<true>;
+    'tipologie-cocktail': TipologieCocktailSelect<false> | TipologieCocktailSelect<true>;
+    'tipologie-bevanda': TipologieBevandaSelect<false> | TipologieBevandaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -199,6 +215,133 @@ export interface Allergeni {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nazioni".
+ */
+export interface Nazioni {
+  id: number;
+  /**
+   * Nome della nazione (es. 'Italia', 'Francia')
+   */
+  nome: string;
+  /**
+   * Sigla ISO alpha-3 (es. ITA, FRA)
+   */
+  sigla: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regioni".
+ */
+export interface Regioni {
+  id: number;
+  /**
+   * Nome della regione (es. 'Toscana', 'Piemonte')
+   */
+  nome: string;
+  nazione: number | Nazioni;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zone".
+ */
+export interface Zone {
+  id: number;
+  /**
+   * Nome della zona (es. 'Chianti', 'Barolo')
+   */
+  nome: string;
+  regione: number | Regioni;
+  /**
+   * Per facilitare le query
+   */
+  nazione: number | Nazioni;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-vino".
+ */
+export interface TipologieVino {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-birra".
+ */
+export interface TipologieBirra {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-liquore".
+ */
+export interface TipologieLiquore {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-cocktail".
+ */
+export interface TipologieCocktail {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-bevanda".
+ */
+export interface TipologieBevanda {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -248,6 +391,38 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'allergeni';
         value: number | Allergeni;
+      } | null)
+    | ({
+        relationTo: 'nazioni';
+        value: number | Nazioni;
+      } | null)
+    | ({
+        relationTo: 'regioni';
+        value: number | Regioni;
+      } | null)
+    | ({
+        relationTo: 'zone';
+        value: number | Zone;
+      } | null)
+    | ({
+        relationTo: 'tipologie-vino';
+        value: number | TipologieVino;
+      } | null)
+    | ({
+        relationTo: 'tipologie-birra';
+        value: number | TipologieBirra;
+      } | null)
+    | ({
+        relationTo: 'tipologie-liquore';
+        value: number | TipologieLiquore;
+      } | null)
+    | ({
+        relationTo: 'tipologie-cocktail';
+        value: number | TipologieCocktail;
+      } | null)
+    | ({
+        relationTo: 'tipologie-bevanda';
+        value: number | TipologieBevanda;
       } | null)
     | ({
         relationTo: 'users';
@@ -342,6 +517,95 @@ export interface CategoriaPiattiSelect<T extends boolean = true> {
  * via the `definition` "allergeni_select".
  */
 export interface AllergeniSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nazioni_select".
+ */
+export interface NazioniSelect<T extends boolean = true> {
+  nome?: T;
+  sigla?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regioni_select".
+ */
+export interface RegioniSelect<T extends boolean = true> {
+  nome?: T;
+  nazione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zone_select".
+ */
+export interface ZoneSelect<T extends boolean = true> {
+  nome?: T;
+  regione?: T;
+  nazione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-vino_select".
+ */
+export interface TipologieVinoSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-birra_select".
+ */
+export interface TipologieBirraSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-liquore_select".
+ */
+export interface TipologieLiquoreSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-cocktail_select".
+ */
+export interface TipologieCocktailSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-bevanda_select".
+ */
+export interface TipologieBevandaSelect<T extends boolean = true> {
   nome?: T;
   descrizione?: T;
   updatedAt?: T;

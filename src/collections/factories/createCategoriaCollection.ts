@@ -1,0 +1,48 @@
+import type { CollectionConfig } from 'payload'
+import { menuImpostazioniReadAccess } from '../../access/menuImpostazioniAccess'
+import { nomeField, descrizioneField, inListaField } from '../fields/commonFields'
+
+interface CategoriaCollectionOptions {
+  slug: string
+  singular: string
+  plural: string
+  nomeDescription?: string
+  descrizioneDescription?: string
+  inListaDescription?: string
+  defaultColumns?: string[]
+}
+
+/**
+ * Factory function per creare collections di categoria con nome + descrizione + inLista
+ * Usata per: CategoriaMenuFisso, CategoriaPiatti
+ */
+export function createCategoriaCollection(
+  options: CategoriaCollectionOptions,
+): CollectionConfig {
+  return {
+    slug: options.slug,
+    labels: {
+      singular: options.singular,
+      plural: options.plural,
+    },
+    admin: {
+      useAsTitle: 'nome',
+      group: 'Menu impostazioni',
+      defaultColumns:
+        options.defaultColumns ||
+        ['nome', 'descrizione', 'inLista', '_status', 'createdAt'],
+    },
+    fields: [
+      nomeField({ description: options.nomeDescription }),
+      descrizioneField({ description: options.descrizioneDescription }),
+      inListaField({ description: options.inListaDescription }),
+    ],
+    versions: {
+      drafts: true,
+    },
+    timestamps: true,
+    access: {
+      read: menuImpostazioniReadAccess,
+    },
+  }
+}
