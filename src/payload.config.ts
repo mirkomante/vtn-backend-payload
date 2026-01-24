@@ -9,6 +9,7 @@ import sharp from 'sharp'
 import { OAuth2Plugin } from 'payload-oauth2'
 
 import { Users } from './collections/Users'
+import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
@@ -77,6 +78,7 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
+    cancelButtonPlugin(),
     OAuth2Plugin({
       strategyName: 'google',
       serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000',
