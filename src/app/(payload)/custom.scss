@@ -1,0 +1,144 @@
+// Stili personalizzati per migliorare l'UI dei bottoni bulk nella list view
+//
+// Questo file migliora l'aspetto visivo dei bottoni bulk (Elimina, Modifica, Pubblica, ecc.)
+// che appaiono quando si selezionano uno o più elementi nella list view.
+//
+// IMPORTANTE: Gli stili targettano SOLO gli elementi all'interno di .list-selection__actions
+// per evitare interferenze con checkbox, selettori di colonne e altri elementi dell'UI.
+
+// Importa le variabili SCSS di Payload
+@import '~@payloadcms/ui/scss';
+
+// Container delle azioni bulk - isolato per non interferire con altri elementi
+.list-selection__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  // Bottoni bulk (Modificare, Pubblicare, Annulla pubblicazione, Elimina)
+  button,
+  a[role='button'] {
+    padding: 0 8px !important;
+    border: none !important;
+    border-radius: 3px !important;
+    box-sizing: border-box !important;
+    height: fit-content !important;
+    line-height: var(--btn-line-height, 24px) !important;
+    overflow: hidden !important;
+    background-color: transparent !important;
+    color: var(--theme-text) !important;
+    font-size: var(--base-body-size, 13px) !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    white-space: nowrap !important;
+
+    // Hover effect - più leggero con sottolineatura
+    &:hover {
+      background-color: var(--theme-elevation-50) !important;
+      text-decoration: underline !important;
+    }
+
+    // Active state - senza transform
+    &:active {
+      background-color: var(--theme-elevation-100) !important;
+    }
+
+    // Disabled state
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+    }
+  }
+
+  // Link "Seleziona tutto" (escludendo quelli già stilizzati come bottoni)
+  a:not([role='button']) {
+    padding: 0 8px !important;
+    border: none !important;
+    border-radius: 3px !important;
+    box-sizing: border-box !important;
+    height: fit-content !important;
+    line-height: var(--btn-line-height, 24px) !important;
+    overflow: hidden !important;
+    background-color: transparent !important;
+    color: var(--theme-text) !important;
+    font-size: var(--base-body-size, 13px) !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    white-space: nowrap !important;
+
+    &:hover {
+      background-color: var(--theme-elevation-50) !important;
+      text-decoration: underline !important;
+    }
+
+    &:active {
+      background-color: var(--theme-elevation-100) !important;
+    }
+  }
+
+  // Contatore elementi selezionati (badge style - più discreto)
+  // Solo per span che NON sono dentro bottoni
+  > span:not(button span):not(a span),
+  > [class*='count']:not(button *):not(a *),
+  > [class*='selected']:not(button *):not(a *) {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 0 0.375rem !important;
+    background-color: var(--theme-elevation-200) !important;
+    color: var(--theme-text) !important;
+    border-radius: 3px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    margin-right: 0.5rem !important;
+    white-space: nowrap !important;
+    border: none !important;
+  }
+
+  // Span dentro bottoni devono essere trasparenti per permettere hover
+  button span,
+  a[role='button'] span,
+  a:not([role='button']) span {
+    background-color: transparent !important;
+  }
+}
+
+// Allineamento verticale header list view
+.list-header,
+header.list-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  // Bottoni di destra allineati verticalmente
+  > *:last-child,
+  [class*='actions'],
+  [class*='header-actions'],
+  [class*='list-header-actions'] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+}
+
+// Media query per responsive design
+@include mid-break {
+  // Su schermi più piccoli, i bottoni possono essere più compatti
+  .list-selection__actions {
+    button,
+    a {
+      padding: 0 6px !important;
+      font-size: var(--base-body-size, 13px) !important;
+    }
+  }
+}

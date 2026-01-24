@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
-import { menuImpostazioniReadAccess } from '../access/menuImpostazioniAccess'
+import {
+  menuImpostazioniReadAccess,
+  menuImpostazioniUpdateAccess,
+  menuImpostazioniDeleteAccess,
+} from '../access/menuImpostazioniAccess'
 
 export const Zona: CollectionConfig = {
   slug: 'zone',
@@ -91,5 +95,7 @@ export const Zona: CollectionConfig = {
   },
   access: {
     read: menuImpostazioniReadAccess,
+    update: menuImpostazioniUpdateAccess,
+    delete: menuImpostazioniDeleteAccess,
   },
 }

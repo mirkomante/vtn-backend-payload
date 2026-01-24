@@ -10,3 +10,21 @@ export const menuImpostazioniReadAccess: Access = ({ req: { user } }) => {
   // Gli altri utenti vedono solo documenti pubblicati
   return { _status: { equals: 'published' } }
 }
+
+/**
+ * Access control per update nelle collections del gruppo "Menu impostazioni"
+ * Solo gli admin possono modificare i documenti
+ */
+export const menuImpostazioniUpdateAccess: Access = ({ req: { user } }) => {
+  // Solo gli admin possono modificare
+  return user?.roles?.includes('admin') || false
+}
+
+/**
+ * Access control per delete nelle collections del gruppo "Menu impostazioni"
+ * Solo gli admin possono eliminare i documenti
+ */
+export const menuImpostazioniDeleteAccess: Access = ({ req: { user } }) => {
+  // Solo gli admin possono eliminare
+  return user?.roles?.includes('admin') || false
+}

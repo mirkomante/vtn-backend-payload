@@ -45,5 +45,8 @@ export const inListaField = (options?: {
   label: 'In Lista',
   admin: {
     description: options?.description || 'Se la categoria è visibile nel menu',
+    components: {
+      Cell: '/components/InListaCell#InListaCell',
+    },
   },
 })

@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
-import { menuImpostazioniReadAccess } from '../../access/menuImpostazioniAccess'
+import {
+  menuImpostazioniReadAccess,
+  menuImpostazioniUpdateAccess,
+  menuImpostazioniDeleteAccess,
+} from '../../access/menuImpostazioniAccess'
 import { nomeField, descrizioneField } from '../fields/commonFields'
 
 interface SimpleCollectionOptions {
@@ -40,6 +44,8 @@ export function createSimpleCollection(
     timestamps: true,
     access: {
       read: menuImpostazioniReadAccess,
+      update: menuImpostazioniUpdateAccess,
+      delete: menuImpostazioniDeleteAccess,
     },
   }
 }

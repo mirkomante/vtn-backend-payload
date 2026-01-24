@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
-import { menuImpostazioniReadAccess } from '../../access/menuImpostazioniAccess'
+import {
+  menuImpostazioniReadAccess,
+  menuImpostazioniUpdateAccess,
+  menuImpostazioniDeleteAccess,
+} from '../../access/menuImpostazioniAccess'
 import { nomeField, descrizioneField, inListaField } from '../fields/commonFields'
 
 interface CategoriaCollectionOptions {
@@ -43,6 +47,8 @@ export function createCategoriaCollection(
     timestamps: true,
     access: {
       read: menuImpostazioniReadAccess,
+      update: menuImpostazioniUpdateAccess,
+      delete: menuImpostazioniDeleteAccess,
     },
   }
 }

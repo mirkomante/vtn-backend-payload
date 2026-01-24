@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
-import { menuImpostazioniReadAccess } from '../access/menuImpostazioniAccess'
+import {
+  menuImpostazioniReadAccess,
+  menuImpostazioniUpdateAccess,
+  menuImpostazioniDeleteAccess,
+} from '../access/menuImpostazioniAccess'
 
 export const Nazione: CollectionConfig = {
   slug: 'nazioni',
@@ -51,5 +55,7 @@ export const Nazione: CollectionConfig = {
   timestamps: true,
   access: {
     read: menuImpostazioniReadAccess,
+    update: menuImpostazioniUpdateAccess,
+    delete: menuImpostazioniDeleteAccess,
   },
 }
