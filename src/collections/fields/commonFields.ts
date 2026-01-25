@@ -68,7 +68,7 @@ export const prezzoField = (options?: {
     description: options?.description || 'Prezzo del piatto (max 10 cifre, 2 decimali)',
     step: 0.01,
   },
-  validate: (value) => {
+  validate: (value: any) => {
     if (value === undefined || value === null) {
       return 'Il prezzo è obbligatorio'
     }
@@ -104,7 +104,7 @@ export const prezzoCaliceField = (options?: {
     description: options?.description || 'Prezzo per calice (max 10 cifre, 2 decimali)',
     step: 0.01,
   },
-  validate: (value) => {
+  validate: (value: any) => {
     if (value === undefined || value === null) {
       return true // Opzionale
     }

@@ -4,17 +4,6 @@ import { useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
-// Prova a importare SaveDraftButton da diversi percorsi possibili
-let DefaultSaveDraftButton: React.ComponentType<any> | null = null
-
-try {
-  // Prova il percorso più comune
-  const uiModule = require('@payloadcms/ui')
-  DefaultSaveDraftButton = uiModule.SaveDraftButton || null
-} catch (e) {
-  // Se non funziona, proveremo altri approcci
-}
-
 /**
  * Wrapper per SaveDraftButton che aggiunge il bottone "Annulla" accanto.
  * Questo componente sostituisce il SaveDraftButton standard e mostra
@@ -27,14 +16,14 @@ export default function SaveDraftButtonWithCancel(props: any) {
 
   // useDocumentInfo restituisce { id, collection, ... } dove collection è il slug
   // Verifica tutte le possibili proprietà
+  const docInfo = documentInfo as any
   const collectionSlug =
-    documentInfo?.collection ||
-    (documentInfo as any)?.collectionSlug ||
-    (documentInfo as any)?.collection
+    docInfo?.collection ||
+    docInfo?.collectionSlug
 
   const globalSlug =
-    (documentInfo as any)?.global ||
-    (documentInfo as any)?.globalSlug
+    docInfo?.global ||
+    docInfo?.globalSlug
 
   const handleCancel = () => {
     if (collectionSlug) {
@@ -55,38 +44,16 @@ export default function SaveDraftButtonWithCancel(props: any) {
     }
   }
 
-  // Prova a ottenere il componente originale
-  const ButtonComponent = DefaultSaveDraftButton || props.DefaultButton || props.defaultButton
+  // Prova a ottenere il componente originale dai props
+  const ButtonComponent = props.DefaultButton || props.defaultButton
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}
-    >
+    <div className="twflex twitems-center twgap-2">
       {/* Bottone Annulla - ora a sinistra */}
       <button
         type="button"
         onClick={handleCancel}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: 'transparent',
-          border: '1px solid var(--theme-border-color)',
-          borderRadius: 'var(--border-radius-s)',
-          color: 'var(--theme-text)',
-          cursor: 'pointer',
-          fontSize: '0.875rem',
-          fontWeight: '500',
-          transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--theme-elevation-100)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-        }}
+        className="twpx-4 twpy-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twtext-sm twfont-medium twtransition-all twduration-200 hover:twbg-payload-elevation-100"
       >
         {t('general:cancel') || 'Annulla'}
       </button>

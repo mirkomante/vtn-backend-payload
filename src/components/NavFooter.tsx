@@ -5,24 +5,8 @@ import LogoutButton from './LogoutButton'
 
 export default function NavFooter() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        padding: '1rem',
-        borderTop: '1px solid var(--theme-elevation-150)',
-        marginTop: 'auto',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.5rem',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
+    <div className="twflex twflex-col twgap-2 twp-4 twborder-t twborder-payload-elevation-150 twmt-auto">
+      <div className="twflex twgap-2 twitems-center twjustify-between">
         <ThemeToggle />
       </div>
       <LogoutButton />

@@ -185,7 +185,7 @@ export function createBevandaCollection(
   fields.push({
     name: 'tipologia',
     type: 'relationship',
-    relationTo: options.tipologiaSlug,
+    relationTo: options.tipologiaSlug as any,
     required: true,
     label: 'Tipologia',
     maxDepth: 1, // Carica dati tipologia ma non relazioni annidate

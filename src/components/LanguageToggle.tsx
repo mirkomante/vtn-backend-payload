@@ -23,38 +23,17 @@ export default function LanguageToggle() {
   }, [mounted, locale, setPreference])
 
   const toggleLanguage = async () => {
-    const newLocale = locale === 'it' ? 'en' : 'it'
+    const newLocale = String(locale) === 'it' ? 'en' : 'it'
     await setPreference('locale', newLocale)
   }
 
-  const currentLanguage = locale === 'it' ? 'Italiano' : 'English'
-  const flag = locale === 'it' ? '🇮🇹' : '🇬🇧'
+  const currentLanguage = String(locale) === 'it' ? 'Italiano' : 'English'
+  const flag = String(locale) === 'it' ? '🇮🇹' : '🇬🇧'
 
   return (
     <button
       onClick={toggleLanguage}
-      style={{
-        padding: '0.5rem',
-        backgroundColor: 'transparent',
-        border: '1px solid var(--theme-border-color)',
-        borderRadius: 'var(--border-radius-s)',
-        color: 'var(--theme-text)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-        minWidth: 'fit-content',
-        height: '2.5rem',
-        transition: 'all 0.2s ease',
-        fontSize: '0.875rem',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--theme-elevation-100)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent'
-      }}
+      className="twp-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twflex twitems-center twjustify-center twgap-2 twmin-w-fit twh-10 twtransition-all twduration-200 twtext-sm hover:twbg-payload-elevation-100"
       aria-label={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
       title={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
     >

@@ -1,7 +1,5 @@
 'use client'
 
-import { Button } from '@payloadcms/ui'
-
 export default function GoogleLoginButton() {
   const handleGoogleLogin = () => {
     // Reindirizza all'endpoint OAuth configurato nel plugin
@@ -9,19 +7,11 @@ export default function GoogleLoginButton() {
   }
 
   return (
-    <div style={{ marginTop: '1rem', width: '100%' }}>
-      <Button
+    <div className="twmt-4 tww-full">
+      <button
         onClick={handleGoogleLogin}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
-          backgroundColor: '#4285F4',
-          color: 'white',
-          border: 'none',
-        }}
+        type="button"
+        className="tww-full twflex twitems-center twjustify-center twgap-2 twbg-[#4285F4] hover:twbg-[#357ae8] twtext-white twborder-none twpx-6 twpy-3 twrounded-s-payload twcursor-pointer twtransition-colors twduration-200"
       >
         <svg
           width="18"
@@ -48,7 +38,7 @@ export default function GoogleLoginButton() {
           />
         </svg>
         Accedi con Google
-      </Button>
+      </button>
     </div>
   )
 }

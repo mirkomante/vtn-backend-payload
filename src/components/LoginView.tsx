@@ -30,76 +30,15 @@ export default function LoginView() {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        overflow: 'hidden',
-        margin: 0,
-        width: '100%',
-        height: '100%',
-        boxSizing: 'border-box',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          padding: '2rem',
-          backgroundColor: 'var(--theme-elevation-50)',
-          borderRadius: 'var(--border-radius-m)',
-          boxShadow: 'var(--shadow-lg)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          margin: '0 auto',
-        }}
-      >
-        <h1
-          style={{
-            marginBottom: '1rem',
-            textAlign: 'center',
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            color: 'var(--theme-text)',
-          }}
-        >
+    <div className="twfixed twinset-0 twflex twflex-col twitems-center twjustify-center twp-8 twoverflow-hidden twm-0 tww-full twh-full">
+      <div className="tww-full twmax-w-[400px] twp-8 twbg-payload-elevation-50 twrounded-m-payload twflex twflex-col twitems-center twmx-auto">
+        <h1 className="twmb-4 twtext-center twtext-2xl twfont-bold twtext-payload-text">
           Accedi al pannello admin
         </h1>
         <button
           onClick={handleGoogleLogin}
           type="button"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1.25rem',
-            backgroundColor: '#4285F4',
-            color: 'white',
-            border: 'none',
-            padding: '0.75rem 1.5rem',
-            fontSize: '1rem',
-            fontWeight: '500',
-            cursor: 'pointer',
-            textAlign: 'center',
-            borderRadius: 'var(--border-radius-s, 4px)',
-            transition: 'background-color 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#357ae8'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#4285F4'
-          }}
+          className="tww-full twflex twitems-center twjustify-center twgap-5 twbg-[#4285F4] hover:twbg-[#357ae8] twtext-white twborder-none twpx-6 twpy-3 twtext-base twfont-medium twcursor-pointer twtext-center twrounded-s-payload twtransition-colors twduration-200"
         >
           <svg
             width="20"

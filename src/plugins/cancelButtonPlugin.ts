@@ -38,7 +38,7 @@ export const cancelButtonPlugin = (): Plugin => (config: Config): Config => {
     // Stessa cosa per i globals
     globals: config.globals?.map((global) => {
       // Ottieni i componenti esistenti
-      const existingComponents = global.admin?.components || {}
+      const existingComponents = global.admin?.components || ({} as any)
       const existingEditComponents = (existingComponents.edit || {}) as any
 
       // Se SaveDraftButton è già stato sostituito, non fare nulla

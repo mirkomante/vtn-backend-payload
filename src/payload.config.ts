@@ -3,7 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { en } from '@payloadcms/translations/languages/en'
 import { it } from '@payloadcms/translations/languages/it'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { OAuth2Plugin } from 'payload-oauth2'
@@ -116,12 +116,12 @@ export default buildConfig({
           sub: userinfo.sub, // Campo sub necessario per il JWT token
         }
       },
-      successRedirect: async (req, accessToken) => {
+      successRedirect: async (req: PayloadRequest, accessToken?: string) => {
         // Reindirizza alla dashboard admin dopo il login
         // Usa percorso relativo per evitare problemi con il cookie
         return '/admin'
       },
-      failureRedirect: (req, error) => {
+      failureRedirect: (req: PayloadRequest, error?: any) => {
         return '/admin/login?error=oauth_failed'
       },
     }),
