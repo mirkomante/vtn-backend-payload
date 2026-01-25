@@ -122,3 +122,31 @@ export const prezzoCaliceField = (options?: {
     return true
   },
 })
+
+/**
+ * Campo grado alcolico comune per bevande alcoliche
+ */
+export const gradoField = (options?: {
+  description?: string
+}): Field => ({
+  name: 'grado',
+  type: 'text',
+  label: 'Grado Alcolico',
+  admin: {
+    description: options?.description || 'Grado alcolico (es. "13.5%", "5.2%", "40%")',
+  },
+})
+
+/**
+ * Campo capacita comune per bevande
+ */
+export const capacitaField = (options?: {
+  description?: string
+}): Field => ({
+  name: 'capacita',
+  type: 'text',
+  label: 'Capacità',
+  admin: {
+    description: options?.description || 'Capacità (es. "750ml", "33cl", "1L")',
+  },
+})

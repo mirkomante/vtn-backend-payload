@@ -76,6 +76,8 @@ export const Piatti: CollectionConfig = {
       relationTo: 'categoria-piatti',
       required: true,
       label: 'Categoria',
+      maxDepth: 1, // Carica dati categoria ma non relazioni annidate
+      index: true, // Index per query veloci per categoria
       admin: {
         description: 'Categoria del piatto',
       },
@@ -86,18 +88,19 @@ export const Piatti: CollectionConfig = {
       relationTo: 'allergeni',
       hasMany: true,
       label: 'Allergeni',
+      maxDepth: 1, // Carica dati allergeni ma non relazioni annidate
       admin: {
         description: 'Allergeni presenti nel piatto',
       },
     },
     {
       name: 'menuFissi',
-      type: 'relationship',
-      relationTo: 'menu-fisso',
-      hasMany: true,
+      type: 'join',
+      collection: 'menu-fisso',
+      on: 'piatti',
       label: 'Menu Fissi',
       admin: {
-        description: 'Menu fissi che includono questo piatto',
+        description: 'Menu fissi che includono questo piatto (sola lettura)',
       },
     },
   ],

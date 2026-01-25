@@ -27,12 +27,12 @@ export const ServizioAccessorio: CollectionConfig = {
     }),
     {
       name: 'menuFissi',
-      type: 'relationship',
-      relationTo: 'menu-fisso',
-      hasMany: true,
+      type: 'join',
+      collection: 'menu-fisso',
+      on: 'servizi',
       label: 'Menu Fissi',
       admin: {
-        description: 'Menu fissi che includono questo servizio',
+        description: 'Menu fissi che includono questo servizio (sola lettura)',
       },
     },
   ],

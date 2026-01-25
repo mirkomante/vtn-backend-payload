@@ -31,6 +31,8 @@ export const MenuFisso: CollectionConfig = {
       relationTo: 'categoria-menu-fisso',
       required: true,
       label: 'Categoria',
+      maxDepth: 1, // Carica dati categoria ma non relazioni annidate
+      index: true, // Index per query veloci per categoria
       admin: {
         description: 'Categoria del menu fisso',
       },
@@ -41,6 +43,7 @@ export const MenuFisso: CollectionConfig = {
       relationTo: 'piatti',
       hasMany: true,
       label: 'Piatti',
+      maxDepth: 1, // Carica dati piatti ma non relazioni annidate
       admin: {
         description: 'Piatti inclusi nel menu',
       },
@@ -51,6 +54,7 @@ export const MenuFisso: CollectionConfig = {
       relationTo: 'servizi-accessori',
       hasMany: true,
       label: 'Servizi',
+      maxDepth: 1, // Carica dati servizi ma non relazioni annidate
       admin: {
         description: 'Servizi inclusi nel menu',
       },

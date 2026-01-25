@@ -93,7 +93,14 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    piatti: {
+      menuFissi: 'menu-fisso';
+    };
+    'servizi-accessori': {
+      menuFissi: 'menu-fisso';
+    };
+  };
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     piatti: PiattiSelect<false> | PiattiSelect<true>;
@@ -224,9 +231,13 @@ export interface Piatti {
    */
   allergeni?: (number | Allergeni)[] | null;
   /**
-   * Menu fissi che includono questo piatto
+   * Menu fissi che includono questo piatto (sola lettura)
    */
-  menuFissi?: (number | MenuFisso)[] | null;
+  menuFissi?: {
+    docs?: (number | MenuFisso)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -348,9 +359,13 @@ export interface ServiziAccessori {
    */
   inLista?: boolean | null;
   /**
-   * Menu fissi che includono questo servizio
+   * Menu fissi che includono questo servizio (sola lettura)
    */
-  menuFissi?: (number | MenuFisso)[] | null;
+  menuFissi?: {
+    docs?: (number | MenuFisso)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -362,11 +377,11 @@ export interface ServiziAccessori {
 export interface Vini {
   id: number;
   /**
-   * Nome del vino
+   * Nome vino
    */
   nome: string;
   /**
-   * Descrizione opzionale del vino
+   * Descrizione opzionale vino
    */
   descrizione?: string | null;
   /**
@@ -394,7 +409,7 @@ export interface Vini {
    */
   prezzo: number;
   /**
-   * Se il vino è visibile nel menu pubblico
+   * Se vino è visibile nel menu pubblico
    */
   inLista?: boolean | null;
   /**
@@ -410,7 +425,7 @@ export interface Vini {
    */
   zona?: (number | null) | Zone;
   /**
-   * Tipologia del vino
+   * Tipologia vino
    */
   tipologia: number | TipologieVino;
   updatedAt: string;
@@ -491,11 +506,11 @@ export interface TipologieVino {
 export interface Birre {
   id: number;
   /**
-   * Nome della birra
+   * Nome birra
    */
   nome: string;
   /**
-   * Descrizione opzionale della birra
+   * Descrizione opzionale birra
    */
   descrizione?: string | null;
   /**
@@ -511,7 +526,7 @@ export interface Birre {
    */
   prezzo: number;
   /**
-   * Se la birra è visibile nel menu pubblico
+   * Se birra è visibile nel menu pubblico
    */
   inLista?: boolean | null;
   /**
@@ -519,7 +534,7 @@ export interface Birre {
    */
   nazione: number | Nazioni;
   /**
-   * Tipologia della birra
+   * Tipologia birra
    */
   tipologia: number | TipologieBirra;
   updatedAt: string;
@@ -548,11 +563,11 @@ export interface TipologieBirra {
 export interface Liquori {
   id: number;
   /**
-   * Nome del liquore
+   * Nome liquore
    */
   nome: string;
   /**
-   * Descrizione opzionale del liquore
+   * Descrizione opzionale liquore
    */
   descrizione?: string | null;
   /**
@@ -572,7 +587,7 @@ export interface Liquori {
    */
   prezzo: number;
   /**
-   * Se il liquore è visibile nel menu pubblico
+   * Se liquore è visibile nel menu pubblico
    */
   inLista?: boolean | null;
   /**
@@ -580,7 +595,7 @@ export interface Liquori {
    */
   nazione: number | Nazioni;
   /**
-   * Tipologia del liquore
+   * Tipologia liquore
    */
   tipologia: number | TipologieLiquore;
   updatedAt: string;
@@ -609,11 +624,11 @@ export interface TipologieLiquore {
 export interface Cocktail {
   id: number;
   /**
-   * Nome del cocktail
+   * Nome cocktail
    */
   nome: string;
   /**
-   * Descrizione opzionale del cocktail
+   * Descrizione opzionale cocktail
    */
   descrizione?: string | null;
   /**
@@ -621,7 +636,7 @@ export interface Cocktail {
    */
   prezzo: number;
   /**
-   * Se il cocktail è visibile nel menu pubblico
+   * Se cocktail è visibile nel menu pubblico
    */
   inLista?: boolean | null;
   /**
@@ -629,7 +644,7 @@ export interface Cocktail {
    */
   nazione: number | Nazioni;
   /**
-   * Tipologia del cocktail
+   * Tipologia cocktail
    */
   tipologia: number | TipologieCocktail;
   updatedAt: string;
@@ -658,11 +673,11 @@ export interface TipologieCocktail {
 export interface Bevande {
   id: number;
   /**
-   * Nome della bevanda
+   * Nome bevanda
    */
   nome: string;
   /**
-   * Descrizione opzionale della bevanda
+   * Descrizione opzionale bevanda
    */
   descrizione?: string | null;
   /**
@@ -670,7 +685,7 @@ export interface Bevande {
    */
   prezzo: number;
   /**
-   * Se la bevanda è visibile nel menu pubblico
+   * Se bevanda è visibile nel menu pubblico
    */
   inLista?: boolean | null;
   /**
@@ -678,7 +693,7 @@ export interface Bevande {
    */
   nazione: number | Nazioni;
   /**
-   * Tipologia della bevanda
+   * Tipologia bevanda
    */
   tipologia: number | TipologieBevanda;
   updatedAt: string;
