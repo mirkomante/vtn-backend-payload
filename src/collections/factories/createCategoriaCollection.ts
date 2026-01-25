@@ -31,7 +31,7 @@ export function createCategoriaCollection(
     },
     admin: {
       useAsTitle: 'nome',
-      group: 'Menu impostazioni',
+      group: 'Ristorante impostazioni',
       defaultColumns:
         options.defaultColumns ||
         ['nome', 'descrizione', 'inLista', '_status', 'createdAt'],

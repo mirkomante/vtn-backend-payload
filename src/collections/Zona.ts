@@ -14,7 +14,7 @@ export const Zona: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'nome',
-    group: 'Menu impostazioni',
+    group: 'Ristorante impostazioni',
     defaultColumns: ['nome', 'regione', 'nazione', '_status', 'createdAt'],
   },
   fields: [

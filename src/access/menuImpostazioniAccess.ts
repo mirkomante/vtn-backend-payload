@@ -1,7 +1,7 @@
 import type { Access } from 'payload'
 
 /**
- * Access control comune per le collections del gruppo "Menu impostazioni"
+ * Access control comune per le collections del gruppo "Ristorante impostazioni"
  * Gli admin vedono tutti i documenti, gli altri utenti solo quelli pubblicati
  */
 export const menuImpostazioniReadAccess: Access = ({ req: { user } }) => {
@@ -12,7 +12,7 @@ export const menuImpostazioniReadAccess: Access = ({ req: { user } }) => {
 }
 
 /**
- * Access control per update nelle collections del gruppo "Menu impostazioni"
+ * Access control per update nelle collections del gruppo "Ristorante impostazioni"
  * Solo gli admin possono modificare i documenti
  */
 export const menuImpostazioniUpdateAccess: Access = ({ req: { user } }) => {
@@ -21,7 +21,7 @@ export const menuImpostazioniUpdateAccess: Access = ({ req: { user } }) => {
 }
 
 /**
- * Access control per delete nelle collections del gruppo "Menu impostazioni"
+ * Access control per delete nelle collections del gruppo "Ristorante impostazioni"
  * Solo gli admin possono eliminare i documenti
  */
 export const menuImpostazioniDeleteAccess: Access = ({ req: { user } }) => {

@@ -14,7 +14,7 @@ export const Piatti: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'nome',
-    group: 'Menu ristorante',
+    group: 'Ristorante menu',
     defaultColumns: ['nome', 'categoria', 'prezzo', 'inLista', '_status', 'createdAt'],
   },
   fields: [

@@ -1,7 +1,7 @@
 import type { Access } from 'payload'
 
 /**
- * Access control comune per le collections del gruppo "Menu ristorante"
+ * Access control comune per le collections del gruppo "Ristorante menu"
  * Gli admin vedono tutti i documenti, gli altri utenti solo quelli pubblicati
  */
 export const menuRistoranteReadAccess: Access = ({ req: { user } }) => {
@@ -12,7 +12,7 @@ export const menuRistoranteReadAccess: Access = ({ req: { user } }) => {
 }
 
 /**
- * Access control per update nelle collections del gruppo "Menu ristorante"
+ * Access control per update nelle collections del gruppo "Ristorante menu"
  * Solo gli admin possono modificare i documenti
  */
 export const menuRistoranteUpdateAccess: Access = ({ req: { user } }) => {
@@ -21,7 +21,7 @@ export const menuRistoranteUpdateAccess: Access = ({ req: { user } }) => {
 }
 
 /**
- * Access control per delete nelle collections del gruppo "Menu ristorante"
+ * Access control per delete nelle collections del gruppo "Ristorante menu"
  * Solo gli admin possono eliminare i documenti
  */
 export const menuRistoranteDeleteAccess: Access = ({ req: { user } }) => {
