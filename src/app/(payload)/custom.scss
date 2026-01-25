@@ -6,6 +6,9 @@
 // IMPORTANTE: Gli stili targettano SOLO gli elementi all'interno di .list-selection__actions
 // per evitare interferenze con checkbox, selettori di colonne e altri elementi dell'UI.
 
+// Importa Tailwind CSS per Payload Admin Panel
+@import '../../styles/payloadStyles.css';
+
 // Importa le variabili SCSS di Payload
 @import '~@payloadcms/ui/scss';
 

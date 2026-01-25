@@ -33,7 +33,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="twp-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twflex twitems-center twjustify-center twgap-2 twmin-w-fit twh-10 twtransition-all twduration-200 twtext-sm hover:twbg-payload-elevation-100"
+      className="p-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer flex items-center justify-center gap-2 min-w-fit h-10 transition-all duration-200 text-sm hover:bg-[var(--theme-elevation-100)]"
       aria-label={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
       title={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
     >

@@ -30,15 +30,15 @@ export default function LoginView() {
   }
 
   return (
-    <div className="twfixed twinset-0 twflex twflex-col twitems-center twjustify-center twp-8 twoverflow-hidden twm-0 tww-full twh-full">
-      <div className="tww-full twmax-w-[400px] twp-8 twbg-payload-elevation-50 twrounded-m-payload twflex twflex-col twitems-center twmx-auto">
-        <h1 className="twmb-4 twtext-center twtext-2xl twfont-bold twtext-payload-text">
+    <div className="fixed inset-0 flex flex-col items-center justify-center p-8 overflow-hidden m-0 w-full h-full box-border">
+      <div className="w-full max-w-[400px] p-8 bg-[var(--theme-elevation-50)] rounded-[var(--border-radius-m)] shadow-[var(--shadow-lg)] flex flex-col items-center mx-auto">
+        <h1 className="mb-8 text-center text-2xl font-bold text-[var(--theme-text)] w-full">
           Accedi al pannello admin
         </h1>
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="tww-full twflex twitems-center twjustify-center twgap-5 twbg-[#4285F4] hover:twbg-[#357ae8] twtext-white twborder-none twpx-6 twpy-3 twtext-base twfont-medium twcursor-pointer twtext-center twrounded-s-payload twtransition-colors twduration-200"
+          className="w-full flex items-center justify-center gap-3 bg-[#4285F4] text-white border-none px-6 py-3 text-base font-medium cursor-pointer text-center rounded-[var(--border-radius-s,4px)] transition-colors duration-200 hover:bg-[#357ae8]"
         >
           <svg
             width="20"
@@ -46,7 +46,7 @@ export default function LoginView() {
             viewBox="0 0 18 18"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ flexShrink: 0, marginRight: '0.5rem' }}
+            className="shrink-0 mr-2"
           >
             <path
               d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H15.9564C17.4382 14.5227 18.3636 12.5455 18.3636 9.20454H17.64Z"

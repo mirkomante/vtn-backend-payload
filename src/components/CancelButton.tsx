@@ -37,7 +37,7 @@ const CancelButton: UIFieldClientComponent = () => {
     <button
       type="button"
       onClick={handleCancel}
-      className="twpx-4 twpy-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twtext-sm twfont-medium twtransition-all twduration-200 hover:twbg-payload-elevation-100"
+      className="px-4 py-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-[var(--theme-elevation-100)]"
     >
       {t('general:cancel') || 'Annulla'}
     </button>

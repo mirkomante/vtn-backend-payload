@@ -7,11 +7,11 @@ export default function GoogleLoginButton() {
   }
 
   return (
-    <div className="twmt-4 tww-full">
+    <div className="mt-4 w-full">
       <button
         onClick={handleGoogleLogin}
         type="button"
-        className="tww-full twflex twitems-center twjustify-center twgap-2 twbg-[#4285F4] hover:twbg-[#357ae8] twtext-white twborder-none twpx-6 twpy-3 twrounded-s-payload twcursor-pointer twtransition-colors twduration-200"
+        className="w-full flex items-center justify-center gap-3 bg-[#4285F4] text-white border-none px-6 py-3 text-base font-medium cursor-pointer rounded-[var(--border-radius-s,4px)] transition-colors duration-200 hover:bg-[#357ae8]"
       >
         <svg
           width="18"

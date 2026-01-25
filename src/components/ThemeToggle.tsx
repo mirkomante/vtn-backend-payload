@@ -17,7 +17,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="twp-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twflex twitems-center twjustify-center tww-10 twh-10 twtransition-all twduration-200 hover:twbg-payload-elevation-100"
+      className="p-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer flex items-center justify-center w-10 h-10 transition-all duration-200 hover:bg-[var(--theme-elevation-100)]"
       aria-label={theme === 'light' ? 'Passa alla modalità scura' : 'Passa alla modalità chiara'}
       title={theme === 'light' ? 'Passa alla modalità scura' : 'Passa alla modalità chiara'}
     >

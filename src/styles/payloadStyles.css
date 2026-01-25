@@ -1,0 +1,141 @@
+/**
+ * Tailwind CSS 4 - Setup per Payload Admin Panel
+ * 
+ * Questo file configura Tailwind CSS per funzionare nell'Admin Panel di Payload
+ * senza conflitti con gli stili core di Payload CMS.
+ * 
+ * Approccio basato sulla guida ufficiale:
+ * https://payloadcms.com/posts/guides/how-to-theme-the-payload-admin-panel-with-tailwind-css-4
+ */
+
+/* Define layers in correct order */
+@layer theme, base, components, utilities;
+
+/* Import Tailwind theme */
+@import 'tailwindcss/theme.css' layer(theme);
+
+/* 
+ * SKIP preflight to avoid conflicts with Payload core styles
+ * Questo è CRITICO: il preflight di Tailwind resetterebbe gli stili di Payload
+ */
+/* @import 'tailwindcss/preflight.css' layer(base); */
+
+/* Import Tailwind utilities */
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* 
+ * Support Payload dark mode
+ * Payload usa data-theme="dark" invece di preferenze di sistema
+ */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* 
+ * Theme personalizzato - Integrazione variabili Payload CMS
+ * 
+ * Queste definizioni mappano le variabili CSS di Payload nel sistema
+ * di design di Tailwind, permettendo di usare utility classes come:
+ * - text-[var(--theme-text)]
+ * - bg-[var(--theme-elevation-50)]
+ * - border-[var(--theme-border-color)]
+ * ecc...
+ */
+@theme {
+  /* Colori principali */
+  --color-payload-bg: var(--theme-bg);
+  --color-payload-text: var(--theme-text);
+  --color-payload-border: var(--theme-border-color);
+
+  /* Elevazione (sfumature di background) */
+  --color-payload-elevation-50: var(--theme-elevation-50);
+  --color-payload-elevation-100: var(--theme-elevation-100);
+  --color-payload-elevation-150: var(--theme-elevation-150);
+  --color-payload-elevation-200: var(--theme-elevation-200);
+  --color-payload-elevation-250: var(--theme-elevation-250);
+  --color-payload-elevation-300: var(--theme-elevation-300);
+  --color-payload-elevation-400: var(--theme-elevation-400);
+  --color-payload-elevation-500: var(--theme-elevation-500);
+  --color-payload-elevation-600: var(--theme-elevation-600);
+  --color-payload-elevation-700: var(--theme-elevation-700);
+  --color-payload-elevation-800: var(--theme-elevation-800);
+  --color-payload-elevation-900: var(--theme-elevation-900);
+  --color-payload-elevation-1000: var(--theme-elevation-1000);
+
+  /* Success palette */
+  --color-payload-success-100: var(--theme-success-100);
+  --color-payload-success-150: var(--theme-success-150);
+  --color-payload-success-200: var(--theme-success-200);
+  --color-payload-success-250: var(--theme-success-250);
+  --color-payload-success-300: var(--theme-success-300);
+  --color-payload-success-350: var(--theme-success-350);
+  --color-payload-success-400: var(--theme-success-400);
+  --color-payload-success-450: var(--theme-success-450);
+  --color-payload-success-500: var(--theme-success-500);
+  --color-payload-success-550: var(--theme-success-550);
+  --color-payload-success-600: var(--theme-success-600);
+  --color-payload-success-650: var(--theme-success-650);
+  --color-payload-success-700: var(--theme-success-700);
+  --color-payload-success-750: var(--theme-success-750);
+  --color-payload-success-800: var(--theme-success-800);
+  --color-payload-success-850: var(--theme-success-850);
+  --color-payload-success-900: var(--theme-success-900);
+  --color-payload-success-950: var(--theme-success-950);
+
+  /* Error palette */
+  --color-payload-error-100: var(--theme-error-100);
+  --color-payload-error-150: var(--theme-error-150);
+  --color-payload-error-200: var(--theme-error-200);
+  --color-payload-error-250: var(--theme-error-250);
+  --color-payload-error-300: var(--theme-error-300);
+  --color-payload-error-350: var(--theme-error-350);
+  --color-payload-error-400: var(--theme-error-400);
+  --color-payload-error-450: var(--theme-error-450);
+  --color-payload-error-500: var(--theme-error-500);
+  --color-payload-error-550: var(--theme-error-550);
+  --color-payload-error-600: var(--theme-error-600);
+  --color-payload-error-650: var(--theme-error-650);
+  --color-payload-error-700: var(--theme-error-700);
+  --color-payload-error-750: var(--theme-error-750);
+  --color-payload-error-800: var(--theme-error-800);
+  --color-payload-error-850: var(--theme-error-850);
+  --color-payload-error-900: var(--theme-error-900);
+  --color-payload-error-950: var(--theme-error-950);
+
+  /* Warning palette */
+  --color-payload-warning-100: var(--theme-warning-100);
+  --color-payload-warning-150: var(--theme-warning-150);
+  --color-payload-warning-200: var(--theme-warning-200);
+  --color-payload-warning-250: var(--theme-warning-250);
+  --color-payload-warning-300: var(--theme-warning-300);
+  --color-payload-warning-350: var(--theme-warning-350);
+  --color-payload-warning-400: var(--theme-warning-400);
+  --color-payload-warning-450: var(--theme-warning-450);
+  --color-payload-warning-500: var(--theme-warning-500);
+  --color-payload-warning-550: var(--theme-warning-550);
+  --color-payload-warning-600: var(--theme-warning-600);
+  --color-payload-warning-650: var(--theme-warning-650);
+  --color-payload-warning-700: var(--theme-warning-700);
+  --color-payload-warning-750: var(--theme-warning-750);
+  --color-payload-warning-800: var(--theme-warning-800);
+  --color-payload-warning-850: var(--theme-warning-850);
+  --color-payload-warning-900: var(--theme-warning-900);
+  --color-payload-warning-950: var(--theme-warning-950);
+
+  /* Spacing basato su --base (8px default) */
+  --spacing-base: var(--base);
+  --spacing-base-half: calc(var(--base) / 2);
+  --spacing-base-2x: calc(var(--base) * 2);
+  --spacing-base-3x: calc(var(--base) * 3);
+  --spacing-base-4x: calc(var(--base) * 4);
+  --spacing-gap: var(--gap);
+
+  /* Border radius */
+  --radius-s-payload: var(--border-radius-s);
+  --radius-m-payload: var(--border-radius-m);
+  --radius-l-payload: var(--border-radius-l);
+
+  /* Font family */
+  --font-family-mono: var(--font-mono);
+
+  /* Font size */
+  --font-size-base-payload: var(--base-body-size);
+}

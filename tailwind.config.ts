@@ -14,9 +14,10 @@
  */
 
 export default {
-  // Content paths: scansiona solo componenti custom e frontend, NON Payload core
+  // Content paths: scansiona componenti custom, frontend e admin panel
   content: [
     './src/app/(frontend)/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/(payload)/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
 }
