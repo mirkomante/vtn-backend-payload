@@ -17,26 +17,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      style={{
-        padding: '0.5rem',
-        backgroundColor: 'transparent',
-        border: '1px solid var(--theme-border-color)',
-        borderRadius: 'var(--border-radius-s)',
-        color: 'var(--theme-text)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '2.5rem',
-        height: '2.5rem',
-        transition: 'all 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--theme-elevation-100)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent'
-      }}
+      className="twp-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twflex twitems-center twjustify-center tww-10 twh-10 twtransition-all twduration-200 hover:twbg-payload-elevation-100"
       aria-label={theme === 'light' ? 'Passa alla modalità scura' : 'Passa alla modalità chiara'}
       title={theme === 'light' ? 'Passa alla modalità scura' : 'Passa alla modalità chiara'}
     >
