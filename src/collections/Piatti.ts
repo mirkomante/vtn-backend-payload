@@ -90,17 +90,16 @@ export const Piatti: CollectionConfig = {
         description: 'Allergeni presenti nel piatto',
       },
     },
-    // TODO: Aggiungere campo menuFissi quando la collection menu-fisso sarà creata
-    // {
-    //   name: 'menuFissi',
-    //   type: 'relationship',
-    //   relationTo: 'menu-fisso',
-    //   hasMany: true,
-    //   label: 'Menu Fissi',
-    //   admin: {
-    //     description: 'Menu fissi che includono questo piatto',
-    //   },
-    // },
+    {
+      name: 'menuFissi',
+      type: 'relationship',
+      relationTo: 'menu-fisso',
+      hasMany: true,
+      label: 'Menu Fissi',
+      admin: {
+        description: 'Menu fissi che includono questo piatto',
+      },
+    },
   ],
   versions: {
     drafts: true,

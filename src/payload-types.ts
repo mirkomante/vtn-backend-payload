@@ -69,6 +69,13 @@ export interface Config {
   collections: {
     media: Media;
     piatti: Piatti;
+    'servizi-accessori': ServiziAccessori;
+    'menu-fisso': MenuFisso;
+    vini: Vini;
+    birre: Birre;
+    liquori: Liquori;
+    cocktail: Cocktail;
+    bevande: Bevande;
     allergeni: Allergeni;
     'categoria-menu-fisso': CategoriaMenuFisso;
     'categoria-piatti': CategoriaPiatti;
@@ -90,6 +97,13 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     piatti: PiattiSelect<false> | PiattiSelect<true>;
+    'servizi-accessori': ServiziAccessoriSelect<false> | ServiziAccessoriSelect<true>;
+    'menu-fisso': MenuFissoSelect<false> | MenuFissoSelect<true>;
+    vini: ViniSelect<false> | ViniSelect<true>;
+    birre: BirreSelect<false> | BirreSelect<true>;
+    liquori: LiquoriSelect<false> | LiquoriSelect<true>;
+    cocktail: CocktailSelect<false> | CocktailSelect<true>;
+    bevande: BevandeSelect<false> | BevandeSelect<true>;
     allergeni: AllergeniSelect<false> | AllergeniSelect<true>;
     'categoria-menu-fisso': CategoriaMenuFissoSelect<false> | CategoriaMenuFissoSelect<true>;
     'categoria-piatti': CategoriaPiattiSelect<false> | CategoriaPiattiSelect<true>;
@@ -209,6 +223,10 @@ export interface Piatti {
    * Allergeni presenti nel piatto
    */
   allergeni?: (number | Allergeni)[] | null;
+  /**
+   * Menu fissi che includono questo piatto
+   */
+  menuFissi?: (number | MenuFisso)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -252,6 +270,44 @@ export interface Allergeni {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-fisso".
+ */
+export interface MenuFisso {
+  id: number;
+  /**
+   * Nome del menu fisso
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale del menu
+   */
+  descrizione?: string | null;
+  /**
+   * Prezzo del menu fisso (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il menu è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Categoria del menu fisso
+   */
+  categoria: number | CategoriaMenuFisso;
+  /**
+   * Piatti inclusi nel menu
+   */
+  piatti?: (number | Piatti)[] | null;
+  /**
+   * Servizi inclusi nel menu
+   */
+  servizi?: (number | ServiziAccessori)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categoria-menu-fisso".
  */
 export interface CategoriaMenuFisso {
@@ -271,75 +327,92 @@ export interface CategoriaMenuFisso {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-vino".
+ * via the `definition` "servizi-accessori".
  */
-export interface TipologieVino {
+export interface ServiziAccessori {
   id: number;
+  /**
+   * Nome del servizio (es. "Coperto", "Pane e Grissini")
+   */
   nome: string;
   /**
-   * Testo lungo per descrizione dettagliata
+   * Descrizione opzionale del servizio
    */
   descrizione?: string | null;
+  /**
+   * Prezzo del servizio (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il servizio è visibile nel menu
+   */
+  inLista?: boolean | null;
+  /**
+   * Menu fissi che includono questo servizio
+   */
+  menuFissi?: (number | MenuFisso)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-birra".
+ * via the `definition` "vini".
  */
-export interface TipologieBirra {
+export interface Vini {
   id: number;
+  /**
+   * Nome del vino
+   */
   nome: string;
   /**
-   * Testo lungo per descrizione dettagliata
+   * Descrizione opzionale del vino
    */
   descrizione?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-liquore".
- */
-export interface TipologieLiquore {
-  id: number;
-  nome: string;
   /**
-   * Testo lungo per descrizione dettagliata
+   * Nome della cantina produttrice
    */
-  descrizione?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-cocktail".
- */
-export interface TipologieCocktail {
-  id: number;
-  nome: string;
+  cantina?: string | null;
   /**
-   * Testo lungo per descrizione dettagliata
+   * Grado alcolico (es. "13.5%", "12%")
    */
-  descrizione?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-bevanda".
- */
-export interface TipologieBevanda {
-  id: number;
-  nome: string;
+  grado?: string | null;
   /**
-   * Testo lungo per descrizione dettagliata
+   * Certificazione (es. DOC, DOCG, IGT)
    */
-  descrizione?: string | null;
+  certificazione?: string | null;
+  /**
+   * Capacità della bottiglia (es. "750ml", "1L")
+   */
+  capacita?: string | null;
+  /**
+   * Prezzo per calice (max 10 cifre, 2 decimali)
+   */
+  prezzoCalice?: number | null;
+  /**
+   * Prezzo della bottiglia (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il vino è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Nazione di produzione
+   */
+  nazione: number | Nazioni;
+  /**
+   * Regione di produzione (opzionale)
+   */
+  regione?: (number | null) | Regioni;
+  /**
+   * Zona di produzione (opzionale)
+   */
+  zona?: (number | null) | Zone;
+  /**
+   * Tipologia del vino
+   */
+  tipologia: number | TipologieVino;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -398,6 +471,237 @@ export interface Zone {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-vino".
+ */
+export interface TipologieVino {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "birre".
+ */
+export interface Birre {
+  id: number;
+  /**
+   * Nome della birra
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale della birra
+   */
+  descrizione?: string | null;
+  /**
+   * Grado alcolico (es. "5.2%", "4.5%")
+   */
+  grado?: string | null;
+  /**
+   * Capacità (es. "33cl", "50cl", "1L")
+   */
+  capacita?: string | null;
+  /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se la birra è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Nazione di produzione
+   */
+  nazione: number | Nazioni;
+  /**
+   * Tipologia della birra
+   */
+  tipologia: number | TipologieBirra;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-birra".
+ */
+export interface TipologieBirra {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "liquori".
+ */
+export interface Liquori {
+  id: number;
+  /**
+   * Nome del liquore
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale del liquore
+   */
+  descrizione?: string | null;
+  /**
+   * Grado alcolico (es. "40%", "35%")
+   */
+  grado?: string | null;
+  /**
+   * Invecchiamento (es. "12 anni", "8 mesi", "Non invecchiato")
+   */
+  invecchiamento?: string | null;
+  /**
+   * Capacità (es. "50ml", "70cl", "1L")
+   */
+  capacita?: string | null;
+  /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il liquore è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Nazione di produzione
+   */
+  nazione: number | Nazioni;
+  /**
+   * Tipologia del liquore
+   */
+  tipologia: number | TipologieLiquore;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-liquore".
+ */
+export interface TipologieLiquore {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cocktail".
+ */
+export interface Cocktail {
+  id: number;
+  /**
+   * Nome del cocktail
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale del cocktail
+   */
+  descrizione?: string | null;
+  /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se il cocktail è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Nazione di origine del cocktail
+   */
+  nazione: number | Nazioni;
+  /**
+   * Tipologia del cocktail
+   */
+  tipologia: number | TipologieCocktail;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-cocktail".
+ */
+export interface TipologieCocktail {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bevande".
+ */
+export interface Bevande {
+  id: number;
+  /**
+   * Nome della bevanda
+   */
+  nome: string;
+  /**
+   * Descrizione opzionale della bevanda
+   */
+  descrizione?: string | null;
+  /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Se la bevanda è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Nazione di produzione
+   */
+  nazione: number | Nazioni;
+  /**
+   * Tipologia della bevanda
+   */
+  tipologia: number | TipologieBevanda;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-bevanda".
+ */
+export interface TipologieBevanda {
+  id: number;
+  nome: string;
+  /**
+   * Testo lungo per descrizione dettagliata
+   */
+  descrizione?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -439,6 +743,34 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'piatti';
         value: number | Piatti;
+      } | null)
+    | ({
+        relationTo: 'servizi-accessori';
+        value: number | ServiziAccessori;
+      } | null)
+    | ({
+        relationTo: 'menu-fisso';
+        value: number | MenuFisso;
+      } | null)
+    | ({
+        relationTo: 'vini';
+        value: number | Vini;
+      } | null)
+    | ({
+        relationTo: 'birre';
+        value: number | Birre;
+      } | null)
+    | ({
+        relationTo: 'liquori';
+        value: number | Liquori;
+      } | null)
+    | ({
+        relationTo: 'cocktail';
+        value: number | Cocktail;
+      } | null)
+    | ({
+        relationTo: 'bevande';
+        value: number | Bevande;
       } | null)
     | ({
         relationTo: 'allergeni';
@@ -564,6 +896,124 @@ export interface PiattiSelect<T extends boolean = true> {
   soloMenuFissi?: T;
   categoria?: T;
   allergeni?: T;
+  menuFissi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servizi-accessori_select".
+ */
+export interface ServiziAccessoriSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  prezzo?: T;
+  inLista?: T;
+  menuFissi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-fisso_select".
+ */
+export interface MenuFissoSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  prezzo?: T;
+  inLista?: T;
+  categoria?: T;
+  piatti?: T;
+  servizi?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vini_select".
+ */
+export interface ViniSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  cantina?: T;
+  grado?: T;
+  certificazione?: T;
+  capacita?: T;
+  prezzoCalice?: T;
+  prezzo?: T;
+  inLista?: T;
+  nazione?: T;
+  regione?: T;
+  zona?: T;
+  tipologia?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "birre_select".
+ */
+export interface BirreSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  grado?: T;
+  capacita?: T;
+  prezzo?: T;
+  inLista?: T;
+  nazione?: T;
+  tipologia?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "liquori_select".
+ */
+export interface LiquoriSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  grado?: T;
+  invecchiamento?: T;
+  capacita?: T;
+  prezzo?: T;
+  inLista?: T;
+  nazione?: T;
+  tipologia?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cocktail_select".
+ */
+export interface CocktailSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  prezzo?: T;
+  inLista?: T;
+  nazione?: T;
+  tipologia?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bevande_select".
+ */
+export interface BevandeSelect<T extends boolean = true> {
+  nome?: T;
+  descrizione?: T;
+  prezzo?: T;
+  inLista?: T;
+  nazione?: T;
+  tipologia?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -86,3 +86,39 @@ export const prezzoField = (options?: {
     return true
   },
 })
+
+/**
+ * Campo prezzo calice opzionale per i vini
+ * Max 10 cifre totali, 2 decimali (es. 99999999.99)
+ */
+export const prezzoCaliceField = (options?: {
+  description?: string
+}): Field => ({
+  name: 'prezzoCalice',
+  type: 'number',
+  required: false,
+  label: 'Prezzo Calice',
+  min: 0,
+  max: 99999999.99,
+  admin: {
+    description: options?.description || 'Prezzo per calice (max 10 cifre, 2 decimali)',
+    step: 0.01,
+  },
+  validate: (value) => {
+    if (value === undefined || value === null) {
+      return true // Opzionale
+    }
+    if (value < 0) {
+      return 'Il prezzo non può essere negativo'
+    }
+    if (value > 99999999.99) {
+      return 'Il prezzo non può superare 99999999.99'
+    }
+    // Verifica che non ci siano più di 2 decimali
+    const decimalPart = value.toString().split('.')[1]
+    if (decimalPart && decimalPart.length > 2) {
+      return 'Il prezzo può avere massimo 2 decimali'
+    }
+    return true
+  },
+})

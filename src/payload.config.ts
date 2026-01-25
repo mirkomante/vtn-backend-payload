@@ -14,6 +14,13 @@ import { Media } from './collections/Media'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
 import { Piatti } from './collections/Piatti'
+import { ServizioAccessorio } from './collections/ServizioAccessorio'
+import { MenuFisso } from './collections/MenuFisso'
+import { Vino } from './collections/Vino'
+import { Birra } from './collections/Birra'
+import { Liquore } from './collections/Liquore'
+import { Cocktail } from './collections/Cocktail'
+import { Bevanda } from './collections/Bevanda'
 import { Allergene } from './collections/Allergene'
 import { Nazione } from './collections/Nazione'
 import { Regione } from './collections/Regione'
@@ -48,6 +55,13 @@ export default buildConfig({
     Users,
     Media,
     Piatti,
+    ServizioAccessorio,
+    MenuFisso,
+    Vino,
+    Birra,
+    Liquore,
+    Cocktail,
+    Bevanda,
     Allergene,
     CategoriaMenuFisso,
     CategoriaPiatti,
