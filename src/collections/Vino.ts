@@ -11,6 +11,7 @@ export const Vino = createBevandaCollection({
     capacita: true,
     cantina: true,
     certificazione: true,
+    anno: true, // Anno di produzione
     prezzoCalice: true,
     regioneZona: true, // Vino ha regione e zona
   },

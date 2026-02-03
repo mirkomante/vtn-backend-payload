@@ -397,6 +397,10 @@ export interface Vini {
    */
   certificazione?: string | null;
   /**
+   * Anno di produzione (es. "2020", "2018", "NV" per non vintage)
+   */
+  anno?: string | null;
+  /**
    * Capacità della bottiglia (es. "750ml", "1L")
    */
   capacita?: string | null;
@@ -956,6 +960,7 @@ export interface ViniSelect<T extends boolean = true> {
   cantina?: T;
   grado?: T;
   certificazione?: T;
+  anno?: T;
   capacita?: T;
   prezzoCalice?: T;
   prezzo?: T;

@@ -11,6 +11,7 @@ import { OAuth2Plugin } from 'payload-oauth2'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
+import { migrateDataEndpoint } from './endpoints/migrateData'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
 import { Piatti } from './collections/Piatti'
@@ -49,6 +50,7 @@ export default buildConfig({
         },
       },
       afterNavLinks: ['./components/NavFooter'],
+      beforeDashboard: ['./components/MigrationButton'],
     },
   },
   collections: [
@@ -89,6 +91,7 @@ export default buildConfig({
     },
   }),
   sharp,
+  endpoints: [migrateDataEndpoint],
   plugins: [
     cancelButtonPlugin(),
     OAuth2Plugin({

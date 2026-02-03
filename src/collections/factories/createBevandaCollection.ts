@@ -27,6 +27,7 @@ interface BevandaCollectionOptions {
     certificazione?: boolean
     invecchiamento?: boolean
     prezzoCalice?: boolean
+    anno?: boolean // Anno di produzione (solo Vino)
     regioneZona?: boolean // Se includere regione e zona
   }
 }
@@ -81,6 +82,18 @@ export function createBevandaCollection(
       label: 'Certificazione',
       admin: {
         description: 'Certificazione (es. DOC, DOCG, IGT)',
+      },
+    })
+  }
+
+  // Campo anno (solo Vino)
+  if (campiAggiuntivi.anno) {
+    fields.push({
+      name: 'anno',
+      type: 'text',
+      label: 'Anno',
+      admin: {
+        description: 'Anno di produzione (es. "2020", "2018", "NV" per non vintage)',
       },
     })
   }
