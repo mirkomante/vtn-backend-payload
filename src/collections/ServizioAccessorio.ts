@@ -15,7 +15,7 @@ export const ServizioAccessorio: CollectionConfig = {
   admin: {
     useAsTitle: 'nome',
     group: 'Ristorante menu',
-    defaultColumns: ['nome', 'prezzo', 'inLista', '_status', 'createdAt'],
+    defaultColumns: ['nome', 'inLista', 'prezzo', '_status'],
   },
   fields: [
     nomeField({ description: 'Nome del servizio (es. "Coperto", "Pane e Grissini")' }),
@@ -24,6 +24,7 @@ export const ServizioAccessorio: CollectionConfig = {
     inListaField({
       description: 'Se il servizio è visibile nel menu',
       defaultValue: true,
+      collectionSlug: 'servizi-accessori',
     }),
     {
       name: 'menuFissi',

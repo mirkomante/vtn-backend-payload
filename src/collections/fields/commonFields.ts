@@ -33,20 +33,27 @@ export const descrizioneField = (options?: {
 })
 
 /**
- * Campo inLista comune per le categorie
+ * Campo inLista comune per le categorie e i prodotti.
+ * Usa un toggle interattivo nella lista per attivare/disattivare rapidamente.
  */
-export const inListaField = (options?: {
+export const inListaField = (options: {
   description?: string
   defaultValue?: boolean
+  collectionSlug: string // Necessario per l'API call del toggle
 }): Field => ({
   name: 'inLista',
   type: 'checkbox',
   defaultValue: options?.defaultValue !== false, // default true
   label: 'In Lista',
   admin: {
-    description: options?.description || 'Se la categoria è visibile nel menu',
+    description: options?.description || 'Se visibile nel menu pubblico',
     components: {
-      Cell: '/components/InListaCell#InListaCell',
+      Cell: {
+        path: '/components/InListaToggleCell#InListaToggleCell',
+        clientProps: {
+          collectionSlug: options.collectionSlug,
+        },
+      },
     },
   },
 })

@@ -51,7 +51,7 @@ const uiModule = require('@payloadcms/ui')
 style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, ... }}
 
 // ✅ DOPO
-className="twfixed twinset-0 twflex twflex-col twitems-center twjustify-center ..."
+className="fixed inset-0 flex flex-col items-center justify-center ..."
 ```
 
 ### 4. Errori TypeScript Pre-esistenti Fixati
@@ -96,16 +96,16 @@ className="twfixed twinset-0 twflex twflex-col twitems-center twjustify-center .
 ### Colori Google Brand
 ```typescript
 // Colore custom con arbitrary values
-className="twbg-[#4285F4] hover:twbg-[#357ae8]"
+className="bg-[#4285F4] hover:bg-[#357ae8]"
 ```
 
 ### Variabili Payload
 ```typescript
 // Mapping variabili Payload nel theme
-twbg-payload-elevation-50    // var(--theme-elevation-50)
-twtext-payload-text          // var(--theme-text)
-twborder-payload-border      // var(--theme-border-color)
-twrounded-s-payload          // var(--border-radius-s)
+bg-payload-elevation-50    // var(--theme-elevation-50)
+text-payload-text          // var(--theme-text)
+border-payload-border      // var(--theme-border-color)
+rounded-s-payload          // var(--border-radius-s)
 ```
 
 ### Hover States
@@ -116,19 +116,19 @@ onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '...'}
 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
 
 // ✅ DOPO
-hover:twbg-payload-elevation-100
+hover:bg-payload-elevation-100
 ```
 
 ### Layout Utilities
 ```typescript
 // Flexbox
-twflex twflex-col twitems-center twjustify-center twgap-2
+flex flex-col items-center justify-center gap-2
 
 // Positioning
-twfixed twinset-0   // fixed + top/right/bottom/left: 0
+fixed inset-0   // fixed + top/right/bottom/left: 0
 
 // Sizing
-tww-full twh-full twmax-w-[400px]
+w-full h-full max-w-[400px]
 ```
 
 ## 🏗️ File CSS Globali - Stato
@@ -177,7 +177,7 @@ tww-full twh-full twmax-w-[400px]
 
 ### Dopo (Tailwind)
 ```typescript
-<button className="twpx-4 twpy-2 twbg-transparent twborder twborder-payload-border twrounded-s-payload twtext-payload-text twcursor-pointer twtext-sm twfont-medium twtransition-all twduration-200 hover:twbg-payload-elevation-100">
+<button className="px-4 py-2 bg-transparent border border-payload-border rounded-s-payload text-payload-text cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-payload-elevation-100">
   Bottone
 </button>
 ```
@@ -233,15 +233,15 @@ hover:twbg-blue  // hover state
 
 ### Variabili CSS Mappate
 Tutte le variabili Payload sono disponibili:
-- `--theme-*` → `tw*-payload-*`
-- `--border-radius-*` → `twrounded-*-payload`
-- `--base` → `twp-base`, `twm-base`, etc.
+- `--theme-*` → `*-payload-*`
+- `--border-radius-*` → `rounded-*-payload`
+- `--base` → `p-base`, `m-base`, etc.
 
 ### Arbitrary Values
 Per colori custom (es. Google Blue):
 ```typescript
-twbg-[#4285F4]
-hover:twbg-[#357ae8]
+bg-[#4285F4]
+hover:bg-[#357ae8]
 ```
 
 ## 🚀 Prossimi Passi (Opzionali)

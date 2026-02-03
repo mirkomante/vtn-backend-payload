@@ -5,7 +5,7 @@ export const Vino = createBevandaCollection({
   singular: 'Vino',
   plural: 'Vini',
   tipologiaSlug: 'tipologie-vino',
-  defaultColumns: ['nome', 'cantina', 'nazione', 'prezzo', 'inLista', '_status', 'createdAt'],
+  defaultColumns: ['nome', 'inLista', 'cantina', 'nazione', 'prezzo', '_status'],
   campiAggiuntivi: {
     grado: true,
     capacita: true,

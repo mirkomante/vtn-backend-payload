@@ -81,73 +81,68 @@ I seguenti componenti sono stati migrati da inline styles a Tailwind:
 - ✅ `src/components/LogoutButton.tsx`  
 - ✅ `src/components/ThemeToggle.tsx`
 
-## ⚠️ Differenze Importanti dal Piano Originale
+## 📌 Configurazione Prefix
 
-### Prefix Cambiato: `tw` invece di `tw-`
-
-**Motivo:** Tailwind v4 accetta solo caratteri ASCII lowercase (a-z) nei prefix, quindi il trattino `-` non è permesso.
+**Nessun prefix utilizzato** - Le classi Tailwind sono nella loro forma standard per massima compatibilità e leggibilità.
 
 **Utilizzo delle classi:**
 
 ```tsx
-// ❌ NON funziona (come nel piano originale)
-className="tw-px-4 tw-py-2 tw-bg-transparent"
-
-// ✅ CORRETTO (Tailwind v4)
-className="twpx-4 twpy-2 twbg-transparent"
+// ✅ CORRETTO - Classi standard Tailwind
+className="px-4 py-2 bg-transparent"
 ```
 
-### Sintassi CSS Diversa
+### Sintassi CSS Tailwind v4
 
 Tailwind v4 usa:
 - `@import "tailwindcss"` invece di `@tailwind`
 - `@theme` invece di configurazione JavaScript
-- `prefix()` nella direttiva import invece che nel config
+- Nessun prefix per mantenere le classi standard
 
 ## 🎨 Come Usare le Variabili Payload
 
-Le variabili CSS di Payload sono accessibili tramite utility classes prefissate:
+Le variabili CSS di Payload sono accessibili tramite utility classes:
 
 ### Colori
 
 ```tsx
 // Background
-className="twbg-payload-elevation-100"
-className="twbg-payload-elevation-500"
+className="bg-payload-elevation-100"
+className="bg-payload-elevation-500"
 
 // Testo
-className="twtext-payload-text"
+className="text-payload-text"
 
 // Bordi
-className="twborder-payload-border"
+className="border-payload-border"
 
 // Stati
-className="twbg-payload-success-500"
-className="twbg-payload-error-500"
-className="twbg-payload-warning-500"
+className="bg-payload-success-500"
+className="bg-payload-error-500"
+className="bg-payload-warning-500"
 ```
 
 ### Spacing
 
 ```tsx
-className="twp-base"        // padding: var(--base)
-className="twm-base-2x"     // margin: calc(var(--base) * 2)
-className="twgap-gap"       // gap: var(--gap)
+className="p-base"        // padding: var(--base)
+className="m-base-2x"     // margin: calc(var(--base) * 2)
+className="gap-gap"       // gap: var(--gap)
 ```
 
 ### Border Radius
 
 ```tsx
-className="twrounded-s-payload"  // border-radius: var(--border-radius-s)
-className="twrounded-m-payload"  // border-radius: var(--border-radius-m)
-className="twrounded-l-payload"  // border-radius: var(--border-radius-l)
+className="rounded-s-payload"  // border-radius: var(--border-radius-s)
+className="rounded-m-payload"  // border-radius: var(--border-radius-m)
+className="rounded-l-payload"  // border-radius: var(--border-radius-l)
 ```
 
 ### Font
 
 ```tsx
-className="twfont-mono"           // font-family: var(--font-mono)
-className="twtext-base-payload"   // font-size: var(--base-body-size)
+className="font-mono"           // font-family: var(--font-mono)
+className="text-base-payload"   // font-size: var(--base-body-size)
 ```
 
 ## 🌓 Dark Mode
@@ -163,19 +158,19 @@ Il dark mode funziona automaticamente! Le variabili CSS di Payload (`--theme-*`)
 │      Payload Admin Panel                │
 │  • Usa CSS core di Payload              │
 │  • custom.scss per override globali     │
-│  • NON usa Tailwind                     │
+│  • payloadStyles.css per Tailwind       │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
 │      Frontend Next.js                   │
-│  • Usa Tailwind CSS v4 (prefix: tw)    │
+│  • Usa Tailwind CSS v4 (nessun prefix) │
 │  • styles.css per stili custom          │
 │  • Referenzia variabili Payload        │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
 │      Componenti Custom Payload          │
-│  • Possono usare Tailwind (prefix: tw) │
+│  • Usano Tailwind (nessun prefix)      │
 │  • Referenziano variabili Payload       │
 │  • Mantengono coerenza visiva           │
 └─────────────────────────────────────────┘
@@ -190,9 +185,9 @@ Il dark mode funziona automaticamente! Le variabili CSS di Payload (`--theme-*`)
 
 export function MyComponent() {
   return (
-    <div className="twp-4 twbg-payload-elevation-100 twrounded-s-payload">
-      <h2 className="twtext-payload-text twfont-medium">Titolo</h2>
-      <button className="twpx-4 twpy-2 twbg-payload-success-500 twtext-white hover:twbg-payload-success-600">
+    <div className="p-4 bg-payload-elevation-100 rounded-s-payload">
+      <h2 className="text-payload-text font-medium">Titolo</h2>
+      <button className="px-4 py-2 bg-payload-success-500 text-white hover:bg-payload-success-600">
         Click me
       </button>
     </div>
@@ -227,17 +222,17 @@ npm run dev
 
 ### DO ✅
 
-- Usa il prefix `tw` per tutte le utility classes
-- Referenzia variabili Payload per mantenere coerenza (`twbg-payload-elevation-100`)
-- Applica Tailwind solo a componenti custom e frontend
+- Usa classi Tailwind standard senza prefix
+- Referenzia variabili Payload per mantenere coerenza (`bg-payload-elevation-100`)
+- Usa Tailwind sia nell'Admin Panel che nel frontend
 - Testa sia light che dark mode
 
 ### DON'T ❌
 
-- Non usare Tailwind nell'Admin Panel core
+- Non sovrascrivere il preflight di Tailwind nell'admin (già disabilitato)
 - Non sovrascrivere variabili CSS di Payload con valori hardcoded
 - Non usare `!important` a meno che strettamente necessario
-- Non dimenticare il prefix `tw` nelle classi
+- Non modificare direttamente gli stili core di Payload
 
 ## 🎯 Prossimi Passi (Opzionali)
 
@@ -250,7 +245,7 @@ npm run dev
 
 - **Versione Tailwind:** 4.1.18 (latest)
 - **Approccio:** CSS-first configuration
-- **Prefix:** `tw` (solo lowercase letters)
+- **Prefix:** Nessuno (classi standard Tailwind)
 - **PostCSS Plugin:** `@tailwindcss/postcss`
 - **Build Status:** ✅ Compila con successo
 - **Compatibilità:** Next.js 15.4.10, Payload CMS 3.72.0

@@ -5,21 +5,21 @@
  * La configurazione del tema e delle variabili viene fatta direttamente nel CSS.
  * 
  * Integrazione con Payload CMS:
- * - Prefix `tw-` per evitare conflitti
+ * - Nessun prefix per mantenere le classi standard di Tailwind
  * - Variabili CSS di Payload mappate nel theme
  * - Dark mode automatico tramite variabili CSS custom
  */
 
-@import "tailwindcss" prefix(tw);
+@import "tailwindcss";
 
 /**
  * Theme personalizzato - Integrazione variabili Payload CMS
  * 
  * Queste definizioni mappano le variabili CSS di Payload nel sistema
  * di design di Tailwind, permettendo di usare utility classes come:
- * - tw-text-payload-text
- * - tw-bg-payload-elevation-100
- * - tw-border-payload-border
+ * - text-payload-text
+ * - bg-payload-elevation-100
+ * - border-payload-border
  * ecc...
  */
 @theme {

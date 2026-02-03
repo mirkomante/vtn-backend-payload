@@ -33,13 +33,15 @@ export function createCategoriaCollection(
       useAsTitle: 'nome',
       group: 'Ristorante impostazioni',
       defaultColumns:
-        options.defaultColumns ||
-        ['nome', 'descrizione', 'inLista', '_status', 'createdAt'],
+        options.defaultColumns || ['nome', 'inLista', 'descrizione', '_status'],
     },
     fields: [
       nomeField({ description: options.nomeDescription }),
       descrizioneField({ description: options.descrizioneDescription }),
-      inListaField({ description: options.inListaDescription }),
+      inListaField({
+        description: options.inListaDescription,
+        collectionSlug: options.slug,
+      }),
     ],
     versions: {
       drafts: true,

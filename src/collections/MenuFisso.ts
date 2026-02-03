@@ -15,7 +15,7 @@ export const MenuFisso: CollectionConfig = {
   admin: {
     useAsTitle: 'nome',
     group: 'Ristorante menu',
-    defaultColumns: ['nome', 'categoria', 'prezzo', 'inLista', '_status', 'createdAt'],
+    defaultColumns: ['nome', 'inLista', 'categoria', 'prezzo', '_status'],
   },
   fields: [
     nomeField({ description: 'Nome del menu fisso' }),
@@ -24,6 +24,7 @@ export const MenuFisso: CollectionConfig = {
     inListaField({
       description: 'Se il menu è visibile nel menu pubblico',
       defaultValue: true,
+      collectionSlug: 'menu-fisso',
     }),
     {
       name: 'categoria',

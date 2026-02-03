@@ -3,14 +3,13 @@
  * 
  * NOTA: Tailwind v4 usa un approccio CSS-first per la configurazione del tema.
  * La maggior parte della configurazione del tema (colori, spacing, ecc.) 
- * è stata spostata in src/app/(frontend)/tailwind.css usando @theme.
+ * è stata spostata in src/app/(frontend)/tailwind.css e src/styles/payloadStyles.css usando @theme.
  * 
  * Questo file è mantenuto principalmente per:
  * - Specificare i content paths (file da scansionare)
  * - Documentazione delle scelte di configurazione
  * 
- * Il prefix 'tw-' è ora gestito direttamente nell'import CSS:
- * @import "tailwindcss" prefix(tw-);
+ * Nessun prefix è utilizzato per mantenere le classi standard di Tailwind.
  */
 
 export default {

@@ -15,7 +15,7 @@ export const Piatti: CollectionConfig = {
   admin: {
     useAsTitle: 'nome',
     group: 'Ristorante menu',
-    defaultColumns: ['nome', 'categoria', 'prezzo', 'inLista', '_status', 'createdAt'],
+    defaultColumns: ['nome', 'inLista', 'categoria', 'prezzo', '_status'],
   },
   fields: [
     nomeField({ description: 'Nome del piatto' }),
@@ -24,6 +24,7 @@ export const Piatti: CollectionConfig = {
     inListaField({
       description: 'Se il piatto è visibile nel menu pubblico',
       defaultValue: true,
+      collectionSlug: 'piatti',
     }),
     {
       name: 'glutenFree',

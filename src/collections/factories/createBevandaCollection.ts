@@ -126,11 +126,12 @@ export function createBevandaCollection(
     }),
   )
 
-  // Campo inLista con index
+  // Campo inLista con index e toggle interattivo
   fields.push(
     inListaField({
       description: `Se ${options.singular.toLowerCase()} è visibile nel menu pubblico`,
       defaultValue: true,
+      collectionSlug: options.slug,
     }),
   )
 
@@ -206,11 +207,10 @@ export function createBevandaCollection(
       group: 'Ristorante menu',
       defaultColumns: options.defaultColumns || [
         'nome',
+        'inLista',
         'nazione',
         'prezzo',
-        'inLista',
         '_status',
-        'createdAt',
       ],
     },
     fields,
