@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo, useTranslation } from '@payloadcms/ui'
+import { Button, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
@@ -48,15 +48,15 @@ export default function SaveDraftButtonWithCancel(props: any) {
   const ButtonComponent = props.DefaultButton || props.defaultButton
 
   return (
-    <div className="flex items-center gap-2">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'calc(var(--base) * 0.5)' }}>
       {/* Bottone Annulla - ora a sinistra */}
-      <button
-        type="button"
+      <Button
+        buttonStyle="secondary"
+        size="medium"
         onClick={handleCancel}
-        className="px-4 py-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-[var(--theme-elevation-100)]"
       >
         {t('general:cancel') || 'Annulla'}
-      </button>
+      </Button>
 
       {/* Bottone originale SaveDraftButton - ora a destra */}
       {ButtonComponent ? (

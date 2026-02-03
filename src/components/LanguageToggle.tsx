@@ -33,9 +33,14 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="p-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer flex items-center justify-center gap-2 min-w-fit h-10 transition-all duration-200 text-sm hover:bg-[var(--theme-elevation-100)]"
+      className="btn btn--style-pill btn--size-medium btn--no-margin"
       aria-label={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
       title={`Cambia lingua. Lingua corrente: ${currentLanguage}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'calc(var(--base) * 0.3)',
+      }}
     >
       <span>{flag}</span>
       <span>{currentLanguage}</span>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useDocumentInfo, useTranslation } from '@payloadcms/ui'
+import { Button, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import type { UIFieldClientComponent } from 'payload'
 
@@ -34,13 +34,13 @@ const CancelButton: UIFieldClientComponent = () => {
   }
 
   return (
-    <button
-      type="button"
+    <Button
+      buttonStyle="secondary"
+      size="medium"
       onClick={handleCancel}
-      className="px-4 py-2 bg-transparent border border-[var(--theme-border-color)] rounded-[var(--border-radius-s)] text-[var(--theme-text)] cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-[var(--theme-elevation-100)]"
     >
       {t('general:cancel') || 'Annulla'}
-    </button>
+    </Button>
   )
 }
 
