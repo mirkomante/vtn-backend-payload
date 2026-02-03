@@ -1,67 +1,123 @@
-# Payload Blank Template
+# Sistema di Gestione Menu Ristorante (Backend Payload CMS)
 
-This template comes configured with the bare minimum to get started on anything you need.
+Questo progetto è un backend completo basato su **Payload CMS 3.0** e **Next.js 15**, progettato per la gestione di menu digitali, carte dei vini e configurazioni per ristoranti.
 
-## Quick start
+## 🚀 Funzionalità Principali
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+Il sistema è strutturato in diverse aree funzionali gestite tramite Collections di Payload:
 
-## Quick Start - local setup
+### 🍽️ Gestione Menu
+- **Piatti**: Gestione dettagliata dei piatti con descrizioni, prezzi e associazioni.
+- **Menu Fissi**: Creazione di menu degustazione o fissi.
+- **Categorie Piatti**: Organizzazione gerarchica delle portate.
+- **Categorie Menu Fisso**: Tipologie di menu fissi.
 
-To spin up this template locally, follow these steps:
+### 🍷 Gestione Cantina e Bevande
+- **Vini**: Schede tecniche complete per vini (bianchi, rossi, rosati, bollicine).
+- **Birre**: Gestione birre artigianali e industriali.
+- **Cocktail**: Lista cocktail e ingredienti.
+- **Liquori**: Gestione spirit e amari.
+- **Bevande**: Acqua, bibite e caffetteria.
 
-### Clone
+### ⚙️ Configurazioni e Impostazioni
+- **Allergeni**: Gestione centralizzata degli allergeni per conformità normativa.
+- **Zone, Nazioni, Regioni**: Gestione geografica per la provenienza dei prodotti (vini, materie prime).
+- **Tipologie**: Classificazioni trasversali.
+- **Servizi Accessori**: Gestione servizi extra.
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### 👥 Utenti e Sicurezza
+- **RBAC (Role-Based Access Control)**:
+  - **Admin**: Accesso completo in lettura/scrittura su tutte le collezioni.
+  - **Public/User**: Accesso in sola lettura ai contenuti pubblicati (`_status: 'published'`).
+- **Autenticazione**: Gestione utenti sicura integrata in Payload.
 
-### Development
+## 🛠️ Stack Tecnologico
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+- **Core**: [Payload CMS 3.0](https://payloadcms.com) (Beta/RC versions)
+- **Framework**: [Next.js 15](https://nextjs.org) (App Router)
+- **Database**: MongoDB (via Mongoose Adapter)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com) (integrato per componenti custom)
+- **Language**: TypeScript
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## 🏁 Quick Start
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+### Prerequisiti
+- Node.js (v18 o superiore)
+- MongoDB (locale o Atlas)
+- Pnpm (consigliato) o Npm
 
-#### Docker (Optional)
+### Installazione Locale
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+1.  **Clona il repository:**
+    ```bash
+    git clone <repository-url>
+    cd <project-folder>
+    ```
 
-To do so, follow these steps:
+2.  **Configura le variabili d'ambiente:**
+    Copia il file di esempio e configuralo:
+    ```bash
+    cp .env.example .env
+    ```
+    Assicurati di impostare `DATABASE_URI` (MongoDB connection string) e `PAYLOAD_SECRET`.
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+3.  **Installa le dipendenze:**
+    ```bash
+    pnpm install
+    # oppure
+    npm install
+    ```
 
-## How it works
+4.  **Avvia il server di sviluppo:**
+    ```bash
+    pnpm dev
+    # oppure
+    npm run dev
+    ```
+    > **Nota:** Se incontri problemi di cache con Next.js, puoi usare `npm run devsafe` per pulire la cache `.next` prima dell'avvio.
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+5.  **Accedi all'Admin Panel:**
+    Apri [http://localhost:3000/admin](http://localhost:3000/admin) e crea il primo utente amministratore.
 
 ### Docker
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+È disponibile un file `docker-compose.yml` per avviare rapidamente l'ambiente con MongoDB locale.
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+```bash
+docker-compose up -d
+```
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+## 📂 Struttura del Progetto
 
-## Questions
+```
+src/
+├── access/              # Logiche di controllo accessi (RBAC)
+│   ├── menuImpostazioniAccess.ts
+│   └── menuRistoranteAccess.ts
+├── app/                 # Next.js App Router
+│   ├── (frontend)/      # Pagine frontend pubbliche (attualmente placeholder)
+│   └── (payload)/       # Pagine amministrative Payload
+├── collections/         # Definizioni delle Collezioni (Schema Dati)
+│   ├── factories/       # Factory functions per creare collezioni simili
+│   └── fields/          # Field riutilizzabili (commonFields)
+├── components/          # Componenti React Custom (Admin UI)
+├── plugins/             # Plugin Payload custom
+└── styles/              # Stili globali e integrazioni CSS
+```
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+## 🎨 Integrazione Tailwind CSS
+
+Il progetto utilizza **Tailwind CSS v4** per lo styling dei componenti custom dell'interfaccia di amministrazione.
+Per dettagli sulla migrazione e l'utilizzo, consultare:
+- [TAILWIND_INTEGRATION.md](./TAILWIND_INTEGRATION.md)
+- [MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)
+
+## 🤝 Contribuire
+
+1.  Assicurati di seguire le regole definite in `.cursor/rules` se utilizzi Cursor IDE.
+2.  Esegui sempre `npm run generate:types` dopo aver modificato le collezioni per aggiornare i tipi TypeScript.
+3.  Utilizza i componenti Tailwind per nuove interfacce custom.
+
+## 📄 Licenza
+
+MIT
