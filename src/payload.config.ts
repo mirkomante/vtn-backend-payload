@@ -106,7 +106,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
-    push: true, // Sincronizza automaticamente lo schema del database all'avvio
+    push: false, // Disabilitato per produzione - usare migrazioni esplicite
+    prodMigrations: true, // Abilita migrazioni in produzione
   }),
   sharp,
   endpoints: [migrateDataEndpoint],
