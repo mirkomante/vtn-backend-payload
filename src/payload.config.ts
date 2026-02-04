@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { gcsStorage } from '@payloadcms/storage-gcs'
 import { en } from '@payloadcms/translations/languages/en'
 import { it } from '@payloadcms/translations/languages/it'
 import path from 'path'
@@ -36,6 +37,22 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// GCS Storage Plugin - attivo solo in produzione quando GCS_BUCKET è configurato
+// In locale i media vengono salvati nella cartella /media del progetto
+const gcsPlugin = process.env.GCS_BUCKET
+  ? [
+      gcsStorage({
+        collections: {
+          media: true,
+        },
+        bucket: process.env.GCS_BUCKET,
+        options: {
+          projectId: process.env.GCP_PROJECT_ID,
+        },
+      }),
+    ]
+  : []
 
 export default buildConfig({
   admin: {
@@ -93,6 +110,7 @@ export default buildConfig({
   sharp,
   endpoints: [migrateDataEndpoint],
   plugins: [
+    ...gcsPlugin,
     cancelButtonPlugin(),
     OAuth2Plugin({
       strategyName: 'google',
