@@ -106,6 +106,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    push: true, // Sincronizza automaticamente lo schema del database all'avvio
   }),
   sharp,
   endpoints: [migrateDataEndpoint],
