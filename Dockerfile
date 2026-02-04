@@ -55,4 +55,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Run migrations and start server
-CMD ["sh", "-c", "node node_modules/.bin/payload migrate && node node_modules/next/dist/bin/next start"]
+CMD ["sh", "-c", "npx payload migrate && npx next start"]
