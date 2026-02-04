@@ -49,7 +49,7 @@ export async function importPiatti(
           nome: piatto.nome,
           descrizione: piatto.descrizione || '',
           prezzo: Number(piatto.prezzo),
-          inLista: true,
+          inLista: piatto.inLista !== undefined ? piatto.inLista : true,
           glutenFree: piatto.glutenFree || false,
           noUovo: piatto.noUovo || false,
           noLatticini: piatto.noLatticini || false,
@@ -57,6 +57,7 @@ export async function importPiatti(
           soloMenuFissi: piatto.soloMenuFissi || false,
           categoria: categoriaId as number,
           allergeni: allergeniIds as number[],
+          _status: 'published',
         },
       })
 

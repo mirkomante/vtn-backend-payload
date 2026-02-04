@@ -35,6 +35,7 @@ export async function importRegioni(
         data: {
           nome: regione.nome,
           nazione: nazioneId as number,
+          _status: 'published',
         },
       })
 

@@ -25,7 +25,8 @@ export async function importCategoriePiatti(
         data: {
           nome: categoria.nome,
           descrizione: categoria.descrizione || '',
-          inLista: true,
+          inLista: categoria.inLista !== undefined ? categoria.inLista : true,
+          _status: 'published',
         },
       })
 
@@ -62,7 +63,8 @@ export async function importCategorieMenuFisso(
         data: {
           nome: categoria.nome,
           descrizione: categoria.descrizione || '',
-          inLista: true,
+          inLista: categoria.inLista !== undefined ? categoria.inLista : true,
+          _status: 'published',
         },
       })
 

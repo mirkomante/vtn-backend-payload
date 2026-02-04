@@ -61,6 +61,8 @@ export interface BackendCategoriaPiatti {
   id: number | string
   nome: string
   descrizione?: string | null
+  inLista?: boolean
+  piattiCount?: number
   createdAt?: string
   updatedAt?: string
 }
@@ -69,6 +71,8 @@ export interface BackendCategoriaMenuFisso {
   id: number | string
   nome: string
   descrizione?: string | null
+  inLista?: boolean
+  menuFissiCount?: number
   createdAt?: string
   updatedAt?: string
 }

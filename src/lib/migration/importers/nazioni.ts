@@ -25,6 +25,7 @@ export async function importNazioni(
         data: {
           nome: nazione.nome,
           sigla: nazione.sigla.toUpperCase(),
+          _status: 'published',
         },
       })
 

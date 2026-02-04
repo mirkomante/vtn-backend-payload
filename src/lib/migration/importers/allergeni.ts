@@ -25,6 +25,7 @@ export async function importAllergeni(
         data: {
           nome: allergene.nome,
           descrizione: allergene.descrizione || '',
+          _status: 'published',
         },
       })
 

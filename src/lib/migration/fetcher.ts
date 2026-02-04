@@ -1,4 +1,5 @@
 // Client HTTP per recuperare dati dal backend attuale
+// Aggiornato per API v1.2.0 con endpoint dedicati e supporto ?all=true
 
 import type {
   BackendData,
@@ -48,240 +49,86 @@ async function fetchFromBackend<T>(endpoint: string): Promise<T[]> {
 }
 
 /**
- * Estrae entità uniche da array di oggetti
- */
-function extractUnique<T extends { id: number | string }>(items: T[]): T[] {
-  const seen = new Set<number | string>()
-  const unique: T[] = []
-
-  for (const item of items) {
-    if (!seen.has(item.id)) {
-      seen.add(item.id)
-      unique.push(item)
-    }
-  }
-
-  return unique
-}
-
-/**
- * Estrae nazioni dai dati delle bevande e piatti
- */
-function extractNazioni(data: {
-  vini: BackendVino[]
-  birre: BackendBirra[]
-  liquori: BackendLiquore[]
-  cocktail: BackendCocktail[]
-  bevande: BackendBevanda[]
-}): BackendNazione[] {
-  const nazioni: BackendNazione[] = []
-
-  // Estrai da vini
-  for (const vino of data.vini) {
-    if (vino.nazione && vino.nazione.id && vino.nazione.nome) {
-      nazioni.push(vino.nazione)
-    }
-  }
-
-  // Estrai da birre
-  for (const birra of data.birre) {
-    if (birra.nazione && birra.nazione.id && birra.nazione.nome) {
-      nazioni.push(birra.nazione)
-    }
-  }
-
-  // Estrai da liquori
-  for (const liquore of data.liquori) {
-    if (liquore.nazione && liquore.nazione.id && liquore.nazione.nome) {
-      nazioni.push(liquore.nazione)
-    }
-  }
-
-  // Estrai da cocktail
-  for (const cocktail of data.cocktail) {
-    if (cocktail.nazione && cocktail.nazione.id && cocktail.nazione.nome) {
-      nazioni.push(cocktail.nazione)
-    }
-  }
-
-  // Estrai da bevande
-  for (const bevanda of data.bevande) {
-    if (bevanda.nazione && bevanda.nazione.id && bevanda.nazione.nome) {
-      nazioni.push(bevanda.nazione)
-    }
-  }
-
-  return extractUnique(nazioni)
-}
-
-/**
- * Estrae regioni dai vini
- * Nota: le regioni nel backend non hanno nazioneId separato,
- * quindi lo prendiamo dalla nazione del vino
- */
-function extractRegioni(vini: BackendVino[]): BackendRegione[] {
-  const regioni: BackendRegione[] = []
-
-  for (const vino of vini) {
-    if (vino.regione && vino.regione.id && vino.regione.nome && vino.nazione) {
-      // Aggiungi la nazione alla regione se non è già presente
-      const regioneConNazione: BackendRegione = {
-        ...vino.regione,
-        nazioneId: vino.nazione.id,
-        nazione: vino.nazione,
-      }
-      regioni.push(regioneConNazione)
-    }
-  }
-
-  return extractUnique(regioni)
-}
-
-/**
- * Estrae zone dai vini
- * Nota: le zone nel backend non hanno nazioneId/regioneId separati,
- * quindi li prendiamo dalla nazione e regione del vino
- */
-function extractZone(vini: BackendVino[]): BackendZona[] {
-  const zone: BackendZona[] = []
-
-  for (const vino of vini) {
-    if (vino.zona && vino.zona.id && vino.zona.nome && vino.nazione && vino.regione) {
-      // Aggiungi la nazione e regione alla zona se non sono già presenti
-      const zonaConRelazioni: BackendZona = {
-        ...vino.zona,
-        nazioneId: vino.nazione.id,
-        nazione: vino.nazione,
-        regioneId: vino.regione.id,
-        regione: vino.regione,
-      }
-      zone.push(zonaConRelazioni)
-    }
-  }
-
-  return extractUnique(zone)
-}
-
-/**
- * Estrae tipologie da bevande
- */
-function extractTipologie<T extends { tipologia?: BackendTipologia }>(items: T[]): BackendTipologia[] {
-  const tipologie: BackendTipologia[] = []
-
-  for (const item of items) {
-    if (item.tipologia && item.tipologia.id && item.tipologia.nome) {
-      tipologie.push(item.tipologia)
-    }
-  }
-
-  return extractUnique(tipologie)
-}
-
-/**
- * Estrae allergeni dai piatti
- */
-function extractAllergeni(piatti: BackendPiatto[]): BackendAllergene[] {
-  const allergeni: BackendAllergene[] = []
-
-  for (const piatto of piatti) {
-    if (piatto.allergeni && Array.isArray(piatto.allergeni)) {
-      for (const allergene of piatto.allergeni) {
-        // Filtra solo allergeni validi con nome definito
-        if (allergene && allergene.id && allergene.nome) {
-          allergeni.push(allergene)
-        }
-      }
-    }
-  }
-
-  return extractUnique(allergeni)
-}
-
-/**
- * Estrae categorie piatti
- */
-function extractCategoriePiatti(piatti: BackendPiatto[]): BackendCategoriaPiatti[] {
-  const categorie: BackendCategoriaPiatti[] = []
-
-  for (const piatto of piatti) {
-    if (piatto.categoria && piatto.categoria.id && piatto.categoria.nome) {
-      categorie.push(piatto.categoria)
-    }
-  }
-
-  return extractUnique(categorie)
-}
-
-/**
- * Estrae categorie menu fisso
- */
-function extractCategorieMenuFisso(menuFissi: BackendMenuFisso[]): BackendCategoriaMenuFisso[] {
-  const categorie: BackendCategoriaMenuFisso[] = []
-
-  for (const menu of menuFissi) {
-    if (menu.categoria && menu.categoria.id && menu.categoria.nome) {
-      categorie.push(menu.categoria)
-    }
-  }
-
-  return extractUnique(categorie)
-}
-
-/**
  * Recupera tutti i dati dal backend attuale
+ * Utilizza i nuovi endpoint dedicati (API v1.2.0) e il parametro ?all=true
+ * per recuperare tutti i record inclusi quelli con inLista=false
  */
 export async function fetchAllData(): Promise<BackendData> {
-  console.log('🔄 Recupero dati dal backend attuale...')
+  console.log('🔄 Recupero dati dal backend attuale (API v1.2.0)...')
 
-  // Fetch delle entità principali in parallelo
-  const [piatti, vini, birre, liquori, cocktail, bevande, menuFissi, serviziAccessori] = await Promise.all([
-    fetchFromBackend<BackendPiatto>('/piatti'),
-    fetchFromBackend<BackendVino>('/vini'),
-    fetchFromBackend<BackendBirra>('/birre'),
-    fetchFromBackend<BackendLiquore>('/liquori'),
-    fetchFromBackend<BackendCocktail>('/cocktails'),
-    fetchFromBackend<BackendBevanda>('/bevande'),
-    fetchFromBackend<BackendMenuFisso>('/menu-fisso'),
-    fetchFromBackend<BackendServizioAccessorio>('/servizi'),
+  // Fetch di tutte le entità in parallelo usando gli endpoint dedicati
+  // Gli endpoint con ?all=true restituiscono anche i record con inLista=false
+  const [
+    // Entità principali (con ?all=true per includere inLista=false)
+    piatti,
+    vini,
+    birre,
+    liquori,
+    cocktail,
+    bevande,
+    menuFissi,
+    serviziAccessori,
+    // Entità lookup (endpoint dedicati - non hanno inLista)
+    allergeni,
+    nazioni,
+    regioni,
+    zone,
+    tipologieVino,
+    tipologieBirra,
+    tipologieLiquore,
+    tipologieCocktail,
+    tipologieBevanda,
+    categoriePiatti,
+    categorieMenuFisso,
+  ] = await Promise.all([
+    // Entità principali con ?all=true
+    fetchFromBackend<BackendPiatto>('/piatti?all=true'),
+    fetchFromBackend<BackendVino>('/vini?all=true'),
+    fetchFromBackend<BackendBirra>('/birre?all=true'),
+    fetchFromBackend<BackendLiquore>('/liquori?all=true'),
+    fetchFromBackend<BackendCocktail>('/cocktails?all=true'),
+    fetchFromBackend<BackendBevanda>('/bevande?all=true'),
+    fetchFromBackend<BackendMenuFisso>('/menu-fisso?all=true'),
+    fetchFromBackend<BackendServizioAccessorio>('/servizi?all=true'),
+    // Entità lookup (endpoint dedicati)
+    fetchFromBackend<BackendAllergene>('/allergeni'),
+    fetchFromBackend<BackendNazione>('/nazioni'),
+    fetchFromBackend<BackendRegione>('/regioni'),
+    fetchFromBackend<BackendZona>('/zone'),
+    fetchFromBackend<BackendTipologia>('/tipologie-vino'),
+    fetchFromBackend<BackendTipologia>('/tipologie-birra'),
+    fetchFromBackend<BackendTipologia>('/tipologie-liquore'),
+    fetchFromBackend<BackendTipologia>('/tipologie-cocktail'),
+    fetchFromBackend<BackendTipologia>('/tipologie-bevanda'),
+    fetchFromBackend<BackendCategoriaPiatti>('/categorie-piatti?all=true'),
+    fetchFromBackend<BackendCategoriaMenuFisso>('/categoria-menu-fisso?all=true'),
   ])
 
   console.log('✅ Dati recuperati dal backend')
-  console.log(`   - Piatti: ${piatti.length}`)
-  console.log(`   - Vini: ${vini.length}`)
-  console.log(`   - Birre: ${birre.length}`)
-  console.log(`   - Liquori: ${liquori.length}`)
-  console.log(`   - Cocktail: ${cocktail.length}`)
-  console.log(`   - Bevande: ${bevande.length}`)
-  console.log(`   - Menu Fissi: ${menuFissi.length}`)
-  console.log(`   - Servizi Accessori: ${serviziAccessori.length}`)
-
-  // Estrai entità secondarie dai dati recuperati
-  const nazioni = extractNazioni({ vini, birre, liquori, cocktail, bevande })
-  const regioni = extractRegioni(vini)
-  const zone = extractZone(vini)
-  const tipologieVino = extractTipologie(vini)
-  const tipologieBirra = extractTipologie(birre)
-  const tipologieLiquore = extractTipologie(liquori)
-  const tipologieCocktail = extractTipologie(cocktail)
-  const tipologieBevanda = extractTipologie(bevande)
-  const allergeni = extractAllergeni(piatti)
-  const categoriePiatti = extractCategoriePiatti(piatti)
-  const categorieMenuFisso = extractCategorieMenuFisso(menuFissi)
-
-  console.log('✅ Entità estratte dai dati')
-  console.log(`   - Nazioni: ${nazioni.length}`)
-  console.log(`   - Regioni: ${regioni.length}`)
-  console.log(`   - Zone: ${zone.length}`)
-  console.log(`   - Tipologie Vino: ${tipologieVino.length}`)
-  console.log(`   - Tipologie Birra: ${tipologieBirra.length}`)
-  console.log(`   - Tipologie Liquore: ${tipologieLiquore.length}`)
-  console.log(`   - Tipologie Cocktail: ${tipologieCocktail.length}`)
-  console.log(`   - Tipologie Bevanda: ${tipologieBevanda.length}`)
-  console.log(`   - Allergeni: ${allergeni.length}`)
-  console.log(`   - Categorie Piatti: ${categoriePiatti.length}`)
-  console.log(`   - Categorie Menu Fisso: ${categorieMenuFisso.length}`)
+  console.log('   📦 Entità principali:')
+  console.log(`      - Piatti: ${piatti.length}`)
+  console.log(`      - Vini: ${vini.length}`)
+  console.log(`      - Birre: ${birre.length}`)
+  console.log(`      - Liquori: ${liquori.length}`)
+  console.log(`      - Cocktail: ${cocktail.length}`)
+  console.log(`      - Bevande: ${bevande.length}`)
+  console.log(`      - Menu Fissi: ${menuFissi.length}`)
+  console.log(`      - Servizi Accessori: ${serviziAccessori.length}`)
+  console.log('   🏷️ Entità lookup:')
+  console.log(`      - Allergeni: ${allergeni.length}`)
+  console.log(`      - Nazioni: ${nazioni.length}`)
+  console.log(`      - Regioni: ${regioni.length}`)
+  console.log(`      - Zone: ${zone.length}`)
+  console.log(`      - Tipologie Vino: ${tipologieVino.length}`)
+  console.log(`      - Tipologie Birra: ${tipologieBirra.length}`)
+  console.log(`      - Tipologie Liquore: ${tipologieLiquore.length}`)
+  console.log(`      - Tipologie Cocktail: ${tipologieCocktail.length}`)
+  console.log(`      - Tipologie Bevanda: ${tipologieBevanda.length}`)
+  console.log(`      - Categorie Piatti: ${categoriePiatti.length}`)
+  console.log(`      - Categorie Menu Fisso: ${categorieMenuFisso.length}`)
 
   return {
+    // Entità lookup
     nazioni,
     regioni,
     zone,
@@ -293,6 +140,7 @@ export async function fetchAllData(): Promise<BackendData> {
     allergeni,
     categoriePiatti,
     categorieMenuFisso,
+    // Entità principali
     piatti,
     serviziAccessori,
     menuFissi,

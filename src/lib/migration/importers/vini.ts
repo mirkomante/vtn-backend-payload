@@ -57,11 +57,12 @@ export async function importVini(
           anno: vino.anno || '',
           prezzo: Number(vino.prezzo),
           prezzoCalice: vino.prezzoCalice ? Number(vino.prezzoCalice) : undefined,
-          inLista: true,
+          inLista: vino.inLista !== undefined ? vino.inLista : true,
           nazione: nazioneId as number,
           regione: regioneId,
           zona: zonaId,
           tipologia: tipologiaId as number,
+          _status: 'published',
         },
       })
 

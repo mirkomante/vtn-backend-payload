@@ -26,7 +26,8 @@ export async function importServiziAccessori(
           nome: servizio.nome,
           descrizione: servizio.descrizione || '',
           prezzo: Number(servizio.prezzo),
-          inLista: true,
+          inLista: servizio.inLista !== undefined ? servizio.inLista : true,
+          _status: 'published',
         },
       })
 

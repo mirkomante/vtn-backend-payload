@@ -27,6 +27,7 @@ export async function importTipologie(
         data: {
           nome: tipologia.nome,
           descrizione: tipologia.descrizione || '',
+          _status: 'published',
         },
       })
 

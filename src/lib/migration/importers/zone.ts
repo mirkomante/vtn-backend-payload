@@ -44,6 +44,7 @@ export async function importZone(
           nome: zona.nome,
           nazione: nazioneId as number,
           regione: regioneId as number,
+          _status: 'published',
         },
       })
 

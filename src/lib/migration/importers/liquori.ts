@@ -51,9 +51,10 @@ export async function importLiquori(
           invecchiamento: liquore.invecchiamento || '',
           capacita: liquore.capacita || '',
           prezzo: Number(liquore.prezzo),
-          inLista: true,
+          inLista: liquore.inLista !== undefined ? liquore.inLista : true,
           nazione: nazioneId as number,
           tipologia: tipologiaId as number,
+          _status: 'published',
         },
       })
 

@@ -60,10 +60,11 @@ export async function importMenuFisso(
           nome: menu.nome,
           descrizione: menu.descrizione || '',
           prezzo: Number(menu.prezzo),
-          inLista: true,
+          inLista: menu.inLista !== undefined ? menu.inLista : true,
           categoria: categoriaId as number,
           piatti: piattiIds as number[],
           servizi: serviziIds as number[],
+          _status: 'published',
         },
       })
 

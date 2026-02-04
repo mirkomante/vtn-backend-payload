@@ -50,9 +50,10 @@ export async function importBevande(
           nome: bevanda.nome,
           descrizione: bevanda.descrizione || '',
           prezzo: Number(bevanda.prezzo),
-          inLista: true,
+          inLista: bevanda.inLista !== undefined ? bevanda.inLista : true,
           nazione: nazioneId as number,
           tipologia: tipologiaId as number,
+          _status: 'published',
         },
       })
 

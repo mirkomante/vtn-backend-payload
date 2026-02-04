@@ -48,9 +48,10 @@ export async function importBirre(
           grado: birra.grado || '',
           capacita: birra.capacita || '',
           prezzo: Number(birra.prezzo),
-          inLista: true,
+          inLista: birra.inLista !== undefined ? birra.inLista : true,
           nazione: nazioneId as number,
           tipologia: tipologiaId as number,
+          _status: 'published',
         },
       })
 
