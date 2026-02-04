@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { OAuth2Plugin } from 'payload-oauth2'
 
+import { migrations } from './migrations'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
@@ -107,7 +108,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
     push: false, // Disabilitato per produzione - usare migrazioni esplicite
-    prodMigrations: true, // Abilita migrazioni in produzione
+    prodMigrations: migrations, // Array delle migrazioni per produzione
   }),
   sharp,
   endpoints: [migrateDataEndpoint],
