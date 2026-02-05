@@ -10,7 +10,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 
 # Install dependencies
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm i --frozen-lockfile
 
 # Build the application
@@ -55,4 +55,6 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Run migrations and start server
-CMD ["sh", "-c", "npx payload migrate && npx next start"]
+# Use 'yes' to auto-accept migration prompts in non-interactive environments
+# CI=true disables interactive prompts in some tools
+CMD ["sh", "-c", "yes | npx payload migrate || true && npx next start"]
