@@ -1,35 +1,6 @@
-'use client'
-
-import { useEffect } from 'react'
-
 export default function LoginView() {
-  useEffect(() => {
-    // Disabilita lo scroll del body quando il componente è montato
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.margin = '0'
-    document.body.style.padding = '0'
-    document.documentElement.style.margin = '0'
-    document.documentElement.style.padding = '0'
-
-    // Ripristina quando il componente viene smontato
-    return () => {
-      document.body.style.overflow = ''
-      document.documentElement.style.overflow = ''
-      document.body.style.margin = ''
-      document.body.style.padding = ''
-      document.documentElement.style.margin = ''
-      document.documentElement.style.padding = ''
-    }
-  }, [])
-
-  const handleGoogleLogin = () => {
-    // Reindirizza all'endpoint OAuth configurato nel plugin
-    // Gli endpoint sono registrati sotto /api/{collection-slug}/{path}
-    window.location.href = '/api/users/oauth/google/authorize'
-  }
-
   return (
+<<<<<<< Current (Your changes)
     <div className="fixed inset-0 flex flex-col items-center justify-center p-8 overflow-hidden m-0 w-full h-full box-border">
       <div className="w-full max-w-[400px] p-8 bg-[var(--theme-elevation-50)] rounded-[var(--border-radius-m)] shadow-[var(--shadow-lg)] flex flex-col items-center mx-auto">
         <h1 className="mb-8 text-center text-2xl font-bold text-[var(--theme-text)] w-full">
@@ -68,6 +39,13 @@ export default function LoginView() {
           <span>Accedi con Google</span>
         </button>
       </div>
+=======
+    <div>
+      <h1>Login Admin</h1>
+      <a href="/api/users/oauth/google/authorize">
+        Accedi con Google
+      </a>
+>>>>>>> Incoming (Background Agent changes)
     </div>
   )
 }
