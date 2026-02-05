@@ -67,7 +67,7 @@ export default buildConfig({
     components: {
       views: {
         login: {
-          Component: './components/LoginView.tsx',
+          Component: './components/LoginView',
         },
       },
       afterNavLinks: ['./components/NavFooter'],
