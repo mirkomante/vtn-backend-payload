@@ -51,6 +51,9 @@ const gcsPlugin = process.env.GCS_BUCKET
         options: {
           projectId: process.env.GCP_PROJECT_ID,
         },
+        // Disabilita client uploads per evitare warning importMap
+        // I file vengono caricati via server-side upload
+        clientUploads: false,
       }),
     ]
   : []
