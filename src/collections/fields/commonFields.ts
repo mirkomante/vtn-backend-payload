@@ -68,12 +68,15 @@ export const prezzoField = (options?: {
   name: 'prezzo',
   type: 'number',
   required: true,
-  label: 'Prezzo',
+  label: 'Prezzo (€)',
   min: 0,
   max: 99999999.99,
   admin: {
     description: options?.description || 'Prezzo del piatto (max 10 cifre, 2 decimali)',
     step: 0.01,
+    components: {
+      Cell: '/components/PrezzoCell#PrezzoCell',
+    },
   },
   validate: (value: any) => {
     if (value === undefined || value === null) {
@@ -104,12 +107,15 @@ export const prezzoCaliceField = (options?: {
   name: 'prezzoCalice',
   type: 'number',
   required: false,
-  label: 'Prezzo Calice',
+  label: 'Prezzo Calice (€)',
   min: 0,
   max: 99999999.99,
   admin: {
     description: options?.description || 'Prezzo per calice (max 10 cifre, 2 decimali)',
     step: 0.01,
+    components: {
+      Cell: '/components/PrezzoCell#PrezzoCell',
+    },
   },
   validate: (value: any) => {
     if (value === undefined || value === null) {
