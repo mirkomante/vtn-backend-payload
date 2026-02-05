@@ -30,15 +30,77 @@ export default function LoginView() {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center p-8 overflow-hidden m-0 w-full h-full box-border">
-      <div className="w-full max-w-[400px] p-8 bg-[var(--theme-elevation-50)] rounded-[var(--border-radius-m)] shadow-[var(--shadow-lg)] flex flex-col items-center mx-auto">
-        <h1 className="mb-8 text-center text-2xl font-bold text-[var(--theme-text)] w-full">
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        overflow: 'hidden',
+        margin: 0,
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '400px',
+          padding: '2rem',
+          backgroundColor: 'var(--theme-elevation-50)',
+          borderRadius: 'var(--border-radius-m)',
+          boxShadow: 'var(--shadow-lg)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          margin: '0 auto',
+        }}
+      >
+        <h1
+          style={{
+            marginBottom: '2rem',
+            textAlign: 'center',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: 'var(--theme-text)',
+            width: '100%',
+          }}
+        >
           Accedi al pannello admin
         </h1>
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 bg-[#4285F4] text-white border-none px-6 py-3 text-base font-medium cursor-pointer text-center rounded-[var(--border-radius-s,4px)] transition-colors duration-200 hover:bg-[#357ae8]"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            backgroundColor: '#4285F4',
+            color: 'white',
+            border: 'none',
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            textAlign: 'center',
+            borderRadius: 'var(--border-radius-s, 4px)',
+            transition: 'background-color 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#357ae8'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#4285F4'
+          }}
         >
           <svg
             width="20"
@@ -46,7 +108,7 @@ export default function LoginView() {
             viewBox="0 0 18 18"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="shrink-0 mr-2"
+            style={{ flexShrink: 0, marginRight: '0.5rem' }}
           >
             <path
               d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H15.9564C17.4382 14.5227 18.3636 12.5455 18.3636 9.20454H17.64Z"
