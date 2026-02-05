@@ -16,6 +16,17 @@ You are an expert Payload CMS developer. When working with Payload projects, fol
 - To validate typescript correctness after modifying code run `tsc --noEmit`
 - Generate import maps after creating or modifying components.
 
+### Import Map with Conditional Plugins
+
+**CRITICAL**: This project uses `@payloadcms/storage-gcs` which is conditionally enabled via `GCS_BUCKET` env var. When regenerating the importMap, you MUST simulate production environment:
+
+```bash
+GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap
+```
+
+If you forget this, production will show a blank admin page with error:
+`getFromImportMap: PayloadComponent not found in importMap`
+
 ## Project Structure
 
 ```

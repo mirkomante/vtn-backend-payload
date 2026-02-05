@@ -211,6 +211,37 @@ src/
 | `pnpm generate:types` | Genera tipi TypeScript |
 | `pnpm generate:importmap` | Rigenera import map componenti |
 
+## Import Map e Plugin Condizionali
+
+### Problema
+
+Alcuni plugin (come `@payloadcms/storage-gcs`) vengono attivati solo in produzione tramite variabili d'ambiente. Quando l'importMap viene generato in locale (dove queste variabili non sono configurate), i componenti client del plugin non vengono inclusi.
+
+**Risultato in produzione**: Pagina admin bianca con errore:
+```
+getFromImportMap: PayloadComponent not found in importMap {
+  key: '@payloadcms/storage-gcs/client#GcsClientUploadHandler'
+}
+```
+
+### Soluzione
+
+Quando modifichi plugin in `payload.config.ts`, rigenera l'importMap simulando l'ambiente di produzione:
+
+```bash
+GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap
+```
+
+### Quando rigenerare l'importMap
+
+| Azione | Comando |
+|--------|---------|
+| Aggiungi/rimuovi plugin | `GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap` |
+| Aggiungi componenti custom | `npx payload generate:importmap` |
+| Modifica path componenti admin | `npx payload generate:importmap` |
+
+**Regola**: Se il plugin usa variabili d'ambiente per l'attivazione condizionale, passa quelle variabili al comando di generazione.
+
 ## Contribuire
 
 1. Segui le regole definite in `AGENTS.md` e `.cursor/rules/`
