@@ -108,6 +108,16 @@ Lo script importa i dati nel seguente ordine per rispettare le dipendenze:
 - ✅ Cocktail (con nazione, tipologia)
 - ✅ Bevande (con nazione, tipologia)
 
+### Stato Pubblicazione
+
+Tutti i documenti importati sono creati con `_status: 'published'`, quindi sono immediatamente visibili nelle API pubbliche.
+
+### Gestione Relazioni
+
+Le relazioni many-to-many (Piatti↔Allergeni, MenuFisso↔Piatti, MenuFisso↔Servizi) vengono importate correttamente gestendo la struttura "junction table" dell'API sorgente. Lo script estrae automaticamente gli ID corretti dalle strutture nested.
+
+**Nota**: Se nel backend sorgente esistono referenze a documenti eliminati (dangling references), questi vengono saltati silenziosamente durante l'importazione.
+
 ### Collections NON Toccate
 
 - ❌ **Users** - Gli utenti esistenti non vengono modificati
@@ -149,6 +159,19 @@ Lo script importa i dati nel seguente ordine per rispettare le dipendenze:
 1. **Nazione required**: Cocktail e bevande senza nazione vengono saltati
 2. **Unique constraints**: Duplicati vengono gestiti con errore
 3. **Performance**: Con migliaia di record può richiedere tempo
+4. **Dangling references**: Referenze a documenti eliminati nel backend sorgente vengono ignorate
+
+## Integrità Referenziale Post-Migrazione
+
+Dopo la migrazione, Payload CMS gestisce automaticamente l'integrità referenziale. Quando elimini un documento:
+
+| Documento Eliminato | Pulizia Automatica |
+|---------------------|-------------------|
+| **Piatto** | Rimosso da tutti i `menu-fisso.piatti` |
+| **Servizio** | Rimosso da tutti i `menu-fisso.servizi` |
+| **Allergene** | Rimosso da tutti i `piatti.allergeni` |
+
+Questo previene le "dangling references" e mantiene il database consistente.
 
 ## Endpoint API
 

@@ -5,6 +5,7 @@ import {
   menuRistoranteDeleteAccess,
 } from '../access/menuRistoranteAccess'
 import { nomeField, descrizioneField, inListaField, prezzoField } from './fields/commonFields'
+import { createCleanupHook } from '../hooks/cleanupRelationships'
 
 export const Piatti: CollectionConfig = {
   slug: 'piatti',
@@ -105,6 +106,10 @@ export const Piatti: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    // Quando un piatto viene eliminato, rimuovi la referenza da tutti i menu fissi
+    beforeDelete: [createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'piatti' })],
+  },
   versions: {
     drafts: true,
   },

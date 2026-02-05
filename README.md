@@ -31,6 +31,17 @@ Il sistema è strutturato in diverse aree funzionali gestite tramite Collections
   - **User**: Accesso in sola lettura ai contenuti pubblicati.
 - **Autenticazione**: Google OAuth 2.0 per l'accesso admin.
 
+### Integrità Referenziale
+Il sistema gestisce automaticamente la pulizia delle referenze quando i documenti vengono eliminati:
+
+| Quando elimini... | Viene rimosso da... |
+|-------------------|---------------------|
+| Un **Piatto** | `menu-fisso.piatti` |
+| Un **Servizio Accessorio** | `menu-fisso.servizi` |
+| Un **Allergene** | `piatti.allergeni` |
+
+Questo previene le "dangling references" (referenze orfane) nel database.
+
 ## Stack Tecnologico
 
 - **Core**: [Payload CMS 3.74](https://payloadcms.com)
@@ -181,6 +192,8 @@ src/
 │   ├── factories/       # Factory functions per collezioni
 │   └── fields/          # Field riutilizzabili
 ├── components/          # Componenti React Custom (Admin UI)
+├── hooks/               # Hook Payload (lifecycle, cleanup referenze)
+├── lib/                 # Librerie e utility (migration, fetcher)
 ├── migrations/          # File di migrazione database
 ├── plugins/             # Plugin Payload custom
 └── payload.config.ts    # Configurazione principale

@@ -4,6 +4,55 @@ import type { Payload } from 'payload'
 import type { BackendMenuFisso, MigrationStats } from '../types'
 import type { IDMapper } from '../mapper'
 
+// Tipo per la struttura junction table dell'API
+interface JunctionTablePiatto {
+  id?: string | number // ID della junction table (NON usare!)
+  piattoId?: string | number // ID del piatto (usare questo)
+  piatto?: { id: string | number } // Oggetto nested (alternativa)
+}
+
+interface JunctionTableServizio {
+  id?: string | number // ID della junction table (NON usare!)
+  servizioAccessorioId?: string | number // ID del servizio (usare questo)
+  servizioAccessorio?: { id: string | number } // Oggetto nested (alternativa)
+}
+
+// Helper per estrarre l'ID del piatto dalla struttura junction table
+function extractPiattoId(item: unknown): number | string | undefined {
+  const junction = item as JunctionTablePiatto
+  // Prima prova piattoId (ID diretto)
+  if (junction.piattoId !== undefined) {
+    return junction.piattoId
+  }
+  // Poi prova piatto.id (nested)
+  if (junction.piatto?.id !== undefined) {
+    return junction.piatto.id
+  }
+  // Fallback: se è un formato diretto senza junction table
+  if ('id' in (item as object) && !('piattoId' in (item as object))) {
+    return (item as { id: string | number }).id
+  }
+  return undefined
+}
+
+// Helper per estrarre l'ID del servizio dalla struttura junction table
+function extractServizioId(item: unknown): number | string | undefined {
+  const junction = item as JunctionTableServizio
+  // Prima prova servizioAccessorioId (ID diretto)
+  if (junction.servizioAccessorioId !== undefined) {
+    return junction.servizioAccessorioId
+  }
+  // Poi prova servizioAccessorio.id (nested)
+  if (junction.servizioAccessorio?.id !== undefined) {
+    return junction.servizioAccessorio.id
+  }
+  // Fallback: se è un formato diretto senza junction table
+  if ('id' in (item as object) && !('servizioAccessorioId' in (item as object))) {
+    return (item as { id: string | number }).id
+  }
+  return undefined
+}
+
 export async function importMenuFisso(
   backendMenuFissi: BackendMenuFisso[],
   payload: Payload,
@@ -32,24 +81,30 @@ export async function importMenuFisso(
         continue
       }
 
-      // Mappa i piatti
+      // Mappa i piatti - gestisce struttura junction table
       const piattiIds: (string | number)[] = []
       if (menu.piatti && menu.piatti.length > 0) {
-        for (const piatto of menu.piatti) {
-          const piattoId = idMap.get('piatti', piatto.id)
-          if (piattoId) {
-            piattiIds.push(piattoId)
+        for (const item of menu.piatti) {
+          const backendId = extractPiattoId(item)
+          if (backendId !== undefined) {
+            const piattoId = idMap.get('piatti', backendId)
+            if (piattoId) {
+              piattiIds.push(piattoId)
+            }
           }
         }
       }
 
-      // Mappa i servizi
+      // Mappa i servizi - gestisce struttura junction table
       const serviziIds: (string | number)[] = []
       if (menu.servizi && menu.servizi.length > 0) {
-        for (const servizio of menu.servizi) {
-          const servizioId = idMap.get('servizi-accessori', servizio.id)
-          if (servizioId) {
-            serviziIds.push(servizioId)
+        for (const item of menu.servizi) {
+          const backendId = extractServizioId(item)
+          if (backendId !== undefined) {
+            const servizioId = idMap.get('servizi-accessori', backendId)
+            if (servizioId) {
+              serviziIds.push(servizioId)
+            }
           }
         }
       }

@@ -56,6 +56,19 @@ export interface BackendAllergene {
   updatedAt?: string
 }
 
+// Struttura junction table per allergeni nei piatti (formato API reale)
+// Definito qui prima di BackendPiatto per evitare forward reference
+export interface BackendPiattoAllergeneJunction {
+  id: number | string // ID della junction table
+  piattoId: number | string
+  allergeneId: number | string // ID dell'allergene
+  createdAt?: string
+  allergene: BackendAllergene // Oggetto allergene nested
+}
+
+// Tipo union per supportare sia formato junction che diretto
+export type BackendPiattoAllergeneItem = BackendPiattoAllergeneJunction | BackendAllergene
+
 // Categorie
 export interface BackendCategoriaPiatti {
   id: number | string
@@ -91,7 +104,7 @@ export interface BackendPiatto {
   soloMenuFissi: boolean
   categoriaId?: number | string
   categoria?: BackendCategoriaPiatti
-  allergeni?: BackendAllergene[]
+  allergeni?: BackendPiattoAllergeneItem[] // Può essere junction table o formato diretto
   createdAt?: string
   updatedAt?: string
 }
@@ -107,6 +120,27 @@ export interface BackendServizioAccessorio {
   updatedAt?: string
 }
 
+// Strutture junction table per menu fisso (formato API reale)
+export interface BackendMenuFissoPiattoJunction {
+  id: number | string // ID della junction table
+  menuFissoId: number | string
+  piattoId: number | string // ID del piatto
+  createdAt?: string
+  piatto: BackendPiatto // Oggetto piatto nested
+}
+
+export interface BackendMenuFissoServizioJunction {
+  id: number | string // ID della junction table
+  menuFissoId: number | string
+  servizioAccessorioId: number | string // ID del servizio
+  createdAt?: string
+  servizioAccessorio: BackendServizioAccessorio // Oggetto servizio nested
+}
+
+// Tipo union per supportare sia formato junction che diretto (backward compatibility)
+export type BackendMenuFissoPiattoItem = BackendMenuFissoPiattoJunction | BackendPiatto
+export type BackendMenuFissoServizioItem = BackendMenuFissoServizioJunction | BackendServizioAccessorio
+
 // Menu fisso
 export interface BackendMenuFisso {
   id: number | string
@@ -116,8 +150,8 @@ export interface BackendMenuFisso {
   inLista?: boolean
   categoriaId?: number | string
   categoria?: BackendCategoriaMenuFisso
-  piatti?: BackendPiatto[]
-  servizi?: BackendServizioAccessorio[]
+  piatti?: BackendMenuFissoPiattoItem[]
+  servizi?: BackendMenuFissoServizioItem[]
   createdAt?: string
   updatedAt?: string
 }

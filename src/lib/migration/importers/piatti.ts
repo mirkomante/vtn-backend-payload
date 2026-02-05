@@ -4,6 +4,31 @@ import type { Payload } from 'payload'
 import type { BackendPiatto, MigrationStats } from '../types'
 import type { IDMapper } from '../mapper'
 
+// Tipo per la struttura junction table dell'API per allergeni
+interface JunctionTableAllergene {
+  id?: string | number // ID della junction table (NON usare!)
+  allergeneId?: string | number // ID dell'allergene (usare questo)
+  allergene?: { id: string | number } // Oggetto nested (alternativa)
+}
+
+// Helper per estrarre l'ID dell'allergene dalla struttura junction table
+function extractAllergeneId(item: unknown): number | string | undefined {
+  const junction = item as JunctionTableAllergene
+  // Prima prova allergeneId (ID diretto)
+  if (junction.allergeneId !== undefined) {
+    return junction.allergeneId
+  }
+  // Poi prova allergene.id (nested)
+  if (junction.allergene?.id !== undefined) {
+    return junction.allergene.id
+  }
+  // Fallback: se è un formato diretto senza junction table
+  if ('id' in (item as object) && !('allergeneId' in (item as object))) {
+    return (item as { id: string | number }).id
+  }
+  return undefined
+}
+
 export async function importPiatti(
   backendPiatti: BackendPiatto[],
   payload: Payload,
@@ -32,13 +57,16 @@ export async function importPiatti(
         continue
       }
 
-      // Mappa gli allergeni
+      // Mappa gli allergeni - gestisce struttura junction table
       const allergeniIds: (string | number)[] = []
       if (piatto.allergeni && piatto.allergeni.length > 0) {
-        for (const allergene of piatto.allergeni) {
-          const allergeneId = idMap.get('allergeni', allergene.id)
-          if (allergeneId) {
-            allergeniIds.push(allergeneId)
+        for (const item of piatto.allergeni) {
+          const backendId = extractAllergeneId(item)
+          if (backendId !== undefined) {
+            const allergeneId = idMap.get('allergeni', backendId)
+            if (allergeneId) {
+              allergeniIds.push(allergeneId)
+            }
           }
         }
       }
