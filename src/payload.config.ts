@@ -51,6 +51,10 @@ const gcsPlugin = process.env.GCS_BUCKET
         options: {
           projectId: process.env.GCP_PROJECT_ID,
         },
+        // Disabilita client uploads per evitare errori importMap
+        // Il componente GcsClientUploadHandler non viene incluso nell'importMap
+        // perché in locale GCS_BUCKET non è configurato
+        clientUploads: false,
       }),
     ]
   : []
