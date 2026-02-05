@@ -1,27 +1,52 @@
-/**
- * LoginView - Server Component per la pagina di login
- *
- * Renderizzato lato server per:
- * - Nessun ritardo (no hydration necessaria)
- * - Visibile immediatamente al caricamento della pagina
- * - SEO friendly
- */
-import './LoginView.css'
+'use client'
+
+import { useEffect } from 'react'
 
 export default function LoginView() {
+  useEffect(() => {
+    // Disabilita lo scroll del body quando il componente è montato
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.margin = '0'
+    document.body.style.padding = '0'
+    document.documentElement.style.margin = '0'
+    document.documentElement.style.padding = '0'
+
+    // Ripristina quando il componente viene smontato
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
+      document.body.style.margin = ''
+      document.body.style.padding = ''
+      document.documentElement.style.margin = ''
+      document.documentElement.style.padding = ''
+    }
+  }, [])
+
+  const handleGoogleLogin = () => {
+    // Reindirizza all'endpoint OAuth configurato nel plugin
+    // Gli endpoint sono registrati sotto /api/{collection-slug}/{path}
+    window.location.href = '/api/users/oauth/google/authorize'
+  }
+
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1 className="login-title">Accedi al pannello admin</h1>
-        {/* Link diretto invece di onClick - funziona senza JavaScript */}
-        <a href="/api/users/oauth/google/authorize" className="google-login-button">
+    <div className="fixed inset-0 flex flex-col items-center justify-center p-8 overflow-hidden m-0 w-full h-full box-border">
+      <div className="w-full max-w-[400px] p-8 bg-[var(--theme-elevation-50)] rounded-[var(--border-radius-m)] shadow-[var(--shadow-lg)] flex flex-col items-center mx-auto">
+        <h1 className="mb-8 text-center text-2xl font-bold text-[var(--theme-text)] w-full">
+          Accedi al pannello admin
+        </h1>
+        <button
+          onClick={handleGoogleLogin}
+          type="button"
+          className="w-full flex items-center justify-center gap-3 bg-[#4285F4] text-white border-none px-6 py-3 text-base font-medium cursor-pointer text-center rounded-[var(--border-radius-s,4px)] transition-colors duration-200 hover:bg-[#357ae8]"
+        >
           <svg
             width="20"
             height="20"
             viewBox="0 0 18 18"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="google-icon"
+            className="shrink-0 mr-2"
           >
             <path
               d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H15.9564C17.4382 14.5227 18.3636 12.5455 18.3636 9.20454H17.64Z"
@@ -41,7 +66,7 @@ export default function LoginView() {
             />
           </svg>
           <span>Accedi con Google</span>
-        </a>
+        </button>
       </div>
     </div>
   )
