@@ -2,6 +2,20 @@
 
 Questo progetto è un backend completo basato su **Payload CMS 3.0** e **Next.js 15**, progettato per la gestione di menu digitali, carte dei vini e configurazioni per ristoranti.
 
+## 📚 Documentazione
+
+**🔍 [Vai all'Indice Completo della Documentazione →](./DOCS_INDEX.md)**
+
+| Documento | Descrizione |
+|-----------|-------------|
+| **[DOCS_INDEX.md](./DOCS_INDEX.md)** | 🎯 **Indice navigabile** di tutta la documentazione |
+| **README.md** (questo file) | Panoramica del progetto, setup, deploy |
+| **[API_REFERENCE.md](./API_REFERENCE.md)** | Documentazione completa API REST e GraphQL |
+| **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | Guida risoluzione problemi tecnici |
+| **[TAILWIND_INTEGRATION.md](./TAILWIND_INTEGRATION.md)** | Integrazione Tailwind CSS nell'admin panel |
+| **[AGENTS.md](./AGENTS.md)** | Regole per sviluppo con Payload CMS |
+| **[.cursor/rules/](./cursor/rules/)** | Context rules per Cursor AI |
+
 ## Funzionalità Principali
 
 Il sistema è strutturato in diverse aree funzionali gestite tramite Collections di Payload:
@@ -213,34 +227,145 @@ src/
 
 ## Import Map e Plugin Condizionali
 
-### Problema
+### Cos'è l'Import Map
 
-Alcuni plugin (come `@payloadcms/storage-gcs`) vengono attivati solo in produzione tramite variabili d'ambiente. Quando l'importMap viene generato in locale (dove queste variabili non sono configurate), i componenti client del plugin non vengono inclusi.
+L'importMap (`src/app/(payload)/admin/importMap.js`) è un file generato automaticamente che mappa i path dei componenti React alle loro implementazioni. Viene generato durante `next build` e deve contenere **tutti** i componenti che verranno usati a runtime nell'admin panel.
 
-**Risultato in produzione**: Pagina admin bianca con errore:
+### ⚠️ Problema Critico: Plugin con Variabili d'Ambiente
+
+**Sintomo**: Pagina admin bianca in produzione (Cloud Run) con errore nei log:
 ```
 getFromImportMap: PayloadComponent not found in importMap {
   key: '@payloadcms/storage-gcs/client#GcsClientUploadHandler'
 }
 ```
 
-### Soluzione
+**Causa**: Plugin condizionali esclusi dalla config durante il build locale causano componenti mancanti nell'importMap.
 
-Quando modifichi plugin in `payload.config.ts`, rigenera l'importMap simulando l'ambiente di produzione:
+#### Come funziona
 
-```bash
-GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap
+1. **Durante il build Docker** (senza `GCS_BUCKET`):
+   - Se il plugin è escluso condizionalmente: `const plugin = env.VAR ? [plugin(...)] : []`
+   - Il plugin non viene mai chiamato
+   - I suoi componenti client **non entrano nell'importMap**
+   - L'importMap viene compilata nel bundle Next.js
+
+2. **A runtime su Cloud Run** (con `GCS_BUCKET`):
+   - Il plugin si attiva e registra i suoi componenti
+   - Payload cerca i componenti nell'importMap pre-generata
+   - Non li trova → pagina bianca
+
+#### ✅ Soluzione Corretta
+
+**Non escludere mai i plugin condizionalmente dall'array**. Usa invece l'opzione `enabled`:
+
+```typescript
+// ❌ SBAGLIATO - causa importMap mancante
+const gcsPlugin = process.env.GCS_BUCKET
+  ? [gcsStorage({...})]
+  : []
+
+// ✅ CORRETTO - componenti sempre nell'importMap
+const gcsPlugin = gcsStorage({
+  collections: { media: true },
+  bucket: process.env.GCS_BUCKET || 'not-configured',
+  enabled: Boolean(process.env.GCS_BUCKET),  // ← plugin disabilitato ma componenti registrati
+})
 ```
+
+Con `enabled: false`, il plugin:
+- ✅ Registra i suoi componenti nell'importMap (tramite `initClientUploads`)
+- ✅ NON modifica le collections
+- ✅ NON aggiunge endpoint server
+
+In produzione con `enabled: true`, tutto funziona normalmente.
 
 ### Quando rigenerare l'importMap
 
-| Azione | Comando |
-|--------|---------|
-| Aggiungi/rimuovi plugin | `GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap` |
-| Aggiungi componenti custom | `npx payload generate:importmap` |
-| Modifica path componenti admin | `npx payload generate:importmap` |
+| Azione | Comando | Note |
+|--------|---------|------|
+| Aggiungi componenti custom | `npx payload generate:importmap` | Standard |
+| Modifica path componenti admin | `npx payload generate:importmap` | Standard |
+| Dopo modifiche ai plugin | `npx payload generate:importmap` | Se usi `enabled` correttamente |
 
-**Regola**: Se il plugin usa variabili d'ambiente per l'attivazione condizionale, passa quelle variabili al comando di generazione.
+**Nota**: Con la configurazione corretta del plugin GCS (usando `enabled`), non serve più passare variabili d'ambiente dummy al comando di generazione.
+
+## Troubleshooting
+
+### Pagina Admin Bianca su Cloud Run
+
+**Sintomo**: L'admin panel funziona in locale ma mostra una pagina bianca in produzione.
+
+**Causa più comune**: Componenti mancanti nell'importMap a causa di plugin condizionali.
+
+**Soluzione**:
+1. Verifica i log di Cloud Run per l'errore esatto
+2. Se vedi `getFromImportMap: PayloadComponent not found`:
+   - Controlla che tutti i plugin siano sempre inclusi in `payload.config.ts`
+   - Usa l'opzione `enabled` invece di escludere condizionalmente
+   - Rigenera l'importMap: `npx payload generate:importmap`
+3. Verifica che il commit includa `importMap.js` aggiornato
+4. Rideploya su Cloud Run
+
+**Prevenzione**: Segui sempre il pattern `enabled` per plugin con variabili d'ambiente.
+
+### Errori di Compilazione TypeScript
+
+**Sintomo**: Errori TypeScript dopo modifiche alle collections.
+
+**Soluzione**:
+```bash
+pnpm generate:types
+npx tsc --noEmit
+```
+
+### Login Google non funziona
+
+**Sintomo**: Errore durante il redirect OAuth.
+
+**Verifica**:
+1. `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` configurati
+2. Redirect URI autorizzato in Google Cloud Console:
+   - Locale: `http://localhost:3000/api/users/oauth/google/callback`
+   - Produzione: `https://your-domain.com/api/users/oauth/google/callback`
+
+### Scroll Verticale nella Pagina di Login
+
+**Sintomo**: Presenza di scroll inutile e bottone non centrato verticalmente.
+
+**Causa**: I wrapper generati da Payload (`section.login`, `.template-minimal`) hanno padding/margin di default.
+
+**Soluzione**: Già implementata in `src/app/(payload)/custom.scss`:
+```scss
+section.login,
+.template-minimal,
+.template-minimal__wrap {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+```
+
+### Database Connection Error
+
+**Sintomo**: Impossibile connettersi al database.
+
+**Verifica**:
+- `DATABASE_URL` corretto
+- Database PostgreSQL avviato
+- Cloud SQL Proxy attivo (se usi Cloud SQL)
+- Firewall/VPC configurato correttamente
+
+### Media Upload Fails
+
+**Sintomo**: Upload di immagini fallisce in produzione.
+
+**Verifica**:
+1. `GCS_BUCKET` e `GCP_PROJECT_ID` configurati
+2. Service account ha permessi su Cloud Storage
+3. Plugin GCS configurato con `enabled: true` in produzione
 
 ## Contribuire
 
@@ -248,6 +373,7 @@ GCS_BUCKET=dummy GCP_PROJECT_ID=dummy npx payload generate:importmap
 2. Esegui `pnpm generate:types` dopo modifiche alle collections
 3. Crea sempre una migrazione per modifiche allo schema
 4. Testa localmente prima di fare push
+5. Verifica che l'importMap sia aggiornato se modifichi plugin o componenti
 
 ## Licenza
 

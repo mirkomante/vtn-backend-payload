@@ -80,6 +80,7 @@ I seguenti componenti sono stati migrati da inline styles a Tailwind:
 - ✅ `src/components/CancelButton.tsx`
 - ✅ `src/components/LogoutButton.tsx`  
 - ✅ `src/components/ThemeToggle.tsx`
+- ✅ `src/components/LoginView.tsx` (pagina di login admin con Google OAuth)
 
 ## 📌 Configurazione Prefix
 
@@ -98,6 +99,84 @@ Tailwind v4 usa:
 - `@import "tailwindcss"` invece di `@tailwind`
 - `@theme` invece di configurazione JavaScript
 - Nessun prefix per mantenere le classi standard
+
+## 🔐 LoginView: Pagina di Login Admin
+
+La pagina di login dell'admin panel (`src/components/LoginView.tsx`) è stata completamente ridisegnata con Tailwind CSS v4.
+
+### Design e Funzionalità
+
+**Caratteristiche**:
+- ✅ Login con Google OAuth 2.0
+- ✅ Centrato verticalmente e orizzontalmente
+- ✅ Nessuno scroll verticale indesiderato
+- ✅ Supporto completo dark mode
+- ✅ Usa variabili Payload per coerenza visiva
+
+**Codice Tailwind**:
+
+```tsx
+export default function LoginView() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-5 bg-[var(--theme-bg)]">
+      <div className="flex flex-col items-center gap-6 text-center max-w-md w-full">
+        <p className="text-[var(--theme-text)] text-base mb-2">
+          Accedi al backend.
+        </p>
+        <a
+          href="/api/users/oauth/google/authorize"
+          className="inline-flex items-center justify-center gap-3 bg-[#4285F4] text-white px-7 py-3.5 rounded-lg no-underline text-base font-medium w-full transition-all duration-200 hover:bg-[#357ae8] hover:shadow-lg"
+        >
+          {/* Google Icon SVG */}
+          Accedi con Google
+        </a>
+      </div>
+    </div>
+  )
+}
+```
+
+### Fix Scroll Verticale
+
+**Problema**: I wrapper generati automaticamente da Payload (`section.login`, `.template-minimal`, `.template-minimal__wrap`) aggiungono padding/margin di default che causano scroll verticale indesiderato.
+
+**Soluzione**: Override CSS in `src/app/(payload)/custom.scss`:
+
+```scss
+// Fix per la pagina di login: rimuove scroll verticale e centra il contenuto
+section.login,
+.template-minimal,
+.template-minimal__wrap {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+```
+
+**Perché serve**:
+- Payload genera automaticamente wrapper con stili di default
+- Questi stili interferiscono con il centering Flexbox di Tailwind
+- L'override forza i wrapper a comportarsi come contenitori neutri
+
+### Testing
+
+Per testare la LoginView:
+
+```bash
+pnpm dev
+```
+
+Poi apri:
+- Light mode: http://localhost:3000/admin
+- Dark mode: Switcha tema nell'admin panel
+
+**Verifica che**:
+- ✅ Nessuno scroll verticale presente
+- ✅ Bottone centrato perfettamente (verticalmente e orizzontalmente)
+- ✅ Funziona in entrambe le modalità (light/dark)
+- ✅ Colori e spacing coerenti con il tema Payload
 
 ## 🎨 Come Usare le Variabili Payload
 
