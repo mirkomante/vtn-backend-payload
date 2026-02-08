@@ -41,23 +41,19 @@ const dirname = path.dirname(filename)
 
 // GCS Storage Plugin - attivo solo in produzione quando GCS_BUCKET è configurato
 // In locale i media vengono salvati nella cartella /media del progetto
-const gcsPlugin = process.env.GCS_BUCKET
-  ? [
-      gcsStorage({
-        collections: {
-          media: true,
-        },
-        bucket: process.env.GCS_BUCKET,
-        options: {
-          projectId: process.env.GCP_PROJECT_ID,
-        },
-        // Disabilita client uploads per evitare errori importMap
-        // Il componente GcsClientUploadHandler non viene incluso nell'importMap
-        // perché in locale GCS_BUCKET non è configurato
-        clientUploads: false,
-      }),
-    ]
-  : []
+// Il plugin è SEMPRE incluso nella config (con enabled condizionale) per garantire
+// che il componente GcsClientUploadHandler sia sempre presente nell'importMap,
+// evitando pagine bianche in produzione.
+const gcsPlugin = gcsStorage({
+  collections: {
+    media: true,
+  },
+  bucket: process.env.GCS_BUCKET || 'not-configured',
+  options: {
+    projectId: process.env.GCP_PROJECT_ID,
+  },
+  enabled: Boolean(process.env.GCS_BUCKET),
+})
 
 export default buildConfig({
   admin: {
@@ -117,7 +113,7 @@ export default buildConfig({
   sharp,
   endpoints: [migrateDataEndpoint],
   plugins: [
-    ...gcsPlugin,
+    gcsPlugin,
     cancelButtonPlugin(),
     OAuth2Plugin({
       strategyName: 'google',
