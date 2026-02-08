@@ -1,71 +1,20 @@
 /**
  * LoginView Component - Custom login page for Payload Admin
  * Server Component (default) - renders on server
+ * Usa Tailwind CSS per lo styling e si adatta al tema light/dark di Payload
  */
 
 export default function LoginView() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '20px',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      }}
-    >
-      <div
-        style={{
-          background: 'white',
-          padding: '48px',
-          borderRadius: '16px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          textAlign: 'center',
-          maxWidth: '400px',
-          width: '100%',
-        }}
-      >
-        <h1
-          style={{
-            marginBottom: '8px',
-            color: '#1a1a2e',
-            fontSize: '28px',
-            fontWeight: '700',
-          }}
-        >
-          VTN Admin
-        </h1>
-        <p
-          style={{
-            marginBottom: '32px',
-            color: '#6b7280',
-            fontSize: '14px',
-          }}
-        >
-          Vietnam on a Mour - Gestione Contenuti
+    <div className="flex flex-col items-center justify-center min-h-screen p-5 bg-[var(--theme-bg)]">
+      <div className="flex flex-col items-center gap-6 text-center max-w-md w-full">
+        <p className="text-[var(--theme-text)] text-base mb-2">
+          Accedi al backend.
         </p>
 
         <a
           href="/api/users/oauth/google/authorize"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-            backgroundColor: '#4285F4',
-            color: 'white',
-            padding: '14px 28px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontSize: '16px',
-            fontWeight: '500',
-            width: '100%',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 4px 6px -1px rgba(66, 133, 244, 0.3)',
-          }}
+          className="inline-flex items-center justify-center gap-3 bg-[#4285F4] text-white px-7 py-3.5 rounded-lg no-underline text-base font-medium w-full transition-all duration-200 hover:bg-[#357ae8] hover:shadow-lg"
         >
           <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
             <path
@@ -87,16 +36,6 @@ export default function LoginView() {
           </svg>
           Accedi con Google
         </a>
-
-        <p
-          style={{
-            marginTop: '24px',
-            color: '#9ca3af',
-            fontSize: '13px',
-          }}
-        >
-          Usa il tuo account Google aziendale
-        </p>
       </div>
     </div>
   )

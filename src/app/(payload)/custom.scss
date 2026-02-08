@@ -12,6 +12,19 @@
 // Importa le variabili SCSS di Payload
 @import '~@payloadcms/ui/scss';
 
+// Fix per la pagina di login: rimuove scroll verticale e centra il contenuto
+// I wrapper generati da Payload (.template-minimal, section.login) aggiungono
+// padding/margin che creano scroll inutile. Questo override li rimuove.
+section.login,
+.template-minimal,
+.template-minimal__wrap {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
 // Container delle azioni bulk - isolato per non interferire con altri elementi
 .list-selection__actions {
   display: flex;
