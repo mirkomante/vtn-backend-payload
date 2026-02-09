@@ -25,6 +25,130 @@ section.login,
   overflow: hidden !important;
 }
 
+/////////////////////////////
+// OTTIMIZZAZIONE TIPOGRAFIA
+/////////////////////////////
+
+// Font-size base HTML - Aumenta la leggibilità generale
+// Desktop: 14px | Tablet: 15px | Mobile: 16px
+html {
+  font-size: 14px !important;  // Desktop: da 13px a 14px (WCAG 2.1 AA compliant)
+  
+  @include mid-break {
+    font-size: 15px !important;  // Tablet: intermedio
+  }
+  
+  @include small-break {
+    font-size: 16px !important;  // Mobile: ottimale per touch
+  }
+}
+
+// Body text - Line-height migliorato per leggibilità
+body {
+  font-size: 14px !important;
+  line-height: 1.5 !important;  // Più arioso del default 1.54
+  
+  @include mid-break {
+    font-size: 15px !important;
+  }
+  
+  @include small-break {
+    font-size: 16px !important;
+  }
+}
+
+// Headings - Gerarchia visiva mantenuta e proporzionata
+h1 {
+  font-size: 24px !important;
+  line-height: 1.3 !important;
+  
+  @include small-break {
+    font-size: 20px !important;
+  }
+}
+
+h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+  
+  @include small-break {
+    font-size: 18px !important;
+  }
+}
+
+h3 {
+  font-size: 18px !important;
+  line-height: 1.4 !important;
+  
+  @include small-break {
+    font-size: 16px !important;
+  }
+}
+
+h4, h5, h6 {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+// Nav links - Menu laterale con testo leggibile
+nav a {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  
+  @include mid-break {
+    font-size: 15px !important;
+  }
+  
+  @include small-break {
+    font-size: 16px !important;
+  }
+}
+
+// Table cells e List Views - Testo leggibile nelle tabelle
+[class*='cell'],
+.table td,
+.table th {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  
+  @include small-break {
+    font-size: 15px !important;
+  }
+}
+
+// Breadcrumb - Navigazione gerarchica leggibile
+[class*='breadcrumb'],
+.breadcrumbs {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  
+  @include small-break {
+    font-size: 14px !important;
+  }
+}
+
+/////////////////////////////
+// FIX CHECKBOX MOBILE
+/////////////////////////////
+
+// Su mobile, mantieni dimensioni checkbox esatte come da screenshot
+@include small-break {
+  .checkbox-input__input {
+    width: 20.453125px !important;
+    height: 20.453125px !important;
+  }
+  
+  .checkbox-input__icon {
+    width: 20.453125px !important;
+    height: 20.453125px !important;
+    
+    .icon--line {
+      width: 18px !important;   // Icona leggermente più piccola del container
+      height: 18px !important;
+    }
+  }
+}
+
 // Container delle azioni bulk - isolato per non interferire con altri elementi
 .list-selection__actions {
   display: flex;
