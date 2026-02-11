@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 import {
   menuRistoranteReadAccess,
   menuRistoranteUpdateAccess,
@@ -19,23 +19,54 @@ export const ServizioAccessorio: CollectionConfig = {
     defaultColumns: ['nome', 'inLista', 'prezzo', '_status'],
   },
   fields: [
-    nomeField({ description: 'Nome del servizio (es. "Coperto", "Pane e Grissini")' }),
-    descrizioneField({ description: 'Descrizione opzionale del servizio' }),
-    prezzoField({ description: 'Prezzo del servizio (max 10 cifre, 2 decimali)' }),
-    inListaField({
-      description: 'Se il servizio è visibile nel menu',
-      defaultValue: true,
-      collectionSlug: 'servizi-accessori',
-    }),
+    // Sidebar: campi di stato/configurazione
     {
-      name: 'menuFissi',
-      type: 'join',
-      collection: 'menu-fisso',
-      on: 'servizi',
-      label: 'Menu Fissi',
+      ...inListaField({
+        description: 'Se il servizio è visibile nel menu',
+        defaultValue: true,
+        collectionSlug: 'servizi-accessori',
+      }),
       admin: {
-        description: 'Menu fissi che includono questo servizio (sola lettura)',
+        ...inListaField({
+          description: 'Se il servizio è visibile nel menu',
+          defaultValue: true,
+          collectionSlug: 'servizi-accessori',
+        }).admin,
+        position: 'sidebar',
       },
+    } as Field,
+
+    // Tabs: contenuti organizzati per sezioni
+    {
+      type: 'tabs',
+      tabs: [
+        // Tab 1: Generale
+        {
+          label: 'Generale',
+          fields: [
+            nomeField({ description: 'Nome del servizio (es. "Coperto", "Pane e Grissini")' }),
+            prezzoField({ description: 'Prezzo del servizio (max 10 cifre, 2 decimali)' }),
+            descrizioneField({ description: 'Descrizione opzionale del servizio' }),
+          ],
+        },
+
+        // Tab 2: Utilizzo
+        {
+          label: 'Utilizzo',
+          fields: [
+            {
+              name: 'menuFissi',
+              type: 'join',
+              collection: 'menu-fisso',
+              on: 'servizi',
+              label: 'Menu Fissi',
+              admin: {
+                description: 'Menu fissi che includono questo servizio (sola lettura)',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
   hooks: {

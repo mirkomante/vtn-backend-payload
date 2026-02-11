@@ -19,21 +19,36 @@ export const Regione: CollectionConfig = {
   },
   fields: [
     {
-      name: 'nome',
-      type: 'text',
-      required: true,
-      index: true,
-      label: 'Nome',
-      admin: {
-        description: "Nome della regione (es. 'Toscana', 'Piemonte')",
-      },
-    },
-    {
-      name: 'nazione',
-      type: 'relationship',
-      relationTo: 'nazioni',
-      required: true,
-      label: 'Nazione',
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Dettagli',
+          fields: [
+            {
+              name: 'nome',
+              type: 'text',
+              required: true,
+              index: true,
+              label: 'Nome',
+              admin: {
+                description: "Nome della regione (es. 'Toscana', 'Piemonte')",
+              },
+            },
+          ],
+        },
+        {
+          label: 'Gerarchia',
+          fields: [
+            {
+              name: 'nazione',
+              type: 'relationship',
+              relationTo: 'nazioni',
+              required: true,
+              label: 'Nazione',
+            },
+          ],
+        },
+      ],
     },
   ],
   versions: {

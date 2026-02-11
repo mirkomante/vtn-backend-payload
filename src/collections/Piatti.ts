@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 import {
   menuRistoranteReadAccess,
   menuRistoranteUpdateAccess,
@@ -19,91 +19,155 @@ export const Piatti: CollectionConfig = {
     defaultColumns: ['nome', 'inLista', 'categoria', 'prezzo', '_status'],
   },
   fields: [
-    nomeField({ description: 'Nome del piatto' }),
-    descrizioneField({ description: 'Descrizione opzionale del piatto' }),
-    prezzoField({ description: 'Prezzo del piatto (max 10 cifre, 2 decimali)' }),
-    inListaField({
-      description: 'Se il piatto è visibile nel menu pubblico',
-      defaultValue: true,
-      collectionSlug: 'piatti',
-    }),
+    // Sidebar: campi di stato/configurazione
     {
-      name: 'glutenFree',
-      type: 'checkbox',
-      defaultValue: false,
-      label: 'Senza Glutine',
+      ...inListaField({
+        description: 'Se il piatto è visibile nel menu pubblico',
+        defaultValue: true,
+        collectionSlug: 'piatti',
+      }),
       admin: {
-        description: 'Se il piatto è senza glutine',
+        ...inListaField({
+          description: 'Se il piatto è visibile nel menu pubblico',
+          defaultValue: true,
+          collectionSlug: 'piatti',
+        }).admin,
+        position: 'sidebar',
       },
-    },
-    {
-      name: 'noUovo',
-      type: 'checkbox',
-      defaultValue: false,
-      label: 'No Uovo',
-      admin: {
-        description: 'Se il piatto non contiene uova',
-      },
-    },
-    {
-      name: 'noLatticini',
-      type: 'checkbox',
-      defaultValue: false,
-      label: 'No Latticini',
-      admin: {
-        description: 'Se il piatto non contiene latticini',
-      },
-    },
-    {
-      name: 'vegan',
-      type: 'checkbox',
-      defaultValue: false,
-      label: 'Vegano',
-      admin: {
-        description: 'Se il piatto è vegano',
-      },
-    },
+    } as Field,
     {
       name: 'soloMenuFissi',
       type: 'checkbox',
       defaultValue: false,
       label: 'Solo Menu Fissi',
       admin: {
+        position: 'sidebar',
         description: 'Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)',
       },
     },
+
+    // Tabs: contenuti organizzati per sezioni
     {
-      name: 'categoria',
-      type: 'relationship',
-      relationTo: 'categoria-piatti',
-      required: true,
-      label: 'Categoria',
-      maxDepth: 1, // Carica dati categoria ma non relazioni annidate
-      index: true, // Index per query veloci per categoria
-      admin: {
-        description: 'Categoria del piatto',
-      },
-    },
-    {
-      name: 'allergeni',
-      type: 'relationship',
-      relationTo: 'allergeni',
-      hasMany: true,
-      label: 'Allergeni',
-      maxDepth: 1, // Carica dati allergeni ma non relazioni annidate
-      admin: {
-        description: 'Allergeni presenti nel piatto',
-      },
-    },
-    {
-      name: 'menuFissi',
-      type: 'join',
-      collection: 'menu-fisso',
-      on: 'piatti',
-      label: 'Menu Fissi',
-      admin: {
-        description: 'Menu fissi che includono questo piatto (sola lettura)',
-      },
+      type: 'tabs',
+      tabs: [
+        // Tab 1: Scheda Piatto
+        {
+          label: 'Scheda Piatto',
+          fields: [
+            nomeField({ description: 'Nome del piatto' }),
+            {
+              type: 'row',
+              fields: [
+                {
+                  ...prezzoField({
+                    description: 'Prezzo del piatto (max 10 cifre, 2 decimali)',
+                  }),
+                  admin: {
+                    ...prezzoField({
+                      description: 'Prezzo del piatto (max 10 cifre, 2 decimali)',
+                    }).admin,
+                    width: '50%',
+                  },
+                } as Field,
+                {
+                  name: 'categoria',
+                  type: 'relationship',
+                  relationTo: 'categoria-piatti',
+                  required: true,
+                  label: 'Categoria',
+                  maxDepth: 1,
+                  index: true,
+                  admin: {
+                    width: '50%',
+                    description: 'Categoria del piatto',
+                  },
+                },
+              ],
+            },
+            descrizioneField({ description: 'Descrizione opzionale del piatto' }),
+          ],
+        },
+
+        // Tab 2: Diete e Allergeni
+        {
+          label: 'Diete e Allergeni',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'glutenFree',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Senza Glutine',
+                  admin: {
+                    width: '25%',
+                    description: 'Se il piatto è senza glutine',
+                  },
+                },
+                {
+                  name: 'noUovo',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'No Uovo',
+                  admin: {
+                    width: '25%',
+                    description: 'Se il piatto non contiene uova',
+                  },
+                },
+                {
+                  name: 'noLatticini',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'No Latticini',
+                  admin: {
+                    width: '25%',
+                    description: 'Se il piatto non contiene latticini',
+                  },
+                },
+                {
+                  name: 'vegan',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Vegano',
+                  admin: {
+                    width: '25%',
+                    description: 'Se il piatto è vegano',
+                  },
+                },
+              ],
+            },
+            {
+              name: 'allergeni',
+              type: 'relationship',
+              relationTo: 'allergeni',
+              hasMany: true,
+              label: 'Allergeni',
+              maxDepth: 1,
+              admin: {
+                description: 'Allergeni presenti nel piatto',
+              },
+            },
+          ],
+        },
+
+        // Tab 3: Utilizzo
+        {
+          label: 'Utilizzo',
+          fields: [
+            {
+              name: 'menuFissi',
+              type: 'join',
+              collection: 'menu-fisso',
+              on: 'piatti',
+              label: 'Menu Fissi',
+              admin: {
+                description: 'Menu fissi che includono questo piatto (sola lettura)',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
   hooks: {

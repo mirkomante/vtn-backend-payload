@@ -42,53 +42,140 @@ export function createBevandaCollection(
   const campiAggiuntivi = options.campiAggiuntivi || {}
   const fields: Field[] = []
 
-  // Campi base sempre presenti
-  fields.push(
+  // Sidebar: campo inLista
+  const inListaFieldBase = inListaField({
+    description: `Se ${options.singular.toLowerCase()} è visibile nel menu pubblico`,
+    defaultValue: true,
+    collectionSlug: options.slug,
+  })
+  fields.push({
+    ...inListaFieldBase,
+    admin: {
+      ...inListaFieldBase.admin,
+      position: 'sidebar',
+    },
+  } as Field)
+
+  // Costruzione dei tabs
+  const tabs: any[] = []
+
+  // Tab 1: Scheda Prodotto
+  const schedaProdottoFields: Field[] = []
+  schedaProdottoFields.push(
     nomeField({ description: `Nome ${options.singular.toLowerCase()}` }),
     descrizioneField({ description: `Descrizione opzionale ${options.singular.toLowerCase()}` }),
   )
 
-  // Campo cantina (solo Vino)
-  if (campiAggiuntivi.cantina) {
-    fields.push({
-      name: 'cantina',
-      type: 'text',
-      label: 'Cantina',
-      admin: {
-        description: 'Nome della cantina produttrice',
-      },
+  // Row con prezzo e prezzoCalice (se presente)
+  const prezziRowFields: Field[] = []
+  const prezzoFieldBase = prezzoField({
+    description:
+      options.slug === 'vini'
+        ? 'Prezzo della bottiglia (max 10 cifre, 2 decimali)'
+        : 'Prezzo (max 10 cifre, 2 decimali)',
+  })
+  prezziRowFields.push({
+    ...prezzoFieldBase,
+    admin: {
+      ...prezzoFieldBase.admin,
+      width: campiAggiuntivi.prezzoCalice ? '50%' : '100%',
+    },
+  } as Field)
+
+  if (campiAggiuntivi.prezzoCalice) {
+    const prezzoCaliceFieldBase = prezzoCaliceField({
+      description: 'Prezzo per calice (max 10 cifre, 2 decimali)',
     })
+    prezziRowFields.push({
+      ...prezzoCaliceFieldBase,
+      admin: {
+        ...prezzoCaliceFieldBase.admin,
+        width: '50%',
+      },
+    } as Field)
   }
 
-  // Campo grado alcolico
+  if (prezziRowFields.length > 1) {
+    schedaProdottoFields.push({
+      type: 'row',
+      fields: prezziRowFields,
+    })
+  } else {
+    schedaProdottoFields.push(...prezziRowFields)
+  }
+
+  // Tipologia
+  schedaProdottoFields.push({
+    name: 'tipologia',
+    type: 'relationship',
+    relationTo: options.tipologiaSlug as any,
+    required: true,
+    label: 'Tipologia',
+    maxDepth: 1,
+    index: true,
+    admin: {
+      description: `Tipologia ${options.singular.toLowerCase()}`,
+    },
+  })
+
+  tabs.push({
+    label: 'Scheda Prodotto',
+    fields: schedaProdottoFields,
+  })
+
+  // Tab 2: Caratteristiche (solo se ci sono campi tecnici)
+  const caratteristicheFields: Field[] = []
+
+  // Row con grado e capacita (se presenti)
+  const gradoCapacitaRowFields: Field[] = []
   if (campiAggiuntivi.grado) {
-    fields.push(
-      gradoField({
-        description:
-          options.slug === 'vini'
-            ? 'Grado alcolico (es. "13.5%", "12%")'
-            : options.slug === 'birre'
-              ? 'Grado alcolico (es. "5.2%", "4.5%")'
-              : 'Grado alcolico (es. "40%", "35%")',
-      }),
-    )
-  }
-
-  // Campo certificazione (solo Vino)
-  if (campiAggiuntivi.certificazione) {
-    fields.push({
-      name: 'certificazione',
-      type: 'text',
-      label: 'Certificazione',
-      admin: {
-        description: 'Certificazione (es. DOC, DOCG, IGT)',
-      },
+    const gradoFieldBase = gradoField({
+      description:
+        options.slug === 'vini'
+          ? 'Grado alcolico (es. "13.5%", "12%")'
+          : options.slug === 'birre'
+            ? 'Grado alcolico (es. "5.2%", "4.5%")'
+            : 'Grado alcolico (es. "40%", "35%")',
     })
+    gradoCapacitaRowFields.push({
+      ...gradoFieldBase,
+      admin: {
+        ...gradoFieldBase.admin,
+        width: campiAggiuntivi.capacita ? '50%' : '100%',
+      },
+    } as Field)
   }
 
-  // Campo anno (solo Vino)
+  if (campiAggiuntivi.capacita) {
+    const capacitaFieldBase = capacitaField({
+      description:
+        options.slug === 'vini'
+          ? 'Capacità della bottiglia (es. "750ml", "1L")'
+          : options.slug === 'birre'
+            ? 'Capacità (es. "33cl", "50cl", "1L")'
+            : 'Capacità (es. "50ml", "70cl", "1L")',
+    })
+    gradoCapacitaRowFields.push({
+      ...capacitaFieldBase,
+      admin: {
+        ...capacitaFieldBase.admin,
+        width: campiAggiuntivi.grado ? '50%' : '100%',
+      },
+    } as Field)
+  }
+
+  if (gradoCapacitaRowFields.length > 1) {
+    caratteristicheFields.push({
+      type: 'row',
+      fields: gradoCapacitaRowFields,
+    })
+  } else if (gradoCapacitaRowFields.length === 1) {
+    caratteristicheFields.push(...gradoCapacitaRowFields)
+  }
+
+  // Anno (solo Vino)
   if (campiAggiuntivi.anno) {
-    fields.push({
+    caratteristicheFields.push({
       name: 'anno',
       type: 'text',
       label: 'Anno',
@@ -98,9 +185,33 @@ export function createBevandaCollection(
     })
   }
 
-  // Campo invecchiamento (solo Liquore)
+  // Cantina (solo Vino)
+  if (campiAggiuntivi.cantina) {
+    caratteristicheFields.push({
+      name: 'cantina',
+      type: 'text',
+      label: 'Cantina',
+      admin: {
+        description: 'Nome della cantina produttrice',
+      },
+    })
+  }
+
+  // Certificazione (solo Vino)
+  if (campiAggiuntivi.certificazione) {
+    caratteristicheFields.push({
+      name: 'certificazione',
+      type: 'text',
+      label: 'Certificazione',
+      admin: {
+        description: 'Certificazione (es. DOC, DOCG, IGT)',
+      },
+    })
+  }
+
+  // Invecchiamento (solo Liquore)
   if (campiAggiuntivi.invecchiamento) {
-    fields.push({
+    caratteristicheFields.push({
       name: 'invecchiamento',
       type: 'text',
       label: 'Invecchiamento',
@@ -110,53 +221,25 @@ export function createBevandaCollection(
     })
   }
 
-  // Campo capacita
-  if (campiAggiuntivi.capacita) {
-    fields.push(
-      capacitaField({
-        description:
-          options.slug === 'vini'
-            ? 'Capacità della bottiglia (es. "750ml", "1L")'
-            : options.slug === 'birre'
-              ? 'Capacità (es. "33cl", "50cl", "1L")'
-              : 'Capacità (es. "50ml", "70cl", "1L")',
-      }),
-    )
+  // Aggiungi tab Caratteristiche solo se ci sono campi
+  if (caratteristicheFields.length > 0) {
+    tabs.push({
+      label: 'Caratteristiche',
+      fields: caratteristicheFields,
+    })
   }
 
-  // Campo prezzo calice (solo Vino)
-  if (campiAggiuntivi.prezzoCalice) {
-    fields.push(prezzoCaliceField({ description: 'Prezzo per calice (max 10 cifre, 2 decimali)' }))
-  }
+  // Tab 3: Origine
+  const origineFields: Field[] = []
 
-  // Campo prezzo (sempre presente)
-  fields.push(
-    prezzoField({
-      description:
-        options.slug === 'vini'
-          ? 'Prezzo della bottiglia (max 10 cifre, 2 decimali)'
-          : 'Prezzo (max 10 cifre, 2 decimali)',
-    }),
-  )
-
-  // Campo inLista con index e toggle interattivo
-  fields.push(
-    inListaField({
-      description: `Se ${options.singular.toLowerCase()} è visibile nel menu pubblico`,
-      defaultValue: true,
-      collectionSlug: options.slug,
-    }),
-  )
-
-  // Relazione nazione (sempre presente) con index e maxDepth
-  fields.push({
+  origineFields.push({
     name: 'nazione',
     type: 'relationship',
     relationTo: 'nazioni',
     required: true,
     label: 'Nazione',
-    maxDepth: 0, // Solo ID per performance
-    index: true, // Index per query veloci
+    maxDepth: 0,
+    index: true,
     admin: {
       description:
         options.slug === 'cocktail'
@@ -165,29 +248,25 @@ export function createBevandaCollection(
     },
   })
 
-  // Relazione regione (solo Vino se regioneZona è true)
   if (campiAggiuntivi.regioneZona) {
-    fields.push({
+    origineFields.push({
       name: 'regione',
       type: 'relationship',
       relationTo: 'regioni',
       label: 'Regione',
-      maxDepth: 0, // Solo ID per performance
+      maxDepth: 0,
       index: true,
       admin: {
         description: 'Regione di produzione (opzionale)',
       },
     })
-  }
 
-  // Relazione zona (solo Vino se regioneZona è true)
-  if (campiAggiuntivi.regioneZona) {
-    fields.push({
+    origineFields.push({
       name: 'zona',
       type: 'relationship',
       relationTo: 'zone',
       label: 'Zona',
-      maxDepth: 0, // Solo ID per performance
+      maxDepth: 0,
       index: true,
       admin: {
         description: 'Zona di produzione (opzionale)',
@@ -195,18 +274,15 @@ export function createBevandaCollection(
     })
   }
 
-  // Relazione tipologia (sempre presente) con index e maxDepth
+  tabs.push({
+    label: 'Origine',
+    fields: origineFields,
+  })
+
+  // Aggiungi la struttura tabs ai fields
   fields.push({
-    name: 'tipologia',
-    type: 'relationship',
-    relationTo: options.tipologiaSlug as any,
-    required: true,
-    label: 'Tipologia',
-    maxDepth: 1, // Carica dati tipologia ma non relazioni annidate
-    index: true, // Index per query veloci
-    admin: {
-      description: `Tipologia ${options.singular.toLowerCase()}`,
-    },
+    type: 'tabs',
+    tabs,
   })
 
   return {

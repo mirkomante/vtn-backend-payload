@@ -19,8 +19,33 @@ export const Allergene: CollectionConfig = {
     defaultColumns: ['nome', 'descrizione', '_status', 'createdAt'],
   },
   fields: [
-    nomeField({ description: "Nome dell'allergene (es. 'Glutine', 'Latte', 'Uova')" }),
-    descrizioneField({ description: "Descrizione opzionale dell'allergene" }),
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Dettagli',
+          fields: [
+            nomeField({ description: "Nome dell'allergene (es. 'Glutine', 'Latte', 'Uova')" }),
+            descrizioneField({ description: "Descrizione opzionale dell'allergene" }),
+          ],
+        },
+        {
+          label: 'Utilizzo',
+          fields: [
+            {
+              name: 'piatti',
+              type: 'join',
+              collection: 'piatti',
+              on: 'allergeni',
+              label: 'Piatti',
+              admin: {
+                description: 'Elenco dei piatti che contengono questo allergene (sola lettura)',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     // Quando un allergene viene eliminato, rimuovi la referenza da tutti i piatti

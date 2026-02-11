@@ -100,6 +100,15 @@ export interface Config {
     'servizi-accessori': {
       menuFissi: 'menu-fisso';
     };
+    allergeni: {
+      piatti: 'piatti';
+    };
+    'categoria-menu-fisso': {
+      elementi: 'menu-fisso';
+    };
+    'categoria-piatti': {
+      elementi: 'piatti';
+    };
   };
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
@@ -187,21 +196,29 @@ export interface Media {
 export interface Piatti {
   id: number;
   /**
+   * Se il piatto è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
+   * Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)
+   */
+  soloMenuFissi?: boolean | null;
+  /**
    * Nome del piatto
    */
   nome: string;
-  /**
-   * Descrizione opzionale del piatto
-   */
-  descrizione?: string | null;
   /**
    * Prezzo del piatto (max 10 cifre, 2 decimali)
    */
   prezzo: number;
   /**
-   * Se il piatto è visibile nel menu pubblico
+   * Categoria del piatto
    */
-  inLista?: boolean | null;
+  categoria: number | CategoriaPiatti;
+  /**
+   * Descrizione opzionale del piatto
+   */
+  descrizione?: string | null;
   /**
    * Se il piatto è senza glutine
    */
@@ -218,14 +235,6 @@ export interface Piatti {
    * Se il piatto è vegano
    */
   vegan?: boolean | null;
-  /**
-   * Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)
-   */
-  soloMenuFissi?: boolean | null;
-  /**
-   * Categoria del piatto
-   */
-  categoria: number | CategoriaPiatti;
   /**
    * Allergeni presenti nel piatto
    */
@@ -248,15 +257,23 @@ export interface Piatti {
  */
 export interface CategoriaPiatti {
   id: number;
+  /**
+   * Se la categoria è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
   nome: string;
   /**
    * Descrizione opzionale della categoria
    */
   descrizione?: string | null;
   /**
-   * Se la categoria è visibile nel menu pubblico
+   * Elementi associati a questa categoria
    */
-  inLista?: boolean | null;
+  elementi?: {
+    docs?: (number | Piatti)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -275,6 +292,14 @@ export interface Allergeni {
    * Descrizione opzionale dell'allergene
    */
   descrizione?: string | null;
+  /**
+   * Elenco dei piatti che contengono questo allergene (sola lettura)
+   */
+  piatti?: {
+    docs?: (number | Piatti)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -286,25 +311,25 @@ export interface Allergeni {
 export interface MenuFisso {
   id: number;
   /**
+   * Se il menu è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome del menu fisso
    */
   nome: string;
   /**
-   * Descrizione opzionale del menu
+   * Categoria del menu fisso
    */
-  descrizione?: string | null;
+  categoria: number | CategoriaMenuFisso;
   /**
    * Prezzo del menu fisso (max 10 cifre, 2 decimali)
    */
   prezzo: number;
   /**
-   * Se il menu è visibile nel menu pubblico
+   * Descrizione opzionale del menu
    */
-  inLista?: boolean | null;
-  /**
-   * Categoria del menu fisso
-   */
-  categoria: number | CategoriaMenuFisso;
+  descrizione?: string | null;
   /**
    * Piatti inclusi nel menu
    */
@@ -323,15 +348,23 @@ export interface MenuFisso {
  */
 export interface CategoriaMenuFisso {
   id: number;
+  /**
+   * Se la categoria è visibile nel menu
+   */
+  inLista?: boolean | null;
   nome: string;
   /**
    * Descrizione opzionale della categoria
    */
   descrizione?: string | null;
   /**
-   * Se la categoria è visibile nel menu
+   * Elementi associati a questa categoria
    */
-  inLista?: boolean | null;
+  elementi?: {
+    docs?: (number | MenuFisso)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -343,21 +376,21 @@ export interface CategoriaMenuFisso {
 export interface ServiziAccessori {
   id: number;
   /**
+   * Se il servizio è visibile nel menu
+   */
+  inLista?: boolean | null;
+  /**
    * Nome del servizio (es. "Coperto", "Pane e Grissini")
    */
   nome: string;
-  /**
-   * Descrizione opzionale del servizio
-   */
-  descrizione?: string | null;
   /**
    * Prezzo del servizio (max 10 cifre, 2 decimali)
    */
   prezzo: number;
   /**
-   * Se il servizio è visibile nel menu
+   * Descrizione opzionale del servizio
    */
-  inLista?: boolean | null;
+  descrizione?: string | null;
   /**
    * Menu fissi che includono questo servizio (sola lettura)
    */
@@ -377,6 +410,10 @@ export interface ServiziAccessori {
 export interface Vini {
   id: number;
   /**
+   * Se vino è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome vino
    */
   nome: string;
@@ -385,37 +422,37 @@ export interface Vini {
    */
   descrizione?: string | null;
   /**
-   * Nome della cantina produttrice
+   * Prezzo della bottiglia (max 10 cifre, 2 decimali)
    */
-  cantina?: string | null;
-  /**
-   * Grado alcolico (es. "13.5%", "12%")
-   */
-  grado?: string | null;
-  /**
-   * Certificazione (es. DOC, DOCG, IGT)
-   */
-  certificazione?: string | null;
-  /**
-   * Anno di produzione (es. "2020", "2018", "NV" per non vintage)
-   */
-  anno?: string | null;
-  /**
-   * Capacità della bottiglia (es. "750ml", "1L")
-   */
-  capacita?: string | null;
+  prezzo: number;
   /**
    * Prezzo per calice (max 10 cifre, 2 decimali)
    */
   prezzoCalice?: number | null;
   /**
-   * Prezzo della bottiglia (max 10 cifre, 2 decimali)
+   * Tipologia vino
    */
-  prezzo: number;
+  tipologia: number | TipologieVino;
   /**
-   * Se vino è visibile nel menu pubblico
+   * Grado alcolico (es. "13.5%", "12%")
    */
-  inLista?: boolean | null;
+  grado?: string | null;
+  /**
+   * Capacità della bottiglia (es. "750ml", "1L")
+   */
+  capacita?: string | null;
+  /**
+   * Anno di produzione (es. "2020", "2018", "NV" per non vintage)
+   */
+  anno?: string | null;
+  /**
+   * Nome della cantina produttrice
+   */
+  cantina?: string | null;
+  /**
+   * Certificazione (es. DOC, DOCG, IGT)
+   */
+  certificazione?: string | null;
   /**
    * Nazione di produzione
    */
@@ -428,10 +465,21 @@ export interface Vini {
    * Zona di produzione (opzionale)
    */
   zona?: (number | null) | Zone;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tipologie-vino".
+ */
+export interface TipologieVino {
+  id: number;
+  nome: string;
   /**
-   * Tipologia vino
+   * Testo lungo per descrizione dettagliata
    */
-  tipologia: number | TipologieVino;
+  descrizione?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -479,26 +527,11 @@ export interface Zone {
    * Nome della zona (es. 'Chianti', 'Barolo')
    */
   nome: string;
-  regione: number | Regioni;
   /**
    * Per facilitare le query
    */
   nazione: number | Nazioni;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tipologie-vino".
- */
-export interface TipologieVino {
-  id: number;
-  nome: string;
-  /**
-   * Testo lungo per descrizione dettagliata
-   */
-  descrizione?: string | null;
+  regione: number | Regioni;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -510,6 +543,10 @@ export interface TipologieVino {
 export interface Birre {
   id: number;
   /**
+   * Se birra è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome birra
    */
   nome: string;
@@ -517,6 +554,14 @@ export interface Birre {
    * Descrizione opzionale birra
    */
   descrizione?: string | null;
+  /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Tipologia birra
+   */
+  tipologia: number | TipologieBirra;
   /**
    * Grado alcolico (es. "5.2%", "4.5%")
    */
@@ -526,21 +571,9 @@ export interface Birre {
    */
   capacita?: string | null;
   /**
-   * Prezzo (max 10 cifre, 2 decimali)
-   */
-  prezzo: number;
-  /**
-   * Se birra è visibile nel menu pubblico
-   */
-  inLista?: boolean | null;
-  /**
    * Nazione di produzione
    */
   nazione: number | Nazioni;
-  /**
-   * Tipologia birra
-   */
-  tipologia: number | TipologieBirra;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -567,6 +600,10 @@ export interface TipologieBirra {
 export interface Liquori {
   id: number;
   /**
+   * Se liquore è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome liquore
    */
   nome: string;
@@ -575,33 +612,29 @@ export interface Liquori {
    */
   descrizione?: string | null;
   /**
+   * Prezzo (max 10 cifre, 2 decimali)
+   */
+  prezzo: number;
+  /**
+   * Tipologia liquore
+   */
+  tipologia: number | TipologieLiquore;
+  /**
    * Grado alcolico (es. "40%", "35%")
    */
   grado?: string | null;
-  /**
-   * Invecchiamento (es. "12 anni", "8 mesi", "Non invecchiato")
-   */
-  invecchiamento?: string | null;
   /**
    * Capacità (es. "50ml", "70cl", "1L")
    */
   capacita?: string | null;
   /**
-   * Prezzo (max 10 cifre, 2 decimali)
+   * Invecchiamento (es. "12 anni", "8 mesi", "Non invecchiato")
    */
-  prezzo: number;
-  /**
-   * Se liquore è visibile nel menu pubblico
-   */
-  inLista?: boolean | null;
+  invecchiamento?: string | null;
   /**
    * Nazione di produzione
    */
   nazione: number | Nazioni;
-  /**
-   * Tipologia liquore
-   */
-  tipologia: number | TipologieLiquore;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -628,6 +661,10 @@ export interface TipologieLiquore {
 export interface Cocktail {
   id: number;
   /**
+   * Se cocktail è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome cocktail
    */
   nome: string;
@@ -640,17 +677,13 @@ export interface Cocktail {
    */
   prezzo: number;
   /**
-   * Se cocktail è visibile nel menu pubblico
+   * Tipologia cocktail
    */
-  inLista?: boolean | null;
+  tipologia: number | TipologieCocktail;
   /**
    * Nazione di origine del cocktail
    */
   nazione: number | Nazioni;
-  /**
-   * Tipologia cocktail
-   */
-  tipologia: number | TipologieCocktail;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -677,6 +710,10 @@ export interface TipologieCocktail {
 export interface Bevande {
   id: number;
   /**
+   * Se bevanda è visibile nel menu pubblico
+   */
+  inLista?: boolean | null;
+  /**
    * Nome bevanda
    */
   nome: string;
@@ -689,17 +726,13 @@ export interface Bevande {
    */
   prezzo: number;
   /**
-   * Se bevanda è visibile nel menu pubblico
+   * Tipologia bevanda
    */
-  inLista?: boolean | null;
+  tipologia: number | TipologieBevanda;
   /**
    * Nazione di produzione
    */
   nazione: number | Nazioni;
-  /**
-   * Tipologia bevanda
-   */
-  tipologia: number | TipologieBevanda;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -904,16 +937,16 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "piatti_select".
  */
 export interface PiattiSelect<T extends boolean = true> {
-  nome?: T;
-  descrizione?: T;
-  prezzo?: T;
   inLista?: T;
+  soloMenuFissi?: T;
+  nome?: T;
+  prezzo?: T;
+  categoria?: T;
+  descrizione?: T;
   glutenFree?: T;
   noUovo?: T;
   noLatticini?: T;
   vegan?: T;
-  soloMenuFissi?: T;
-  categoria?: T;
   allergeni?: T;
   menuFissi?: T;
   updatedAt?: T;
@@ -925,10 +958,10 @@ export interface PiattiSelect<T extends boolean = true> {
  * via the `definition` "servizi-accessori_select".
  */
 export interface ServiziAccessoriSelect<T extends boolean = true> {
-  nome?: T;
-  descrizione?: T;
-  prezzo?: T;
   inLista?: T;
+  nome?: T;
+  prezzo?: T;
+  descrizione?: T;
   menuFissi?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -939,11 +972,11 @@ export interface ServiziAccessoriSelect<T extends boolean = true> {
  * via the `definition` "menu-fisso_select".
  */
 export interface MenuFissoSelect<T extends boolean = true> {
-  nome?: T;
-  descrizione?: T;
-  prezzo?: T;
   inLista?: T;
+  nome?: T;
   categoria?: T;
+  prezzo?: T;
+  descrizione?: T;
   piatti?: T;
   servizi?: T;
   updatedAt?: T;
@@ -955,20 +988,20 @@ export interface MenuFissoSelect<T extends boolean = true> {
  * via the `definition` "vini_select".
  */
 export interface ViniSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
-  cantina?: T;
-  grado?: T;
-  certificazione?: T;
-  anno?: T;
-  capacita?: T;
-  prezzoCalice?: T;
   prezzo?: T;
-  inLista?: T;
+  prezzoCalice?: T;
+  tipologia?: T;
+  grado?: T;
+  capacita?: T;
+  anno?: T;
+  cantina?: T;
+  certificazione?: T;
   nazione?: T;
   regione?: T;
   zona?: T;
-  tipologia?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -978,14 +1011,14 @@ export interface ViniSelect<T extends boolean = true> {
  * via the `definition` "birre_select".
  */
 export interface BirreSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
+  prezzo?: T;
+  tipologia?: T;
   grado?: T;
   capacita?: T;
-  prezzo?: T;
-  inLista?: T;
   nazione?: T;
-  tipologia?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -995,15 +1028,15 @@ export interface BirreSelect<T extends boolean = true> {
  * via the `definition` "liquori_select".
  */
 export interface LiquoriSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
-  grado?: T;
-  invecchiamento?: T;
-  capacita?: T;
   prezzo?: T;
-  inLista?: T;
-  nazione?: T;
   tipologia?: T;
+  grado?: T;
+  capacita?: T;
+  invecchiamento?: T;
+  nazione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1013,12 +1046,12 @@ export interface LiquoriSelect<T extends boolean = true> {
  * via the `definition` "cocktail_select".
  */
 export interface CocktailSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
   prezzo?: T;
-  inLista?: T;
-  nazione?: T;
   tipologia?: T;
+  nazione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1028,12 +1061,12 @@ export interface CocktailSelect<T extends boolean = true> {
  * via the `definition` "bevande_select".
  */
 export interface BevandeSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
   prezzo?: T;
-  inLista?: T;
-  nazione?: T;
   tipologia?: T;
+  nazione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1045,6 +1078,7 @@ export interface BevandeSelect<T extends boolean = true> {
 export interface AllergeniSelect<T extends boolean = true> {
   nome?: T;
   descrizione?: T;
+  piatti?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1054,9 +1088,10 @@ export interface AllergeniSelect<T extends boolean = true> {
  * via the `definition` "categoria-menu-fisso_select".
  */
 export interface CategoriaMenuFissoSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
-  inLista?: T;
+  elementi?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1066,9 +1101,10 @@ export interface CategoriaMenuFissoSelect<T extends boolean = true> {
  * via the `definition` "categoria-piatti_select".
  */
 export interface CategoriaPiattiSelect<T extends boolean = true> {
+  inLista?: T;
   nome?: T;
   descrizione?: T;
-  inLista?: T;
+  elementi?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1156,8 +1192,8 @@ export interface RegioniSelect<T extends boolean = true> {
  */
 export interface ZoneSelect<T extends boolean = true> {
   nome?: T;
-  regione?: T;
   nazione?: T;
+  regione?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

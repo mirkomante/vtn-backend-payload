@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 import {
   menuImpostazioniReadAccess,
   menuImpostazioniUpdateAccess,
@@ -14,6 +14,7 @@ interface CategoriaCollectionOptions {
   descrizioneDescription?: string
   inListaDescription?: string
   defaultColumns?: string[]
+  relatedCollection?: string // Slug della collezione che usa questa categoria
 }
 
 /**
@@ -36,12 +37,54 @@ export function createCategoriaCollection(
         options.defaultColumns || ['nome', 'inLista', 'descrizione', '_status'],
     },
     fields: [
-      nomeField({ description: options.nomeDescription }),
-      descrizioneField({ description: options.descrizioneDescription }),
-      inListaField({
-        description: options.inListaDescription,
-        collectionSlug: options.slug,
-      }),
+      // Sidebar: campo di stato
+      {
+        ...inListaField({
+          description: options.inListaDescription,
+          collectionSlug: options.slug,
+        }),
+        admin: {
+          ...inListaField({
+            description: options.inListaDescription,
+            collectionSlug: options.slug,
+          }).admin,
+          position: 'sidebar',
+        },
+      } as Field,
+
+      // Tabs: contenuti organizzati
+      {
+        type: 'tabs',
+        tabs: [
+          {
+            label: 'Dettagli',
+            fields: [
+              nomeField({ description: options.nomeDescription }),
+              descrizioneField({ description: options.descrizioneDescription }),
+            ],
+          },
+          // Tab Utilizzo (condizionale)
+          ...(options.relatedCollection
+            ? [
+                {
+                  label: 'Utilizzo',
+                  fields: [
+                    {
+                      name: 'elementi',
+                      type: 'join' as const,
+                      collection: options.relatedCollection as any,
+                      on: 'categoria',
+                      label: 'Elementi',
+                      admin: {
+                        description: 'Elementi associati a questa categoria',
+                      },
+                    } as Field,
+                  ],
+                },
+              ]
+            : []),
+        ],
+      },
     ],
     versions: {
       drafts: true,

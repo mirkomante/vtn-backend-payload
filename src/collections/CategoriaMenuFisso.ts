@@ -6,4 +6,5 @@ export const CategoriaMenuFisso = createCategoriaCollection({
   plural: 'Categorie Menu Fisso',
   descrizioneDescription: 'Descrizione opzionale della categoria',
   inListaDescription: 'Se la categoria è visibile nel menu',
+  relatedCollection: 'menu-fisso',
 })

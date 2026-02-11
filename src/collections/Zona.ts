@@ -19,31 +19,55 @@ export const Zona: CollectionConfig = {
   },
   fields: [
     {
-      name: 'nome',
-      type: 'text',
-      required: true,
-      index: true,
-      label: 'Nome',
-      admin: {
-        description: "Nome della zona (es. 'Chianti', 'Barolo')",
-      },
-    },
-    {
-      name: 'regione',
-      type: 'relationship',
-      relationTo: 'regioni',
-      required: true,
-      label: 'Regione',
-    },
-    {
-      name: 'nazione',
-      type: 'relationship',
-      relationTo: 'nazioni',
-      required: true,
-      label: 'Nazione',
-      admin: {
-        description: 'Per facilitare le query',
-      },
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Dettagli',
+          fields: [
+            {
+              name: 'nome',
+              type: 'text',
+              required: true,
+              index: true,
+              label: 'Nome',
+              admin: {
+                description: "Nome della zona (es. 'Chianti', 'Barolo')",
+              },
+            },
+          ],
+        },
+        {
+          label: 'Gerarchia',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'nazione',
+                  type: 'relationship',
+                  relationTo: 'nazioni',
+                  required: true,
+                  label: 'Nazione',
+                  admin: {
+                    width: '50%',
+                    description: 'Per facilitare le query',
+                  },
+                },
+                {
+                  name: 'regione',
+                  type: 'relationship',
+                  relationTo: 'regioni',
+                  required: true,
+                  label: 'Regione',
+                  admin: {
+                    width: '50%',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
   versions: {

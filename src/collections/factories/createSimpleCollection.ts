@@ -35,8 +35,18 @@ export function createSimpleCollection(
         options.defaultColumns || ['nome', 'descrizione', '_status', 'createdAt'],
     },
     fields: [
-      nomeField({ description: options.nomeDescription }),
-      descrizioneField({ description: options.descrizioneDescription }),
+      {
+        type: 'tabs',
+        tabs: [
+          {
+            label: 'Dettagli',
+            fields: [
+              nomeField({ description: options.nomeDescription }),
+              descrizioneField({ description: options.descrizioneDescription }),
+            ],
+          },
+        ],
+      },
     ],
     versions: {
       drafts: true,

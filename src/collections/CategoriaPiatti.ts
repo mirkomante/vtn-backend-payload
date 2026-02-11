@@ -6,4 +6,5 @@ export const CategoriaPiatti = createCategoriaCollection({
   plural: 'Categorie Piatti',
   descrizioneDescription: 'Descrizione opzionale della categoria',
   inListaDescription: 'Se la categoria è visibile nel menu pubblico',
+  relatedCollection: 'piatti',
 })
