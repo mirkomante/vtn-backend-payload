@@ -13,6 +13,7 @@ import {
   gradoField,
   capacitaField,
 } from '../fields/commonFields'
+import { createSmartWebhook } from '../../hooks/smartWebhook'
 
 interface BevandaCollectionOptions {
   slug: string
@@ -303,6 +304,10 @@ export function createBevandaCollection(
       ],
     },
     fields,
+    hooks: {
+      // Quando una bevanda viene modificata, aggiorna disponibilita.json o trigge rebuild
+      afterChange: [createSmartWebhook()],
+    },
     versions: {
       drafts: true,
     },

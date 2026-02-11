@@ -111,7 +111,32 @@ className="bg-[var(--theme-elevation-500)] text-[var(--theme-text)]"
 
 ---
 
-#### 5. [AGENTS.md](./AGENTS.md)
+#### 5. [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
+**Scopo**: Documentazione tecnica del sistema di webhook intelligente  
+**Per**: Backend developers, DevOps, LLM  
+**Contiene**:
+- Architettura "Traffic Cop" (Fast vs Slow Path)
+- Configurazione GCS e Pub/Sub
+- Integrazione collezioni Menu e Impostazioni
+- Logica di aggregazione dati (disponibilita.json)
+- Setup development (mock) vs production
+
+**Quando consultare**:
+- ✅ Modifiche alla logica di aggiornamento menu
+- ✅ Debug mancato aggiornamento frontend
+- ✅ Aggiunta nuove collezioni al sistema
+- ✅ Configurazione infrastruttura GCP (Bucket, Pub/Sub)
+
+**Key patterns**:
+```typescript
+// Traffic Cop Pattern
+if (inListaChanged) return 'fast-path' // Rigenera JSON
+if (heavyFieldsChanged) return 'slow-path' // Rebuild completo
+```
+
+---
+
+#### 6. [AGENTS.md](./AGENTS.md)
 **Scopo**: Regole di sviluppo Payload CMS per AI agents  
 **Per**: LLM, Cursor AI, sviluppatori che seguono best practices  
 **Contiene**:
@@ -142,7 +167,7 @@ const plugin = plugin({ enabled: Boolean(env.VAR) })
 
 ### Documentazione di Dettaglio
 
-#### 6. [.cursor/rules/](./cursor/rules/)
+#### 7. [.cursor/rules/](./cursor/rules/)
 **Scopo**: Context rules specifici per Cursor AI  
 **Per**: LLM che lavorano sul progetto  
 **Contiene**:
@@ -191,6 +216,15 @@ const plugin = plugin({ enabled: Boolean(env.VAR) })
 | Styling con Tailwind | [TAILWIND_INTEGRATION.md](./TAILWIND_INTEGRATION.md) |
 | Fix scroll/layout issues | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) → Problemi UI e Styling |
 | LoginView personalizzata | [TAILWIND_INTEGRATION.md](./TAILWIND_INTEGRATION.md) → LoginView |
+
+### Smart Webhook & Integrazioni
+
+| Task | Documento |
+|------|-----------|
+| Capire logica aggiornamento menu | [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md) |
+| Debug mancato aggiornamento JSON | [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md) → Troubleshooting |
+| Configurare GCS per frontend | [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md) → Setup |
+| Aggiungere collezione al webhook | [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md) → Integrazione |
 
 ### Troubleshooting
 
@@ -289,6 +323,7 @@ hooks: {
 ### Storia Recente
 
 **Febbraio 2026**:
+- ✅ **Smart Webhook System**: Implementazione logica Traffic Cop per aggiornamento menu
 - ✅ Fix ImportMap con plugin GCS condizionale
 - ✅ LoginView UI redesign con Tailwind
 - ✅ Fix scroll verticale pagina login
@@ -346,6 +381,10 @@ Quando aggiungi funzionalità o fix:
 - `migrazioni` → [README.md](./README.md), [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 - `deploy` → [README.md](./README.md), [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 - `OAuth` → [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [API_REFERENCE.md](./API_REFERENCE.md)
+- `webhook` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
+- `traffic cop` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
+- `disponibilita.json` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
+- `pubsub` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
 
 ---
 

@@ -5,6 +5,7 @@ import {
   menuImpostazioniDeleteAccess,
 } from '../../access/menuImpostazioniAccess'
 import { nomeField, descrizioneField, inListaField } from '../fields/commonFields'
+import { createSmartWebhook } from '../../hooks/smartWebhook'
 
 interface CategoriaCollectionOptions {
   slug: string
@@ -86,6 +87,10 @@ export function createCategoriaCollection(
         ],
       },
     ],
+    hooks: {
+      // Quando una categoria viene modificata, aggiorna disponibilita.json (Fast Path)
+      afterChange: [createSmartWebhook()],
+    },
     versions: {
       drafts: true,
     },

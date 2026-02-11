@@ -6,6 +6,7 @@ import {
 } from '../access/menuRistoranteAccess'
 import { nomeField, descrizioneField, inListaField, prezzoField } from './fields/commonFields'
 import { createCleanupHook } from '../hooks/cleanupRelationships'
+import { createSmartWebhook } from '../hooks/smartWebhook'
 
 export const ServizioAccessorio: CollectionConfig = {
   slug: 'servizi-accessori',
@@ -70,6 +71,8 @@ export const ServizioAccessorio: CollectionConfig = {
     },
   ],
   hooks: {
+    // Quando un servizio viene modificato, aggiorna disponibilita.json o trigge rebuild
+    afterChange: [createSmartWebhook()],
     // Quando un servizio viene eliminato, rimuovi la referenza da tutti i menu fissi
     beforeDelete: [createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'servizi' })],
   },

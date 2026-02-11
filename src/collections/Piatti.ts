@@ -6,6 +6,7 @@ import {
 } from '../access/menuRistoranteAccess'
 import { nomeField, descrizioneField, inListaField, prezzoField } from './fields/commonFields'
 import { createCleanupHook } from '../hooks/cleanupRelationships'
+import { createSmartWebhook } from '../hooks/smartWebhook'
 
 export const Piatti: CollectionConfig = {
   slug: 'piatti',
@@ -171,6 +172,8 @@ export const Piatti: CollectionConfig = {
     },
   ],
   hooks: {
+    // Quando un piatto viene modificato, aggiorna disponibilita.json o trigge rebuild
+    afterChange: [createSmartWebhook()],
     // Quando un piatto viene eliminato, rimuovi la referenza da tutti i menu fissi
     beforeDelete: [createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'piatti' })],
   },

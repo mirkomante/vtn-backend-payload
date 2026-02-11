@@ -6,6 +6,7 @@ import {
 } from '../access/menuImpostazioniAccess'
 import { nomeField, descrizioneField } from './fields/commonFields'
 import { createCleanupHook } from '../hooks/cleanupRelationships'
+import { createSmartWebhook } from '../hooks/smartWebhook'
 
 export const Allergene: CollectionConfig = {
   slug: 'allergeni',
@@ -48,6 +49,8 @@ export const Allergene: CollectionConfig = {
     },
   ],
   hooks: {
+    // Quando un allergene viene modificato, aggiorna disponibilita.json (Fast Path)
+    afterChange: [createSmartWebhook()],
     // Quando un allergene viene eliminato, rimuovi la referenza da tutti i piatti
     beforeDelete: [createCleanupHook({ targetCollection: 'piatti', relationshipField: 'allergeni' })],
   },

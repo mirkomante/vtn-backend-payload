@@ -404,6 +404,40 @@ export const Posts: CollectionConfig = {
 }
 ```
 
+### 4. Traffic Cop Pattern (Smart Webhooks)
+
+Use this pattern to intelligently handle document updates based on what changed:
+
+```typescript
+// src/hooks/smartWebhook.ts
+function detectChangeType(doc, previousDoc) {
+  // Fast Path: Only availability changed
+  if (doc.inLista !== previousDoc.inLista) {
+    return 'fast-path' // e.g., regenerate JSON
+  }
+
+  // Slow Path: Content changed
+  if (doc.title !== previousDoc.title || doc.price !== previousDoc.price) {
+    return 'slow-path' // e.g., trigger full rebuild
+  }
+
+  return 'none'
+}
+
+// In collection hook
+afterChange: [
+  async ({ doc, previousDoc, req }) => {
+    const changeType = detectChangeType(doc, previousDoc)
+    
+    if (changeType === 'fast-path') {
+      await regenerateJson(req)
+    } else if (changeType === 'slow-path') {
+      await triggerBuild(req)
+    }
+  }
+]
+```
+
 ## Queries
 
 ### Local API

@@ -5,6 +5,7 @@ import {
   menuRistoranteDeleteAccess,
 } from '../access/menuRistoranteAccess'
 import { nomeField, descrizioneField, inListaField, prezzoField } from './fields/commonFields'
+import { createSmartWebhook } from '../hooks/smartWebhook'
 
 export const MenuFisso: CollectionConfig = {
   slug: 'menu-fisso',
@@ -108,6 +109,10 @@ export const MenuFisso: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    // Quando un menu fisso viene modificato, aggiorna disponibilita.json o trigge rebuild
+    afterChange: [createSmartWebhook()],
+  },
   versions: {
     drafts: true,
   },

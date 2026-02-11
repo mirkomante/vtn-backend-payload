@@ -5,6 +5,7 @@ import {
   menuImpostazioniDeleteAccess,
 } from '../../access/menuImpostazioniAccess'
 import { nomeField, descrizioneField } from '../fields/commonFields'
+import { createSmartWebhook } from '../../hooks/smartWebhook'
 
 interface SimpleCollectionOptions {
   slug: string
@@ -48,6 +49,10 @@ export function createSimpleCollection(
         ],
       },
     ],
+    hooks: {
+      // Quando una tipologia viene modificata, aggiorna disponibilita.json (Fast Path)
+      afterChange: [createSmartWebhook()],
+    },
     versions: {
       drafts: true,
     },

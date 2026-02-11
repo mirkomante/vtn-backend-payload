@@ -54,7 +54,14 @@ Il sistema gestisce automaticamente la pulizia delle referenze quando i document
 | Un **Servizio Accessorio** | `menu-fisso.servizi` |
 | Un **Allergene** | `piatti.allergeni` |
 
-Questo previene le "dangling references" (referenze orfane) nel database.
+### Smart Webhook System (Traffic Cop)
+Il sistema include un meccanismo intelligente per l'aggiornamento dei dati frontend:
+
+- **Fast Path**: Rigenera `disponibilita.json` su GCS quando cambiano disponibilità o impostazioni.
+- **Slow Path**: Invia messaggio Pub/Sub `rebuild-menu` quando cambiano campi strutturali (nome, prezzo, foto).
+- **Mock Mode**: In locale simula le operazioni GCP per facilitare lo sviluppo.
+
+Vedi [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md) per dettagli.
 
 ## Stack Tecnologico
 
@@ -183,7 +190,8 @@ Configurate in Cloud Run tramite Secret Manager:
 | `PAYLOAD_PUBLIC_SERVER_URL` | URL pubblico del servizio |
 | `GOOGLE_CLIENT_ID` | Client ID OAuth |
 | `GOOGLE_CLIENT_SECRET` | Client Secret OAuth |
-| `GCS_BUCKET` | Nome bucket Cloud Storage |
+| `GCS_BUCKET` | Nome bucket Cloud Storage (Media) |
+| `GCS_FRONTEND_BUCKET` | Nome bucket Cloud Storage (JSON Dati) |
 | `GCP_PROJECT_ID` | ID progetto GCP |
 
 ### Configurazione iniziale GCP
