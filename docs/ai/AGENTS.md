@@ -52,16 +52,39 @@ const gcsPlugin = gcsStorage({
 })
 ```
 
-**2. `disableLocalStorage` in `src/collections/Media.ts`** (prevents local file saving):
+**2. `disableLocalStorage` inside the plugin config in `src/payload.config.ts`** (NOT in the collection):
 ```typescript
-upload: {
-  disableLocalStorage: true,  // MUST be true (fixed), NOT Boolean(process.env.GCS_BUCKET)
-}
+// ✅ CORRECT: evaluated at runtime by Node.js
+media: gcsEnabled ? { disableLocalStorage: true } : true,
+
+// ❌ WRONG: compiled into the bundle at build time (always false in Docker)
+// upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }
 ```
 
-**WHY BOTH ARE NEEDED**: Without `disableLocalStorage: true`, Payload saves files locally AND uploads to GCS, but returns the local URL (`/api/media/file/...`) instead of the GCS public URL (`https://storage.googleapis.com/...`). The plugin alone is not sufficient.
+**3. `afterRead` hook + `adminThumbnail` in `src/collections/Media.ts`** (absolute guarantee):
+```typescript
+upload: {
+  adminThumbnail: ({ doc }) => {
+    if (process.env.GCS_BUCKET && doc.filename)
+      return `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+    return null
+  },
+},
+hooks: {
+  afterRead: [({ doc }) => {
+    if (doc.filename && process.env.GCS_BUCKET)
+      doc.url = `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+    return doc
+  }],
+},
+```
 
-**CRITICAL - Build-time vs Runtime trap**: `disableLocalStorage` MUST be the literal `true`, never `Boolean(process.env.GCS_BUCKET)`. The Dockerfile runs `next build` without production env vars, so `Boolean(process.env.GCS_BUCKET)` evaluates to `false` at build time and gets compiled into the bundle. At runtime on Cloud Run, the value stays `false` even if `GCS_BUCKET` is set. With `true` fixed: locally the GCS plugin is `enabled: false` (no `GCS_BUCKET` in `.env`), so Payload ignores `disableLocalStorage` and uses local storage normally.
+**WHY ALL THREE ARE NEEDED**:
+- `disableLocalStorage` in plugin config: prevents writing file to local disk on Cloud Run
+- `afterRead` hook: overwrites `doc.url` at every read — works even if the plugin falls back to local URLs (e.g. with Uniform Bucket Level Access active on the bucket, which blocks per-file ACL and causes the plugin to silently fall back to local URLs)
+- `adminThumbnail`: ensures Admin Panel previews load from GCS
+
+**CRITICAL - Build-time vs Runtime trap**: `disableLocalStorage` in the collection's `upload` config is compiled into the Next.js bundle during `next build` in Docker (where `GCS_BUCKET` is undefined → `false`). In the plugin config it's evaluated at runtime by Node.js. Always put it in the plugin config.
 
 **Verification**: At startup, check Cloud Run logs for:
 ```

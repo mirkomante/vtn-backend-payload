@@ -51,11 +51,14 @@ console.log('[GCS Storage] Plugin abilitato:', gcsEnabled)
 
 const gcsPlugin = gcsStorage({
   collections: {
-    media: true,
+    // disableLocalStorage condizionale nel plugin (non nella collection):
+    // evita il problema build-time dove Boolean(process.env.GCS_BUCKET) = false
+    // perché qui il valore viene valutato a runtime, non compilato nel bundle.
+    media: gcsEnabled ? { disableLocalStorage: true } : true,
   },
   bucket: process.env.GCS_BUCKET || 'not-configured',
   options: {
-    projectId: process.env.GCP_PROJECT_ID,
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
   },
   enabled: gcsEnabled,
 })

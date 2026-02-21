@@ -13,13 +13,26 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // Deve essere true fisso, NON Boolean(process.env.GCS_BUCKET).
-    // Motivo: payload.config.ts viene eseguito durante `next build` nel Dockerfile,
-    // dove GCS_BUCKET non è disponibile. Se si usa Boolean(process.env.GCS_BUCKET),
-    // il valore viene compilato come `false` nel bundle e rimane tale a runtime.
-    // Con true fisso: in locale il plugin GCS è disabled (enabled: false), quindi
-    // Payload ignora disableLocalStorage e usa lo storage locale normalmente.
-    // In produzione il plugin è enabled e disableLocalStorage:true forza l'URL GCS.
-    disableLocalStorage: true,
+    // Genera l'URL pubblico GCS per le anteprime nell'Admin Panel.
+    // Questo bypassa la logica del plugin che può fallire con Uniform Bucket Level Access.
+    adminThumbnail: ({ doc }) => {
+      if (process.env.GCS_BUCKET && doc.filename) {
+        return `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+      }
+      return null
+    },
+  },
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        // Sovrascrive doc.url con l'URL pubblico GCS ad ogni lettura.
+        // Garantisce URL corretti anche se il plugin genera URL locali come fallback
+        // (es. con Uniform Bucket Level Access attivo sul bucket).
+        if (doc.filename && process.env.GCS_BUCKET) {
+          doc.url = `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+        }
+        return doc
+      },
+    ],
   },
 }

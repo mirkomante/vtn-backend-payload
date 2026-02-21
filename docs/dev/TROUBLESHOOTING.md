@@ -483,41 +483,70 @@ Error: Migration xyz failed to execute
 
 **🔴 Sintomo**: Upload funziona ma Payload restituisce URL locale (`/api/media/file/nome-file.jpg`) invece dell'URL pubblico GCS (`https://storage.googleapis.com/...`).
 
-**🔍 Causa Principale**: `disableLocalStorage: true` mancante nella collection `Media`.
+**🔍 Causa**: Il plugin GCS non disabilita automaticamente lo storage locale e non genera sempre URL pubblici. Questo può succedere per due motivi combinati:
 
-Anche quando il plugin GCS è attivo e funzionante, Payload mantiene il comportamento di storage locale **a meno che non venga esplicitamente disabilitato** nella collection. Senza questo flag:
-- Il file viene salvato sia localmente che su GCS (doppio upload)
-- L'URL restituito è quello locale, non quello GCS
-- In produzione su Cloud Run (filesystem effimero), il file locale viene perso al riavvio del container
+1. `disableLocalStorage` non configurato correttamente nel plugin
+2. Il bucket ha **Uniform Bucket Level Access** attivo: il plugin tenta di impostare ACL sui singoli file, fallisce silenziosamente, e genera URL locali come fallback
 
-**✅ Soluzione**: Impostare `disableLocalStorage: true` fisso nella collection `Media`:
+**✅ Soluzione Definitiva**: Due meccanismi combinati
+
+**1. In `src/payload.config.ts`** — `disableLocalStorage` nella config del plugin (non nella collection):
 
 ```typescript
-// src/collections/Media.ts
+const gcsEnabled = Boolean(process.env.GCS_BUCKET)
+
+const gcsPlugin = gcsStorage({
+  collections: {
+    // CRITICO: disableLocalStorage va qui nel plugin, NON nella collection.
+    // Qui viene valutato a runtime (non compilato nel bundle da Next.js).
+    media: gcsEnabled ? { disableLocalStorage: true } : true,
+  },
+  bucket: process.env.GCS_BUCKET || 'not-configured',
+  options: {
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
+  },
+  enabled: gcsEnabled,
+})
+```
+
+**2. In `src/collections/Media.ts`** — hook `afterRead` + `adminThumbnail` come garanzia assoluta:
+
+```typescript
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: {
-    read: () => true,
-  },
-  fields: [
-    { name: 'alt', type: 'text', required: true },
-  ],
   upload: {
-    // CRITICO: deve essere true fisso, NON Boolean(process.env.GCS_BUCKET).
-    // Vedi sezione "Insidia Build-Time vs Runtime" sotto.
-    disableLocalStorage: true,
+    // Anteprime Admin Panel sempre da GCS
+    adminThumbnail: ({ doc }) => {
+      if (process.env.GCS_BUCKET && doc.filename) {
+        return `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+      }
+      return null
+    },
+  },
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        // Sovrascrive doc.url ad ogni lettura: funziona anche con Uniform Bucket Level Access
+        if (doc.filename && process.env.GCS_BUCKET) {
+          doc.url = `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+        }
+        return doc
+      },
+    ],
   },
 }
 ```
 
-**Perché `true` fisso e NON `Boolean(process.env.GCS_BUCKET)`**:
+**Perché due meccanismi?**
 
-Il Dockerfile esegue `pnpm run build` (che include `next build`) **senza** le variabili d'ambiente di produzione. Se si usa `Boolean(process.env.GCS_BUCKET)`:
-- Durante il build Docker: `GCS_BUCKET` non è definito → `Boolean(undefined)` = `false`
-- Il valore `false` viene **compilato nel bundle JavaScript** da Next.js
-- A runtime su Cloud Run: il valore rimane `false` anche se `GCS_BUCKET` è impostato
+| Meccanismo | Cosa fa | Perché necessario |
+|---|---|---|
+| `disableLocalStorage` nel plugin | Impedisce il salvataggio locale del file fisico | Senza questo, il file viene scritto su disco (inutile su Cloud Run) |
+| Hook `afterRead` | Sovrascrive `doc.url` a ogni lettura | Garantisce URL GCS anche se il plugin fallisce (es. con Uniform Bucket Level Access) |
 
-Con `true` fisso questo problema non esiste. In locale, il plugin GCS è `enabled: false` (perché `GCS_BUCKET` non è nel `.env`), quindi Payload ignora `disableLocalStorage` e usa lo storage locale normalmente. In produzione, il plugin è `enabled: true` e `disableLocalStorage: true` forza l'uso degli URL GCS.
+**Perché `disableLocalStorage` va nel plugin e non nella collection?**
+
+Se messo nella collection (`upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }`), Next.js compila il valore durante `next build` nel Dockerfile dove `GCS_BUCKET` non esiste → il valore diventa `false` e rimane tale a runtime. Nella config del plugin, il valore viene valutato a runtime da Node.js, non compilato nel bundle.
 
 ### Upload Fails in Produzione
 
@@ -564,7 +593,8 @@ Usa questa checklist per verificare che tutto sia configurato correttamente:
 - [ ] Log di debug presenti per verificare le env vars
 
 **`src/collections/Media.ts`**:
-- [ ] `upload: { disableLocalStorage: true }` presente (valore fisso, non condizionale)
+- [ ] Hook `afterRead` presente che sovrascrive `doc.url` con URL GCS
+- [ ] `adminThumbnail` configurato per generare URL GCS
 
 **Cloud Run**:
 - [ ] `GCS_BUCKET` impostato nelle env vars del servizio
