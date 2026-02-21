@@ -1,4 +1,47 @@
-# Payload CMS Development Rules
+# Project Context: Restaurant Menu System
+
+## 🌍 Overview
+This project is a Payload CMS (v3.0) backend for managing a restaurant's digital menu, wine list, and configurations. It uses Next.js 15, PostgreSQL, and Google Cloud Storage.
+
+## 🏗 Domain Model (Collections)
+
+### Menu Management
+- **`Piatti`**: Dishes with descriptions, prices, allergens, and relationships to categories.
+- **`MenuFisso`**: Fixed menus / Tasting menus.
+- **`CategoriaPiatti`**: Hierarchical organization of courses (e.g., Antipasti, Primi).
+- **`CategoriaMenuFisso`**: Types of fixed menus.
+
+### Beverage Management (Cantina)
+- **`Vino`**: Detailed wine sheets (Red, White, Rosé, Sparkling).
+- **`Birra`**: Craft and industrial beers.
+- **`Cocktail`**: Cocktails and ingredients.
+- **`Liquore`**: Spirits and bitters.
+- **`Bevanda`**: Water, soft drinks, coffee.
+
+### Configuration & Locations
+- **`Allergene`**: Centralized allergen management.
+- **`Nazione`, `Regione`, `Zona`**: Geographic data for product origins.
+- **`Tipologie`**: Cross-cutting classifications.
+- **`ServiziAccessorio`**: Extra services.
+
+### System
+- **`Users`**: RBAC (Admin/User).
+- **`Media`**: Image uploads (GCS).
+
+## 🧠 Key Logic Patterns
+
+### Smart Webhook (Traffic Cop)
+Located in `src/hooks/smartWebhook.ts`.
+- **Fast Path**: Regenerates JSON on GCS for simple availability toggles.
+- **Slow Path**: Triggers full rebuilds via Pub/Sub for structural changes.
+- **Mock Mode**: Simulates GCP in local dev.
+
+### Import Map & Conditional Plugins
+**CRITICAL**: When regenerating import maps (`pnpm generate:importmap`), ensure `GCS_BUCKET` is handled correctly to avoid "PayloadComponent not found" errors in production. See `docs/dev/TROUBLESHOOTING.md`.
+
+---
+
+# Payload CMS Development Rules (General)
 
 You are an expert Payload CMS developer. When working with Payload projects, follow these rules:
 
