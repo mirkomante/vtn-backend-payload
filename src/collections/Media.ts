@@ -13,10 +13,13 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // Disabilita lo storage locale quando GCS è attivo.
-    // Senza questo flag, Payload salva i file localmente anche quando il plugin GCS
-    // è abilitato, e l'URL restituito è quello locale (/api/media/file/...) invece
-    // dell'URL pubblico di GCS (https://storage.googleapis.com/...).
-    disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+    // Deve essere true fisso, NON Boolean(process.env.GCS_BUCKET).
+    // Motivo: payload.config.ts viene eseguito durante `next build` nel Dockerfile,
+    // dove GCS_BUCKET non è disponibile. Se si usa Boolean(process.env.GCS_BUCKET),
+    // il valore viene compilato come `false` nel bundle e rimane tale a runtime.
+    // Con true fisso: in locale il plugin GCS è disabled (enabled: false), quindi
+    // Payload ignora disableLocalStorage e usa lo storage locale normalmente.
+    // In produzione il plugin è enabled e disableLocalStorage:true forza l'URL GCS.
+    disableLocalStorage: true,
   },
 }

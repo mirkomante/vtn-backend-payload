@@ -490,7 +490,7 @@ Anche quando il plugin GCS è attivo e funzionante, Payload mantiene il comporta
 - L'URL restituito è quello locale, non quello GCS
 - In produzione su Cloud Run (filesystem effimero), il file locale viene perso al riavvio del container
 
-**✅ Soluzione**: Aggiungere `disableLocalStorage` alla collection `Media`:
+**✅ Soluzione**: Impostare `disableLocalStorage: true` fisso nella collection `Media`:
 
 ```typescript
 // src/collections/Media.ts
@@ -503,17 +503,21 @@ export const Media: CollectionConfig = {
     { name: 'alt', type: 'text', required: true },
   ],
   upload: {
-    // CRITICO: disabilita storage locale quando GCS è attivo.
-    // Senza questo, l'URL restituito è /api/media/file/... invece di https://storage.googleapis.com/...
-    disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+    // CRITICO: deve essere true fisso, NON Boolean(process.env.GCS_BUCKET).
+    // Vedi sezione "Insidia Build-Time vs Runtime" sotto.
+    disableLocalStorage: true,
   },
 }
 ```
 
-**Perché `Boolean(process.env.GCS_BUCKET)` e non `true` fisso**:
-- In locale (senza `GCS_BUCKET`), lo storage locale rimane attivo per lo sviluppo
-- In produzione (con `GCS_BUCKET` impostato), lo storage locale viene disabilitato
-- Questo garantisce che lo stesso codice funzioni in entrambi gli ambienti
+**Perché `true` fisso e NON `Boolean(process.env.GCS_BUCKET)`**:
+
+Il Dockerfile esegue `pnpm run build` (che include `next build`) **senza** le variabili d'ambiente di produzione. Se si usa `Boolean(process.env.GCS_BUCKET)`:
+- Durante il build Docker: `GCS_BUCKET` non è definito → `Boolean(undefined)` = `false`
+- Il valore `false` viene **compilato nel bundle JavaScript** da Next.js
+- A runtime su Cloud Run: il valore rimane `false` anche se `GCS_BUCKET` è impostato
+
+Con `true` fisso questo problema non esiste. In locale, il plugin GCS è `enabled: false` (perché `GCS_BUCKET` non è nel `.env`), quindi Payload ignora `disableLocalStorage` e usa lo storage locale normalmente. In produzione, il plugin è `enabled: true` e `disableLocalStorage: true` forza l'uso degli URL GCS.
 
 ### Upload Fails in Produzione
 
@@ -560,7 +564,7 @@ Usa questa checklist per verificare che tutto sia configurato correttamente:
 - [ ] Log di debug presenti per verificare le env vars
 
 **`src/collections/Media.ts`**:
-- [ ] `upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }` presente
+- [ ] `upload: { disableLocalStorage: true }` presente (valore fisso, non condizionale)
 
 **Cloud Run**:
 - [ ] `GCS_BUCKET` impostato nelle env vars del servizio

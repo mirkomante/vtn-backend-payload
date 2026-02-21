@@ -24,6 +24,14 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# GCS_BUCKET e GCP_PROJECT_ID sono passati come ARG durante il build
+# per garantire che il plugin GCS sia attivo nell'importMap (evita pagina bianca).
+# I valori reali vengono iniettati da Cloud Run a runtime tramite le env vars del servizio.
+ARG GCS_BUCKET=build-placeholder
+ARG GCP_PROJECT_ID=build-placeholder
+ENV GCS_BUCKET=${GCS_BUCKET}
+ENV GCP_PROJECT_ID=${GCP_PROJECT_ID}
+
 RUN pnpm run build
 
 # Production image

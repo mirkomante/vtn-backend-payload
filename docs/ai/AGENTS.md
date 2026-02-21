@@ -55,11 +55,13 @@ const gcsPlugin = gcsStorage({
 **2. `disableLocalStorage` in `src/collections/Media.ts`** (prevents local file saving):
 ```typescript
 upload: {
-  disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+  disableLocalStorage: true,  // MUST be true (fixed), NOT Boolean(process.env.GCS_BUCKET)
 }
 ```
 
 **WHY BOTH ARE NEEDED**: Without `disableLocalStorage: true`, Payload saves files locally AND uploads to GCS, but returns the local URL (`/api/media/file/...`) instead of the GCS public URL (`https://storage.googleapis.com/...`). The plugin alone is not sufficient.
+
+**CRITICAL - Build-time vs Runtime trap**: `disableLocalStorage` MUST be the literal `true`, never `Boolean(process.env.GCS_BUCKET)`. The Dockerfile runs `next build` without production env vars, so `Boolean(process.env.GCS_BUCKET)` evaluates to `false` at build time and gets compiled into the bundle. At runtime on Cloud Run, the value stays `false` even if `GCS_BUCKET` is set. With `true` fixed: locally the GCS plugin is `enabled: false` (no `GCS_BUCKET` in `.env`), so Payload ignores `disableLocalStorage` and uses local storage normally.
 
 **Verification**: At startup, check Cloud Run logs for:
 ```
