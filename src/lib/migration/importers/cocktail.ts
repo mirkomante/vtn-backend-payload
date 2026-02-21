@@ -32,16 +32,14 @@ export async function importCocktail(
         continue
       }
 
-      // Nazione è required, quindi skippiamo se non c'è
+      // Nazione è opzionale per i cocktail (es. Mojito, Spritz internazionali)
       const backendNazioneId = cocktail.nazione?.id || cocktail.nazioneId
       const nazioneId = backendNazioneId ? idMap.get('nazioni', backendNazioneId) : undefined
 
       if (!nazioneId) {
-        console.error(
-          `   ⚠️  Nazione non trovata per cocktail ${cocktail.nome}, skipping (campo required)`,
+        console.log(
+          `   ℹ️  Nazione non trovata per cocktail ${cocktail.nome}, importazione senza nazione`,
         )
-        stats.skipped++
-        continue
       }
 
       const created = await payload.create({
@@ -51,7 +49,7 @@ export async function importCocktail(
           descrizione: cocktail.descrizione || '',
           prezzo: Number(cocktail.prezzo),
           inLista: cocktail.inLista !== undefined ? cocktail.inLista : true,
-          nazione: nazioneId as number,
+          ...(nazioneId !== undefined && { nazione: nazioneId as number }),
           tipologia: tipologiaId as number,
           _status: 'published',
         },

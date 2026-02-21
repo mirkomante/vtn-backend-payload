@@ -584,10 +584,11 @@ Se messo nella collection (`upload: { disableLocalStorage: Boolean(process.env.G
 
 ### Checklist Completa Configurazione GCS
 
-Usa questa checklist per verificare che tutto sia configurato correttamente:
+Usa questa checklist per verificare che tutto sia configurato correttamente.
 
 **`src/payload.config.ts`**:
 - [ ] Plugin `gcsStorage` sempre incluso (non in spread condizionale)
+- [ ] `media: gcsEnabled ? { disableLocalStorage: true } : true` nella config del plugin
 - [ ] `enabled: Boolean(process.env.GCS_BUCKET)` per controllo runtime
 - [ ] `bucket: process.env.GCS_BUCKET || 'not-configured'` (valore dummy per build)
 - [ ] Log di debug presenti per verificare le env vars
@@ -596,46 +597,70 @@ Usa questa checklist per verificare che tutto sia configurato correttamente:
 - [ ] Hook `afterRead` presente che sovrascrive `doc.url` con URL GCS
 - [ ] `adminThumbnail` configurato per generare URL GCS
 
-**Cloud Run**:
+**Cloud Run — Variabili d'ambiente**:
 - [ ] `GCS_BUCKET` impostato nelle env vars del servizio
 - [ ] `GCP_PROJECT_ID` impostato nelle env vars del servizio
 - [ ] Service Account ha ruolo `Storage Object Admin` sul bucket
 
-**Bucket GCS**:
-- [ ] Bucket esiste e ha accesso pubblico (se necessario)
-- [ ] CORS configurato (se le immagini vengono caricate da browser)
+**Bucket GCS — GUI Cloud Storage** (le tre cose da verificare):
+
+1. **Tab "Permissions" → `allUsers` con ruolo `Storage Object Viewer`**
+   - Senza questa voce i file arrivano su GCS ma ogni URL restituisce `403 Forbidden`
+   - Aggiungere: Grant Access → New principals: `allUsers` → Role: `Storage Object Viewer`
+
+2. **Tab "Configuration" → Access control = `Uniform`**
+   - Se è `Uniform`, il punto 1 è obbligatorio (non si possono impostare ACL per singolo file)
+   - Se è `Fine-grained`, il plugin può impostare ACL da solo ma è deprecato da Google
+
+3. **Tab "Configuration" → Public access prevention = `Not enforced`**
+   - Se è `Enforced`, blocca `allUsers` anche se lo aggiungi: i file non saranno mai pubblici
+   - Disabilitare: Edit → uncheck "Prevent public access"
 
 **Build/Deploy**:
 - [ ] `importMap.js` contiene `GcsClientUploadHandler` (vedi sezione Admin Panel Bianco)
 
-### Media Non Accessibili
+### Media Non Accessibili (403 o 404 sull'URL GCS)
 
-**🔴 Sintomo**: Immagini caricate ma URL non funziona (404).
+**🔴 Sintomo**: L'URL è corretto (`https://storage.googleapis.com/...`) ma restituisce `403 Forbidden` o `404 Not Found`.
 
-**🔍 Verifica**:
+**🔍 Diagnosi per tipo di errore**:
 
-1. **URL generato**:
-   ```
-   https://your-domain.com/media/filename.jpg  ← Locale (GCS non attivo)
-   https://storage.googleapis.com/your-bucket/filename.jpg  ← GCS (corretto)
-   ```
-   Se vedi URL locale in produzione, il problema è `disableLocalStorage` mancante (vedi sopra).
+**403 Forbidden** → Il bucket non è pubblico:
+```bash
+# Verifica permessi bucket
+gsutil iam get gs://your-bucket-name | grep allUsers
+# Se non restituisce nulla, allUsers non è configurato
 
-2. **Bucket CORS** (se serve da browser):
-   ```json
-   [
-     {
-       "origin": ["*"],
-       "method": ["GET"],
-       "maxAgeSeconds": 3600
-     }
-   ]
-   ```
-   
-   Applica:
-   ```bash
-   gsutil cors set cors.json gs://your-bucket-name
-   ```
+# Fix: rendi il bucket pubblico
+gsutil iam ch allUsers:objectViewer gs://your-bucket-name
+```
+
+Oppure **Public access prevention** è attivo sulla GUI (vedi checklist sopra).
+
+**404 Not Found** → Il file non è stato caricato su GCS (è rimasto in locale):
+```bash
+# Verifica che il file esista sul bucket
+gsutil ls gs://your-bucket-name/nome-file.jpg
+```
+Se non c'è, il plugin non stava funzionando al momento dell'upload. Ricarica il file dopo aver corretto la configurazione.
+
+**URL locale in produzione** (`/api/media/file/...`):
+- Problema nel codice: vedi sezione "Upload Salva in Locale invece che su GCS" sopra
+
+**Bucket CORS** (se le immagini vengono caricate da browser su dominio diverso):
+```json
+[
+  {
+    "origin": ["*"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+Applica:
+```bash
+gsutil cors set cors.json gs://your-bucket-name
+```
 
 ---
 

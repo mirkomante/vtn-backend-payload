@@ -32,16 +32,14 @@ export async function importBevande(
         continue
       }
 
-      // Nazione è required, quindi skippiamo se non c'è
+      // Nazione è opzionale per le bevande (es. Acqua, Caffè)
       const backendNazioneId = bevanda.nazione?.id || bevanda.nazioneId
       const nazioneId = backendNazioneId ? idMap.get('nazioni', backendNazioneId) : undefined
 
       if (!nazioneId) {
-        console.error(
-          `   ⚠️  Nazione non trovata per bevanda ${bevanda.nome}, skipping (campo required)`,
+        console.log(
+          `   ℹ️  Nazione non trovata per bevanda ${bevanda.nome}, importazione senza nazione`,
         )
-        stats.skipped++
-        continue
       }
 
       const created = await payload.create({
@@ -51,7 +49,7 @@ export async function importBevande(
           descrizione: bevanda.descrizione || '',
           prezzo: Number(bevanda.prezzo),
           inLista: bevanda.inLista !== undefined ? bevanda.inLista : true,
-          nazione: nazioneId as number,
+          ...(nazioneId !== undefined && { nazione: nazioneId as number }),
           tipologia: tipologiaId as number,
           _status: 'published',
         },

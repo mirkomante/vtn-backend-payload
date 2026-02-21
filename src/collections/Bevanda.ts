@@ -5,5 +5,6 @@ export const Bevanda = createBevandaCollection({
   singular: 'Bevanda',
   plural: 'Bevande',
   tipologiaSlug: 'tipologie-bevanda',
+  nazioneOptional: true,
   // Solo campi base, nessun campo aggiuntivo
 })

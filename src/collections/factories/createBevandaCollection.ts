@@ -21,6 +21,7 @@ interface BevandaCollectionOptions {
   plural: string
   tipologiaSlug: string // es. 'tipologie-vino'
   defaultColumns?: string[]
+  nazioneOptional?: boolean // Se true, il campo nazione non è obbligatorio
   campiAggiuntivi?: {
     grado?: boolean
     capacita?: boolean
@@ -41,6 +42,7 @@ export function createBevandaCollection(
   options: BevandaCollectionOptions,
 ): CollectionConfig {
   const campiAggiuntivi = options.campiAggiuntivi || {}
+  const nazioneRequired = options.nazioneOptional !== true
   const fields: Field[] = []
 
   // Sidebar: campo inLista
@@ -237,7 +239,7 @@ export function createBevandaCollection(
     name: 'nazione',
     type: 'relationship',
     relationTo: 'nazioni',
-    required: true,
+    required: nazioneRequired,
     label: 'Nazione',
     maxDepth: 0,
     index: true,

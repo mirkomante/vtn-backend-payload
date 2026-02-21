@@ -105,8 +105,8 @@ Lo script importa i dati nel seguente ordine per rispettare le dipendenze:
 - ✅ Vini (con nazione, regione, zona, tipologia)
 - ✅ Birre (con nazione, tipologia)
 - ✅ Liquori (con nazione, tipologia)
-- ✅ Cocktail (con nazione, tipologia)
-- ✅ Bevande (con nazione, tipologia)
+- ✅ Cocktail (con tipologia; nazione opzionale — importati anche senza nazione)
+- ✅ Bevande (con tipologia; nazione opzionale — importati anche senza nazione)
 
 ### Stato Pubblicazione
 
@@ -144,8 +144,8 @@ Le relazioni many-to-many (Piatti↔Allergeni, MenuFisso↔Piatti, MenuFisso↔S
 ### Errori Comuni
 
 1. **"Unauthorized"**: Non sei loggato come admin
-2. **"Nazione non trovata"**: Dati mancanti nel backend attuale
-3. **"Tipologia non trovata"**: Relazioni mancanti
+2. **"Nazione non trovata" (log `ℹ️`)**: Per `bevande` e `cocktail` è un avviso informativo — il record viene importato ugualmente senza nazione. Per `vini`, `birre` e `liquori` rimane un errore bloccante (`⚠️`).
+3. **"Tipologia non trovata"**: Relazioni mancanti — il record viene saltato
 
 ### In Caso di Errore
 
@@ -156,10 +156,11 @@ Le relazioni many-to-many (Piatti↔Allergeni, MenuFisso↔Piatti, MenuFisso↔S
 
 ## Limitazioni Note
 
-1. **Nazione required**: Cocktail e bevande senza nazione vengono saltati
-2. **Unique constraints**: Duplicati vengono gestiti con errore
-3. **Performance**: Con migliaia di record può richiedere tempo
-4. **Dangling references**: Referenze a documenti eliminati nel backend sorgente vengono ignorate
+1. **Unique constraints**: Duplicati vengono gestiti con errore
+2. **Performance**: Con migliaia di record può richiedere tempo
+3. **Dangling references**: Referenze a documenti eliminati nel backend sorgente vengono ignorate
+
+> **Nota**: La limitazione "Nazione required per Cocktail e Bevande" è stata rimossa. Il campo `nazione` è ora opzionale per queste due collections, permettendo l'importazione di voci generiche come "Acqua", "Caffè" e cocktail internazionali.
 
 ## Integrità Referenziale Post-Migrazione
 
