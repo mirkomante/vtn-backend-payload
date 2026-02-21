@@ -39,6 +39,35 @@ Located in `src/hooks/smartWebhook.ts`.
 ### Import Map & Conditional Plugins
 **CRITICAL**: When regenerating import maps (`pnpm generate:importmap`), ensure `GCS_BUCKET` is handled correctly to avoid "PayloadComponent not found" errors in production. See `docs/dev/TROUBLESHOOTING.md`.
 
+### GCS Media Storage (CRITICAL)
+The `Media` collection uses Google Cloud Storage in production. There are **two independent but both required** configurations:
+
+**1. Plugin in `payload.config.ts`** (handles upload routing to GCS):
+```typescript
+const gcsPlugin = gcsStorage({
+  collections: { media: true },
+  bucket: process.env.GCS_BUCKET || 'not-configured',
+  options: { projectId: process.env.GCP_PROJECT_ID },
+  enabled: Boolean(process.env.GCS_BUCKET), // runtime toggle
+})
+```
+
+**2. `disableLocalStorage` in `src/collections/Media.ts`** (prevents local file saving):
+```typescript
+upload: {
+  disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+}
+```
+
+**WHY BOTH ARE NEEDED**: Without `disableLocalStorage: true`, Payload saves files locally AND uploads to GCS, but returns the local URL (`/api/media/file/...`) instead of the GCS public URL (`https://storage.googleapis.com/...`). The plugin alone is not sufficient.
+
+**Verification**: At startup, check Cloud Run logs for:
+```
+[GCS Storage] GCS_BUCKET: <bucket-name>
+[GCS Storage] Plugin abilitato: true
+```
+If you see `(non impostato)` or `false`, env vars are missing in Cloud Run service configuration.
+
 ---
 
 # Payload CMS Development Rules (General)

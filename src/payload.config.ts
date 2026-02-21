@@ -44,6 +44,11 @@ const dirname = path.dirname(filename)
 // Il plugin è SEMPRE incluso nella config (con enabled condizionale) per garantire
 // che il componente GcsClientUploadHandler sia sempre presente nell'importMap,
 // evitando pagine bianche in produzione.
+const gcsEnabled = Boolean(process.env.GCS_BUCKET)
+console.log('[GCS Storage] GCS_BUCKET:', process.env.GCS_BUCKET || '(non impostato)')
+console.log('[GCS Storage] GCP_PROJECT_ID:', process.env.GCP_PROJECT_ID || '(non impostato)')
+console.log('[GCS Storage] Plugin abilitato:', gcsEnabled)
+
 const gcsPlugin = gcsStorage({
   collections: {
     media: true,
@@ -52,7 +57,7 @@ const gcsPlugin = gcsStorage({
   options: {
     projectId: process.env.GCP_PROJECT_ID,
   },
-  enabled: Boolean(process.env.GCS_BUCKET),
+  enabled: gcsEnabled,
 })
 
 export default buildConfig({

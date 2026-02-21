@@ -479,6 +479,42 @@ Error: Migration xyz failed to execute
 
 ## Problemi Storage e Media
 
+### Upload Salva in Locale invece che su GCS
+
+**🔴 Sintomo**: Upload funziona ma Payload restituisce URL locale (`/api/media/file/nome-file.jpg`) invece dell'URL pubblico GCS (`https://storage.googleapis.com/...`).
+
+**🔍 Causa Principale**: `disableLocalStorage: true` mancante nella collection `Media`.
+
+Anche quando il plugin GCS è attivo e funzionante, Payload mantiene il comportamento di storage locale **a meno che non venga esplicitamente disabilitato** nella collection. Senza questo flag:
+- Il file viene salvato sia localmente che su GCS (doppio upload)
+- L'URL restituito è quello locale, non quello GCS
+- In produzione su Cloud Run (filesystem effimero), il file locale viene perso al riavvio del container
+
+**✅ Soluzione**: Aggiungere `disableLocalStorage` alla collection `Media`:
+
+```typescript
+// src/collections/Media.ts
+export const Media: CollectionConfig = {
+  slug: 'media',
+  access: {
+    read: () => true,
+  },
+  fields: [
+    { name: 'alt', type: 'text', required: true },
+  ],
+  upload: {
+    // CRITICO: disabilita storage locale quando GCS è attivo.
+    // Senza questo, l'URL restituito è /api/media/file/... invece di https://storage.googleapis.com/...
+    disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+  },
+}
+```
+
+**Perché `Boolean(process.env.GCS_BUCKET)` e non `true` fisso**:
+- In locale (senza `GCS_BUCKET`), lo storage locale rimane attivo per lo sviluppo
+- In produzione (con `GCS_BUCKET` impostato), lo storage locale viene disabilitato
+- Questo garantisce che lo stesso codice funzioni in entrambi gli ambienti
+
 ### Upload Fails in Produzione
 
 **🔴 Sintomo**: Upload media funziona in locale ma fallisce su Cloud Run.
@@ -501,9 +537,42 @@ Error: Migration xyz failed to execute
    gsutil iam ch allUsers:objectViewer gs://your-bucket-name
    ```
 
-4. **Test upload**:
+4. **Verifica log all'avvio**: Cerca nei log di Cloud Run le righe di debug:
+   ```
+   [GCS Storage] GCS_BUCKET: your-bucket-name
+   [GCS Storage] GCP_PROJECT_ID: your-project-id
+   [GCS Storage] Plugin abilitato: true
+   ```
+   Se vedi `(non impostato)` o `false`, le env vars non sono configurate correttamente.
+
+5. **Test upload**:
    - Prova upload da admin panel
    - Controlla log Cloud Run per errori specifici
+
+### Checklist Completa Configurazione GCS
+
+Usa questa checklist per verificare che tutto sia configurato correttamente:
+
+**`src/payload.config.ts`**:
+- [ ] Plugin `gcsStorage` sempre incluso (non in spread condizionale)
+- [ ] `enabled: Boolean(process.env.GCS_BUCKET)` per controllo runtime
+- [ ] `bucket: process.env.GCS_BUCKET || 'not-configured'` (valore dummy per build)
+- [ ] Log di debug presenti per verificare le env vars
+
+**`src/collections/Media.ts`**:
+- [ ] `upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }` presente
+
+**Cloud Run**:
+- [ ] `GCS_BUCKET` impostato nelle env vars del servizio
+- [ ] `GCP_PROJECT_ID` impostato nelle env vars del servizio
+- [ ] Service Account ha ruolo `Storage Object Admin` sul bucket
+
+**Bucket GCS**:
+- [ ] Bucket esiste e ha accesso pubblico (se necessario)
+- [ ] CORS configurato (se le immagini vengono caricate da browser)
+
+**Build/Deploy**:
+- [ ] `importMap.js` contiene `GcsClientUploadHandler` (vedi sezione Admin Panel Bianco)
 
 ### Media Non Accessibili
 
@@ -513,9 +582,10 @@ Error: Migration xyz failed to execute
 
 1. **URL generato**:
    ```
-   https://your-domain.com/media/filename.jpg  ← Locale
-   https://storage.googleapis.com/your-bucket/filename.jpg  ← GCS
+   https://your-domain.com/media/filename.jpg  ← Locale (GCS non attivo)
+   https://storage.googleapis.com/your-bucket/filename.jpg  ← GCS (corretto)
    ```
+   Se vedi URL locale in produzione, il problema è `disableLocalStorage` mancante (vedi sopra).
 
 2. **Bucket CORS** (se serve da browser):
    ```json
