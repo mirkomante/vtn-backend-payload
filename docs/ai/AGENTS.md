@@ -28,19 +28,158 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 - **`Users`**: RBAC (Admin/User).
 - **`Media`**: Image uploads (GCS).
 
-## 🌐 Singleton Collections
+### Globals
+- **`generali`** (`Ristorante impostazioni`): Orari settimanali, fasce pranzo/cena, chiusure e festività.
+- **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria).
+
+## 🌐 Globals
+
+### `menu-config` — Struttura e Visibilità del Menu
+
+**File**: `src/globals/MenuConfig.ts`
+**Slug**: `menu-config`
+**Tipo**: Global (Payload GlobalConfig)
+**Group**: `Ristorante configurazione`
+**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+
+Questo Global definisce **quali sezioni mostrare nel frontend** e con quali regole di visibilità. Non contiene i dati dei piatti/vini (che vivono nelle rispettive collections), ma la **struttura di presentazione** del menu.
+
+#### Logica di Override
+
+Il frontend deve applicare questa logica per determinare quale array di sezioni usare:
+
+```
+1. Leggi menu-config
+2. Se specialItems.isActive === true
+   E data corrente >= activeRange.start
+   E data corrente <= activeRange.end
+   → usa specialItems
+3. Altrimenti → usa standardItems
+```
+
+#### Struttura Dati
+
+**Tab 1: Menu Standard (Default)** — campo `standardItems` (Array)
+
+**Tab 2: Menu Speciale (Override)** — campi `isActive`, `activeRange`, `specialItems`
+
+```typescript
+// Struttura del documento menu-config
+{
+  standardItems: MenuItemArray,
+  isActive: boolean,
+  activeRange: {
+    start: string,   // ISO date
+    end: string,     // ISO date
+  },
+  specialItems: MenuItemArray,
+}
+```
+
+#### Struttura "Item Menu" (MenuItemArray)
+
+Sia `standardItems` che `specialItems` sono array di oggetti con questa struttura:
+
+```typescript
+{
+  label: string,
+  sourceCollection: Array<'piatti' | 'vini' | 'birre' | 'liquori' | 'cocktail' | 'bevande' | 'servizi-accessori' | 'menu-fisso'>,
+  filterMode?: 'all' | 'include' | 'exclude',   // visibile solo se sourceCollection.length === 1
+  targetCategories?: PolymorphicRelation[],      // visibile solo se filterMode != 'all' e sorgente singola
+  visibility: 'always' | 'lunch_only' | 'dinner_only',
+}
+```
+
+#### Logica `sourceCollection` — Multi-selezione
+
+Il campo accetta **una o più** collections. Quando sono selezionate più sorgenti, il frontend le unisce in un'unica lista di elementi. In questo caso `filterMode` e `targetCategories` sono **nascosti nell'admin** e ignorati dal frontend (comportamento equivalente a `filterMode: 'all'`).
+
+#### Logica `filterMode`
+
+Disponibile **solo con una singola sorgente dati**.
+
+| Valore | Comportamento |
+|--------|---------------|
+| `all` | Mostra tutti gli elementi della `sourceCollection` |
+| `include` | Mostra solo gli elementi con categoria/tipologia in `targetCategories` |
+| `exclude` | Mostra tutti gli elementi TRANNE quelli con categoria/tipologia in `targetCategories` |
+
+#### `targetCategories` — Relationship Polimorfica
+
+Il campo usa `relationTo` come array (relationship polimorfica Payload). Ogni elemento ha la forma:
+
+```typescript
+{ relationTo: string, value: number | string }
+// es. { relationTo: 'tipologie-vino', value: 3 }
+```
+
+**Mappa sorgente → collection di riferimento corretta:**
+
+| `sourceCollection` | Collection da selezionare in `targetCategories` |
+|--------------------|--------------------------------------------------|
+| `piatti` | `categoria-piatti` |
+| `vini` | `tipologie-vino` |
+| `birre` | `tipologie-birra` |
+| `liquori` | `tipologie-liquore` |
+| `cocktail` | `tipologie-cocktail` |
+| `bevande` | `tipologie-bevanda` |
+| `menu-fisso` | `categoria-menu-fisso` |
+| `servizi-accessori` | — (nessuna categoria, non usare filtro) |
+
+> **Nota per il frontend**: il campo è polimorfico, quindi ogni elemento di `targetCategories` include `relationTo` per discriminare il tipo. Filtra solo gli elementi la cui `relationTo` corrisponde alla `sourceCollection` attiva.
+
+> **Nota per gli agenti AI**: l'admin non impedisce tecnicamente di selezionare categorie di una collection diversa dalla sorgente. La coerenza è affidata alla `description` del campo e alla disciplina dell'utente. In futuro si potrà rafforzare con un custom field component.
+
+#### Logica `visibility` — Collegamento con `generali`
+
+I valori di `visibility` sono **chiavi logiche** che il frontend mappa sugli orari reali del Global `generali`:
+
+| Valore | Comportamento Frontend |
+|--------|------------------------|
+| `always` | Sezione sempre visibile |
+| `lunch_only` | Visibile solo se `orarioCorrente` è compreso in `generali.lunchSlot` |
+| `dinner_only` | Visibile solo se `orarioCorrente` è compreso in `generali.dinnerSlot` |
+
+**Algoritmo frontend per la visibilità di una sezione:**
+
+```
+1. Leggi generali.lunchSlot e generali.dinnerSlot
+2. Per ogni item nel menu attivo (standard o speciale):
+   - Se item.visibility === 'always' → mostra sempre
+   - Se item.visibility === 'lunch_only':
+       mostra se orarioCorrente >= lunchSlot.start && orarioCorrente <= lunchSlot.end
+   - Se item.visibility === 'dinner_only':
+       mostra se orarioCorrente >= dinnerSlot.start && orarioCorrente <= dinnerSlot.end
+```
+
+#### API REST
+
+```bash
+# Lettura (pubblica/autenticata)
+GET /api/globals/menu-config
+
+# Aggiornamento (solo admin)
+POST /api/globals/menu-config
+```
+
+#### Note per gli Agenti AI
+
+- **`targetCategories`** punta alla collection `categoria-piatti` (slug: `categoria-piatti`), non a una collection generica `categories`.
+- **`sourceCollection`** usa i slug reali del progetto: `piatti` e `vini` (non `dishes`/`wines`).
+- Il campo `activeRange` e `specialItems` sono **condizionali**: visibili nell'admin solo se `isActive === true`.
+- Non ci sono hooks o webhooks su questo Global (la configurazione del menu non richiede rebuild immediati).
+
+---
 
 ### `generali` — Single Source of Truth per Orari e Aperture
 
-**File**: `src/collections/Generali.ts`  
-**Slug**: `generali`  
-**Tipo**: Collection (Singleton Pattern — massimo 1 documento)  
-**Group**: `Ristorante configurazione` (prima voce del gruppo)  
-**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess` / `create` bloccato se esiste già un documento / `delete` sempre bloccato
+**File**: `src/globals/Generali.ts`
+**Slug**: `generali`
+**Tipo**: Global (Payload GlobalConfig)
+**Group**: `Ristorante impostazioni`
+**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
 
-> **Perché Collection e non Global?** Payload v3 posiziona sempre i Globals *dopo* tutte le Collections nella sidebar. Usando il Singleton Pattern su una Collection, possiamo controllare liberamente l'ordine nel menu.
-
-Questa collection è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questa collection per determinare disponibilità e menu da mostrare.
+Questo Global è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questo Global per determinare disponibilità e menu da mostrare.
 
 #### Struttura Dati
 
@@ -132,25 +271,12 @@ Bottone React (`'use client'`) che appare in cima alla Tab "Eccezioni & Festivit
 #### API REST
 
 ```bash
-# Lettura del documento singleton (id=1)
-GET /api/generali/1
-
-# Lista (restituisce sempre al massimo 1 documento)
-GET /api/generali
+# Lettura (pubblica/autenticata)
+GET /api/globals/generali
 
 # Aggiornamento (solo admin)
-PATCH /api/generali/1
+POST /api/globals/generali
 ```
-
-#### Singleton Pattern — Regole per gli agenti AI
-
-- **Non creare mai un secondo documento** `generali`. L'`access.create` lo blocca a runtime, ma è bene saperlo.
-- **Per leggere i dati** dal frontend, usare sempre `GET /api/generali?limit=1` e prendere `docs[0]`.
-- **Non eliminare** il documento: `access.delete` è sempre `false`.
-
-#### Nota sull'ordinamento Sidebar
-
-Il gruppo `"Ristorante configurazione"` appare nella sidebar nell'ordine in cui le collections sono dichiarate in `payload.config.ts`. `Generali` è la prima collection del gruppo, quindi appare per prima. Questo è il motivo per cui è una Collection e non un Global.
 
 ## 🧠 Key Logic Patterns
 

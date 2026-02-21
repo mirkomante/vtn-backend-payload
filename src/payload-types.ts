@@ -143,9 +143,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     generali: Generali;
+    'menu-config': MenuConfig;
   };
   globalsSelect: {
     generali: GeneraliSelect<false> | GeneraliSelect<true>;
+    'menu-config': MenuConfigSelect<false> | MenuConfigSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1270,18 +1272,204 @@ export interface Generali {
          */
         isOpen?: boolean | null;
         /**
-         * Aggiungi una o più fasce orarie (es. 12:00-15:00 per pranzo, 19:00-23:00 per cena).
+         * Aggiungi una o più fasce orarie (es. 12:00–15:00 per pranzo, 19:00–23:00 per cena).
          */
         hours?:
           | {
-              /**
-               * Formato HH:MM (24h)
-               */
-              start: string;
-              /**
-               * Formato HH:MM (24h)
-               */
-              end: string;
+              start:
+                | '00:00'
+                | '00:15'
+                | '00:30'
+                | '00:45'
+                | '01:00'
+                | '01:15'
+                | '01:30'
+                | '01:45'
+                | '02:00'
+                | '02:15'
+                | '02:30'
+                | '02:45'
+                | '03:00'
+                | '03:15'
+                | '03:30'
+                | '03:45'
+                | '04:00'
+                | '04:15'
+                | '04:30'
+                | '04:45'
+                | '05:00'
+                | '05:15'
+                | '05:30'
+                | '05:45'
+                | '06:00'
+                | '06:15'
+                | '06:30'
+                | '06:45'
+                | '07:00'
+                | '07:15'
+                | '07:30'
+                | '07:45'
+                | '08:00'
+                | '08:15'
+                | '08:30'
+                | '08:45'
+                | '09:00'
+                | '09:15'
+                | '09:30'
+                | '09:45'
+                | '10:00'
+                | '10:15'
+                | '10:30'
+                | '10:45'
+                | '11:00'
+                | '11:15'
+                | '11:30'
+                | '11:45'
+                | '12:00'
+                | '12:15'
+                | '12:30'
+                | '12:45'
+                | '13:00'
+                | '13:15'
+                | '13:30'
+                | '13:45'
+                | '14:00'
+                | '14:15'
+                | '14:30'
+                | '14:45'
+                | '15:00'
+                | '15:15'
+                | '15:30'
+                | '15:45'
+                | '16:00'
+                | '16:15'
+                | '16:30'
+                | '16:45'
+                | '17:00'
+                | '17:15'
+                | '17:30'
+                | '17:45'
+                | '18:00'
+                | '18:15'
+                | '18:30'
+                | '18:45'
+                | '19:00'
+                | '19:15'
+                | '19:30'
+                | '19:45'
+                | '20:00'
+                | '20:15'
+                | '20:30'
+                | '20:45'
+                | '21:00'
+                | '21:15'
+                | '21:30'
+                | '21:45'
+                | '22:00'
+                | '22:15'
+                | '22:30'
+                | '22:45'
+                | '23:00'
+                | '23:15'
+                | '23:30'
+                | '23:45';
+              end:
+                | '00:00'
+                | '00:15'
+                | '00:30'
+                | '00:45'
+                | '01:00'
+                | '01:15'
+                | '01:30'
+                | '01:45'
+                | '02:00'
+                | '02:15'
+                | '02:30'
+                | '02:45'
+                | '03:00'
+                | '03:15'
+                | '03:30'
+                | '03:45'
+                | '04:00'
+                | '04:15'
+                | '04:30'
+                | '04:45'
+                | '05:00'
+                | '05:15'
+                | '05:30'
+                | '05:45'
+                | '06:00'
+                | '06:15'
+                | '06:30'
+                | '06:45'
+                | '07:00'
+                | '07:15'
+                | '07:30'
+                | '07:45'
+                | '08:00'
+                | '08:15'
+                | '08:30'
+                | '08:45'
+                | '09:00'
+                | '09:15'
+                | '09:30'
+                | '09:45'
+                | '10:00'
+                | '10:15'
+                | '10:30'
+                | '10:45'
+                | '11:00'
+                | '11:15'
+                | '11:30'
+                | '11:45'
+                | '12:00'
+                | '12:15'
+                | '12:30'
+                | '12:45'
+                | '13:00'
+                | '13:15'
+                | '13:30'
+                | '13:45'
+                | '14:00'
+                | '14:15'
+                | '14:30'
+                | '14:45'
+                | '15:00'
+                | '15:15'
+                | '15:30'
+                | '15:45'
+                | '16:00'
+                | '16:15'
+                | '16:30'
+                | '16:45'
+                | '17:00'
+                | '17:15'
+                | '17:30'
+                | '17:45'
+                | '18:00'
+                | '18:15'
+                | '18:30'
+                | '18:45'
+                | '19:00'
+                | '19:15'
+                | '19:30'
+                | '19:45'
+                | '20:00'
+                | '20:15'
+                | '20:30'
+                | '20:45'
+                | '21:00'
+                | '21:15'
+                | '21:30'
+                | '21:45'
+                | '22:00'
+                | '22:15'
+                | '22:30'
+                | '22:45'
+                | '23:00'
+                | '23:15'
+                | '23:30'
+                | '23:45';
               id?: string | null;
             }[]
           | null;
@@ -1292,30 +1480,402 @@ export interface Generali {
    * Intervallo di tempo in cui il ristorante serve il pranzo. Il frontend mostra il menu pranzo se l'orario corrente è compreso in questo range.
    */
   lunchSlot: {
-    /**
-     * Formato HH:MM (24h)
-     */
-    start: string;
-    /**
-     * Formato HH:MM (24h)
-     */
-    end: string;
+    start:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    end:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
   };
   /**
    * Intervallo di tempo in cui il ristorante serve la cena. Il frontend mostra il menu cena se l'orario corrente è compreso in questo range.
    */
   dinnerSlot: {
-    /**
-     * Formato HH:MM (24h)
-     */
-    start: string;
-    /**
-     * Formato HH:MM (24h)
-     */
-    end: string;
+    start:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    end:
+      | '00:00'
+      | '00:15'
+      | '00:30'
+      | '00:45'
+      | '01:00'
+      | '01:15'
+      | '01:30'
+      | '01:45'
+      | '02:00'
+      | '02:15'
+      | '02:30'
+      | '02:45'
+      | '03:00'
+      | '03:15'
+      | '03:30'
+      | '03:45'
+      | '04:00'
+      | '04:15'
+      | '04:30'
+      | '04:45'
+      | '05:00'
+      | '05:15'
+      | '05:30'
+      | '05:45'
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
   };
   /**
-   * Lista di date con comportamento speciale (chiusura totale o orario variato). Sovrascrivono gli orari settimanali.
+   * Lista delle chiusure. Sovrascrivono gli orari settimanali.
    */
   exceptions?:
     | {
@@ -1336,17 +1896,365 @@ export interface Generali {
          */
         variedHours?:
           | {
-              /**
-               * Formato HH:MM (24h)
-               */
-              start: string;
-              /**
-               * Formato HH:MM (24h)
-               */
-              end: string;
+              start:
+                | '00:00'
+                | '00:15'
+                | '00:30'
+                | '00:45'
+                | '01:00'
+                | '01:15'
+                | '01:30'
+                | '01:45'
+                | '02:00'
+                | '02:15'
+                | '02:30'
+                | '02:45'
+                | '03:00'
+                | '03:15'
+                | '03:30'
+                | '03:45'
+                | '04:00'
+                | '04:15'
+                | '04:30'
+                | '04:45'
+                | '05:00'
+                | '05:15'
+                | '05:30'
+                | '05:45'
+                | '06:00'
+                | '06:15'
+                | '06:30'
+                | '06:45'
+                | '07:00'
+                | '07:15'
+                | '07:30'
+                | '07:45'
+                | '08:00'
+                | '08:15'
+                | '08:30'
+                | '08:45'
+                | '09:00'
+                | '09:15'
+                | '09:30'
+                | '09:45'
+                | '10:00'
+                | '10:15'
+                | '10:30'
+                | '10:45'
+                | '11:00'
+                | '11:15'
+                | '11:30'
+                | '11:45'
+                | '12:00'
+                | '12:15'
+                | '12:30'
+                | '12:45'
+                | '13:00'
+                | '13:15'
+                | '13:30'
+                | '13:45'
+                | '14:00'
+                | '14:15'
+                | '14:30'
+                | '14:45'
+                | '15:00'
+                | '15:15'
+                | '15:30'
+                | '15:45'
+                | '16:00'
+                | '16:15'
+                | '16:30'
+                | '16:45'
+                | '17:00'
+                | '17:15'
+                | '17:30'
+                | '17:45'
+                | '18:00'
+                | '18:15'
+                | '18:30'
+                | '18:45'
+                | '19:00'
+                | '19:15'
+                | '19:30'
+                | '19:45'
+                | '20:00'
+                | '20:15'
+                | '20:30'
+                | '20:45'
+                | '21:00'
+                | '21:15'
+                | '21:30'
+                | '21:45'
+                | '22:00'
+                | '22:15'
+                | '22:30'
+                | '22:45'
+                | '23:00'
+                | '23:15'
+                | '23:30'
+                | '23:45';
+              end:
+                | '00:00'
+                | '00:15'
+                | '00:30'
+                | '00:45'
+                | '01:00'
+                | '01:15'
+                | '01:30'
+                | '01:45'
+                | '02:00'
+                | '02:15'
+                | '02:30'
+                | '02:45'
+                | '03:00'
+                | '03:15'
+                | '03:30'
+                | '03:45'
+                | '04:00'
+                | '04:15'
+                | '04:30'
+                | '04:45'
+                | '05:00'
+                | '05:15'
+                | '05:30'
+                | '05:45'
+                | '06:00'
+                | '06:15'
+                | '06:30'
+                | '06:45'
+                | '07:00'
+                | '07:15'
+                | '07:30'
+                | '07:45'
+                | '08:00'
+                | '08:15'
+                | '08:30'
+                | '08:45'
+                | '09:00'
+                | '09:15'
+                | '09:30'
+                | '09:45'
+                | '10:00'
+                | '10:15'
+                | '10:30'
+                | '10:45'
+                | '11:00'
+                | '11:15'
+                | '11:30'
+                | '11:45'
+                | '12:00'
+                | '12:15'
+                | '12:30'
+                | '12:45'
+                | '13:00'
+                | '13:15'
+                | '13:30'
+                | '13:45'
+                | '14:00'
+                | '14:15'
+                | '14:30'
+                | '14:45'
+                | '15:00'
+                | '15:15'
+                | '15:30'
+                | '15:45'
+                | '16:00'
+                | '16:15'
+                | '16:30'
+                | '16:45'
+                | '17:00'
+                | '17:15'
+                | '17:30'
+                | '17:45'
+                | '18:00'
+                | '18:15'
+                | '18:30'
+                | '18:45'
+                | '19:00'
+                | '19:15'
+                | '19:30'
+                | '19:45'
+                | '20:00'
+                | '20:15'
+                | '20:30'
+                | '20:45'
+                | '21:00'
+                | '21:15'
+                | '21:30'
+                | '21:45'
+                | '22:00'
+                | '22:15'
+                | '22:30'
+                | '22:45'
+                | '23:00'
+                | '23:15'
+                | '23:30'
+                | '23:45';
               id?: string | null;
             }[]
           | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-config".
+ */
+export interface MenuConfig {
+  id: number;
+  /**
+   * Ogni riga rappresenta una sezione del menu (es. "Antipasti", "Vini Rossi").
+   */
+  standardItems?:
+    | {
+        /**
+         * Titolo della sezione visibile nel frontend (es. "I Nostri Primi")
+         */
+        label: string;
+        /**
+         * Collection da cui il frontend legge i dati per questa sezione
+         */
+        sourceCollection: (
+          | 'piatti'
+          | 'vini'
+          | 'birre'
+          | 'liquori'
+          | 'cocktail'
+          | 'bevande'
+          | 'servizi-accessori'
+          | 'menu-fisso'
+        )[];
+        /**
+         * Disponibile solo con una singola sorgente dati. Con più sorgenti vengono mostrati tutti gli elementi.
+         */
+        filterMode?: ('all' | 'include' | 'exclude') | null;
+        /**
+         * Seleziona le categorie o tipologie da includere/escludere. Scegli quelle coerenti con la sorgente dati selezionata (es. "Tipologie Vino" se la sorgente è Vini).
+         */
+        targetCategories?:
+          | (
+              | {
+                  relationTo: 'categoria-piatti';
+                  value: number | CategoriaPiatti;
+                }
+              | {
+                  relationTo: 'tipologie-vino';
+                  value: number | TipologieVino;
+                }
+              | {
+                  relationTo: 'tipologie-birra';
+                  value: number | TipologieBirra;
+                }
+              | {
+                  relationTo: 'tipologie-liquore';
+                  value: number | TipologieLiquore;
+                }
+              | {
+                  relationTo: 'tipologie-cocktail';
+                  value: number | TipologieCocktail;
+                }
+              | {
+                  relationTo: 'tipologie-bevanda';
+                  value: number | TipologieBevanda;
+                }
+              | {
+                  relationTo: 'categoria-menu-fisso';
+                  value: number | CategoriaMenuFisso;
+                }
+            )[]
+          | null;
+        /**
+         * Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.
+         */
+        visibility: 'always' | 'lunch_only' | 'dinner_only';
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Se abilitato e la data corrente è compresa nel range, il frontend usa specialItems al posto di standardItems.
+   */
+  isActive?: boolean | null;
+  /**
+   * Intervallo di date in cui il Menu Speciale è attivo.
+   */
+  activeRange?: {
+    /**
+     * Data di inizio del Menu Speciale (inclusa)
+     */
+    start?: string | null;
+    /**
+     * Data di fine del Menu Speciale (inclusa)
+     */
+    end?: string | null;
+  };
+  /**
+   * Sezioni del menu speciale. Struttura identica al Menu Standard.
+   */
+  specialItems?:
+    | {
+        /**
+         * Titolo della sezione visibile nel frontend (es. "I Nostri Primi")
+         */
+        label: string;
+        /**
+         * Collection da cui il frontend legge i dati per questa sezione
+         */
+        sourceCollection: (
+          | 'piatti'
+          | 'vini'
+          | 'birre'
+          | 'liquori'
+          | 'cocktail'
+          | 'bevande'
+          | 'servizi-accessori'
+          | 'menu-fisso'
+        )[];
+        /**
+         * Disponibile solo con una singola sorgente dati. Con più sorgenti vengono mostrati tutti gli elementi.
+         */
+        filterMode?: ('all' | 'include' | 'exclude') | null;
+        /**
+         * Seleziona le categorie o tipologie da includere/escludere. Scegli quelle coerenti con la sorgente dati selezionata (es. "Tipologie Vino" se la sorgente è Vini).
+         */
+        targetCategories?:
+          | (
+              | {
+                  relationTo: 'categoria-piatti';
+                  value: number | CategoriaPiatti;
+                }
+              | {
+                  relationTo: 'tipologie-vino';
+                  value: number | TipologieVino;
+                }
+              | {
+                  relationTo: 'tipologie-birra';
+                  value: number | TipologieBirra;
+                }
+              | {
+                  relationTo: 'tipologie-liquore';
+                  value: number | TipologieLiquore;
+                }
+              | {
+                  relationTo: 'tipologie-cocktail';
+                  value: number | TipologieCocktail;
+                }
+              | {
+                  relationTo: 'tipologie-bevanda';
+                  value: number | TipologieBevanda;
+                }
+              | {
+                  relationTo: 'categoria-menu-fisso';
+                  value: number | CategoriaMenuFisso;
+                }
+            )[]
+          | null;
+        /**
+         * Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.
+         */
+        visibility: 'always' | 'lunch_only' | 'dinner_only';
         id?: string | null;
       }[]
     | null;
@@ -1397,6 +2305,42 @@ export interface GeneraliSelect<T extends boolean = true> {
               end?: T;
               id?: T;
             };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-config_select".
+ */
+export interface MenuConfigSelect<T extends boolean = true> {
+  standardItems?:
+    | T
+    | {
+        label?: T;
+        sourceCollection?: T;
+        filterMode?: T;
+        targetCategories?: T;
+        visibility?: T;
+        id?: T;
+      };
+  isActive?: T;
+  activeRange?:
+    | T
+    | {
+        start?: T;
+        end?: T;
+      };
+  specialItems?:
+    | T
+    | {
+        label?: T;
+        sourceCollection?: T;
+        filterMode?: T;
+        targetCategories?: T;
+        visibility?: T;
         id?: T;
       };
   updatedAt?: T;

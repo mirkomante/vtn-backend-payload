@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalConfig, OptionObject } from 'payload'
 import {
   menuImpostazioniReadAccess,
   menuImpostazioniUpdateAccess,
@@ -12,11 +12,40 @@ import {
  *    con flag isOpen e array di fasce orarie (start/end).
  *  - Tab 2 "Fasce Pranzo/Cena": definisce i range temporali usati dal frontend
  *    per determinare se mostrare il menu "Solo Pranzo" o "Solo Cena".
- *  - Tab 3 "Eccezioni & Festività": gestione di chiusure straordinarie e orari
+ *  - Tab 3 "Chiusure e Festività": gestione di chiusure straordinarie e orari
  *    variati, con bottone per importare automaticamente le festività italiane.
  *
  * Group: "Ristorante impostazioni" — voce dedicata, gruppo separato dalle collections.
  */
+
+// Genera opzioni HH:MM ogni 15 minuti (00:00 → 23:45)
+function buildTimeOptions(): OptionObject[] {
+  const opts: OptionObject[] = []
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      const hh = String(h).padStart(2, '0')
+      const mm = String(m).padStart(2, '0')
+      const val = `${hh}:${mm}`
+      opts.push({ label: val, value: val })
+    }
+  }
+  return opts
+}
+
+const timeOptions = buildTimeOptions()
+
+const timeField = (name: 'start' | 'end', label: string) =>
+  ({
+    name,
+    type: 'select' as const,
+    label,
+    required: true,
+    options: timeOptions,
+    admin: {
+      width: '50%',
+    },
+  }) as const
+
 export const Generali: GlobalConfig = {
   slug: 'generali',
   label: 'Generali',
@@ -90,36 +119,13 @@ export const Generali: GlobalConfig = {
                   label: 'Fasce Orarie',
                   admin: {
                     description:
-                      'Aggiungi una o più fasce orarie (es. 12:00-15:00 per pranzo, 19:00-23:00 per cena).',
+                      'Aggiungi una o più fasce orarie (es. 12:00–15:00 per pranzo, 19:00–23:00 per cena).',
                     condition: (data, siblingData) => siblingData?.isOpen === true,
                   },
                   fields: [
                     {
                       type: 'row',
-                      fields: [
-                        {
-                          name: 'start',
-                          type: 'text',
-                          label: 'Apertura',
-                          required: true,
-                          admin: {
-                            width: '50%',
-                            placeholder: 'es. 12:00',
-                            description: 'Formato HH:MM (24h)',
-                          },
-                        },
-                        {
-                          name: 'end',
-                          type: 'text',
-                          label: 'Chiusura',
-                          required: true,
-                          admin: {
-                            width: '50%',
-                            placeholder: 'es. 15:00',
-                            description: 'Formato HH:MM (24h)',
-                          },
-                        },
-                      ],
+                      fields: [timeField('start', 'Apertura'), timeField('end', 'Chiusura')],
                     },
                   ],
                 },
@@ -148,30 +154,8 @@ export const Generali: GlobalConfig = {
                 {
                   type: 'row',
                   fields: [
-                    {
-                      name: 'start',
-                      type: 'text',
-                      label: 'Inizio Pranzo',
-                      required: true,
-                      defaultValue: '12:00',
-                      admin: {
-                        width: '50%',
-                        placeholder: 'es. 12:00',
-                        description: 'Formato HH:MM (24h)',
-                      },
-                    },
-                    {
-                      name: 'end',
-                      type: 'text',
-                      label: 'Fine Pranzo',
-                      required: true,
-                      defaultValue: '15:00',
-                      admin: {
-                        width: '50%',
-                        placeholder: 'es. 15:00',
-                        description: 'Formato HH:MM (24h)',
-                      },
-                    },
+                    timeField('start', 'Inizio Pranzo'),
+                    timeField('end', 'Fine Pranzo'),
                   ],
                 },
               ],
@@ -187,32 +171,7 @@ export const Generali: GlobalConfig = {
               fields: [
                 {
                   type: 'row',
-                  fields: [
-                    {
-                      name: 'start',
-                      type: 'text',
-                      label: 'Inizio Cena',
-                      required: true,
-                      defaultValue: '19:00',
-                      admin: {
-                        width: '50%',
-                        placeholder: 'es. 19:00',
-                        description: 'Formato HH:MM (24h)',
-                      },
-                    },
-                    {
-                      name: 'end',
-                      type: 'text',
-                      label: 'Fine Cena',
-                      required: true,
-                      defaultValue: '23:00',
-                      admin: {
-                        width: '50%',
-                        placeholder: 'es. 23:00',
-                        description: 'Formato HH:MM (24h)',
-                      },
-                    },
-                  ],
+                  fields: [timeField('start', 'Inizio Cena'), timeField('end', 'Fine Cena')],
                 },
               ],
             },
@@ -220,10 +179,10 @@ export const Generali: GlobalConfig = {
         },
 
         // ─────────────────────────────────────────────────────────────────────
-        // TAB 3: Eccezioni & Festività
+        // TAB 3: Chiusure e Festività
         // ─────────────────────────────────────────────────────────────────────
         {
-          label: 'Eccezioni & Festività',
+          label: 'Chiusure e Festività',
           description:
             'Gestisci chiusure straordinarie, festività e orari variati. Queste eccezioni hanno priorità sugli orari settimanali standard.',
           fields: [
@@ -239,11 +198,13 @@ export const Generali: GlobalConfig = {
             {
               name: 'exceptions',
               type: 'array',
-              label: 'Eccezioni',
+              label: 'Chiusure',
               admin: {
-                description:
-                  'Lista di date con comportamento speciale (chiusura totale o orario variato). Sovrascrivono gli orari settimanali.',
+                description: 'Lista delle chiusure. Sovrascrivono gli orari settimanali.',
                 initCollapsed: true,
+                components: {
+                  RowLabel: './components/ChiusuraRowLabel',
+                },
               },
               fields: [
                 {
@@ -293,39 +254,19 @@ export const Generali: GlobalConfig = {
                 {
                   name: 'variedHours',
                   type: 'array',
-                  label: 'Orari Variati',
+                  label: 'Cambio orario',
                   admin: {
                     description:
                       'Fasce orarie speciali per questo giorno (visibile solo se il tipo è "Orario Variato").',
                     condition: (data, siblingData) => siblingData?.type === 'orario-variato',
+                    components: {
+                      RowLabel: './components/CambioOrarioRowLabel',
+                    },
                   },
                   fields: [
                     {
                       type: 'row',
-                      fields: [
-                        {
-                          name: 'start',
-                          type: 'text',
-                          label: 'Apertura',
-                          required: true,
-                          admin: {
-                            width: '50%',
-                            placeholder: 'es. 12:00',
-                            description: 'Formato HH:MM (24h)',
-                          },
-                        },
-                        {
-                          name: 'end',
-                          type: 'text',
-                          label: 'Chiusura',
-                          required: true,
-                          admin: {
-                            width: '50%',
-                            placeholder: 'es. 15:00',
-                            description: 'Formato HH:MM (24h)',
-                          },
-                        },
-                      ],
+                      fields: [timeField('start', 'Apertura'), timeField('end', 'Chiusura')],
                     },
                   ],
                 },

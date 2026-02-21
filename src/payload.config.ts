@@ -11,6 +11,7 @@ import { OAuth2Plugin } from 'payload-oauth2'
 
 import { migrations } from './migrations'
 import { Generali } from './globals/Generali'
+import { MenuConfig } from './globals/MenuConfig'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
@@ -77,7 +78,20 @@ export default buildConfig({
         },
       },
       afterNavLinks: ['./components/NavFooter'],
-      beforeDashboard: ['./components/MigrationButton'],
+    },
+    dashboard: {
+      widgets: [
+        {
+          slug: 'migration-button',
+          ComponentPath: './components/MigrationButton',
+        },
+      ],
+      defaultLayout: [
+        {
+          widgetSlug: 'migration-button',
+          width: 'full',
+        },
+      ],
     },
   },
   collections: [
@@ -106,7 +120,7 @@ export default buildConfig({
     Users,
     Media,
   ],
-  globals: [Generali],
+  globals: [Generali, MenuConfig],
   editor: lexicalEditor(),
   i18n: {
     supportedLanguages: { en, it },
