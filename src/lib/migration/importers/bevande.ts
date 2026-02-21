@@ -49,7 +49,7 @@ export async function importBevande(
           descrizione: bevanda.descrizione || '',
           prezzo: Number(bevanda.prezzo),
           inLista: bevanda.inLista !== undefined ? bevanda.inLista : true,
-          ...(nazioneId !== undefined && { nazione: nazioneId as number }),
+          nazione: (nazioneId as number) ?? undefined,
           tipologia: tipologiaId as number,
           _status: 'published',
         },

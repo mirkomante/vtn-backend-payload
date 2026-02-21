@@ -49,7 +49,7 @@ export async function importCocktail(
           descrizione: cocktail.descrizione || '',
           prezzo: Number(cocktail.prezzo),
           inLista: cocktail.inLista !== undefined ? cocktail.inLista : true,
-          ...(nazioneId !== undefined && { nazione: nazioneId as number }),
+          nazione: (nazioneId as number) ?? undefined,
           tipologia: tipologiaId as number,
           _status: 'published',
         },

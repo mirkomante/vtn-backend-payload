@@ -1207,6 +1207,7 @@ export const myPlugin =
 8. **MongoDB Transactions**: Require replica set configuration
 9. **SQLite Transactions**: Disabled by default, enable with `transactionOptions: {}`
 10. **Point Fields**: Not supported in SQLite
+11. **Conditional spread in `payload.create` data**: `...(condition && { field: value })` produces type `{ field: T } | false`, which breaks TypeScript overload resolution for collections with drafts enabled. Always use `field: value ?? undefined` for optional fields instead.
 
 ## Additional Context Files
 

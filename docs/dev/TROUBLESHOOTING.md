@@ -697,6 +697,36 @@ Per qualsiasi problema:
 
 ---
 
+---
+
+## Errori TypeScript nella Migrazione
+
+### Spread Condizionale con `payload.create` e Collections con Draft
+
+**🔴 Sintomo** (build Cloud Build fallisce):
+```
+Property 'draft' is missing in type '{ collection: "bevande"; data: { ... nazione?: number | undefined; ... }; }'
+but required in type '{ data: DraftDataFromCollectionSlug<"bevande">; draft: true; }'
+```
+
+**🔍 Causa**: Lo spread condizionale `...(condition && { field: value })` produce il tipo `{ field: number } | false`. Questo tipo unione confonde l'inferenza degli overload di `payload.create`, che per le collections con `versions: { drafts: true }` ha overload distinti a seconda che `draft: true` sia presente o meno.
+
+```typescript
+// ❌ SBAGLIATO: produce tipo `{ nazione: number } | false`
+data: {
+  ...(nazioneId !== undefined && { nazione: nazioneId as number }),
+}
+
+// ✅ CORRETTO: produce tipo `number | undefined`, compatibile con campo opzionale
+data: {
+  nazione: (nazioneId as number) ?? undefined,
+}
+```
+
+**Regola generale**: Negli importatori di migrazione (e in qualsiasi chiamata a `payload.create`/`payload.update`), usare sempre `field: value ?? undefined` per i campi opzionali invece dello spread condizionale.
+
+---
+
 ## 📚 Risorse Aggiuntive
 
 - **Documentazione Payload**: https://payloadcms.com/docs
