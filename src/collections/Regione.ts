@@ -14,7 +14,7 @@ export const Regione: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'nome',
-    group: 'Ristorante impostazioni',
+    group: 'Ristorante configurazione',
     defaultColumns: ['nome', 'nazione', '_status', 'createdAt'],
   },
   fields: [

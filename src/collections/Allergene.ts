@@ -16,7 +16,7 @@ export const Allergene: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'nome',
-    group: 'Ristorante impostazioni',
+    group: 'Ristorante configurazione',
     defaultColumns: ['nome', 'descrizione', '_status', 'createdAt'],
   },
   fields: [

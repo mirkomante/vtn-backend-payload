@@ -13,7 +13,7 @@ export const Nazione: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'nome',
-    group: 'Ristorante impostazioni',
+    group: 'Ristorante configurazione',
     defaultColumns: ['nome', 'sigla', '_status', 'createdAt'],
   },
   fields: [

@@ -10,6 +10,7 @@ import sharp from 'sharp'
 import { OAuth2Plugin } from 'payload-oauth2'
 
 import { migrations } from './migrations'
+import { Generali } from './globals/Generali'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
@@ -80,8 +81,7 @@ export default buildConfig({
     },
   },
   collections: [
-    Users,
-    Media,
+    // Gruppo: Ristorante menu
     Piatti,
     ServizioAccessorio,
     MenuFisso,
@@ -90,6 +90,7 @@ export default buildConfig({
     Liquore,
     Cocktail,
     Bevanda,
+    // Gruppo: Ristorante configurazione
     Allergene,
     CategoriaMenuFisso,
     CategoriaPiatti,
@@ -101,7 +102,13 @@ export default buildConfig({
     Nazione,
     Regione,
     Zona,
+    // Gruppo: Admin — in fondo per avvicinarsi all'ordine desiderato.
+    // Nota: in Payload v3 i globals vengono sempre dopo le collections nella
+    // navigazione, quindi "Ristorante impostazioni" (Global) appare dopo "Admin".
+    Users,
+    Media,
   ],
+  globals: [Generali],
   editor: lexicalEditor(),
   i18n: {
     supportedLanguages: { en, it },

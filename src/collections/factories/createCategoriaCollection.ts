@@ -33,7 +33,7 @@ export function createCategoriaCollection(
     },
     admin: {
       useAsTitle: 'nome',
-      group: 'Ristorante impostazioni',
+      group: 'Ristorante configurazione',
       defaultColumns:
         options.defaultColumns || ['nome', 'inLista', 'descrizione', '_status'],
     },

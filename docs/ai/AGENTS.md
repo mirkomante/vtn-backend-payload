@@ -28,6 +28,114 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 - **`Users`**: RBAC (Admin/User).
 - **`Media`**: Image uploads (GCS).
 
+## 🌐 Globals
+
+### `generali` — Single Source of Truth per Orari e Aperture
+
+**File**: `src/globals/Generali.ts`  
+**Slug**: `generali`  
+**Group**: `Ristorante impostazioni` (prima voce del gruppo)  
+**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+
+Questo Global è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questo Global per determinare disponibilità e menu da mostrare.
+
+#### Struttura Dati
+
+**Tab 1: Orari Settimanali** — campo `scheduleWeekly` (Array, 7 righe fisse)
+
+Ogni elemento rappresenta un giorno della settimana:
+
+```typescript
+{
+  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
+  isOpen: boolean,         // true = aperto, false = chiuso
+  hours: Array<{
+    start: string,         // Formato HH:MM (es. "12:00")
+    end: string,           // Formato HH:MM (es. "15:00")
+  }>
+}
+```
+
+**Regola**: `hours` è visibile nell'admin solo se `isOpen === true`. Il frontend deve ignorare `hours` se `isOpen === false`.
+
+---
+
+**Tab 2: Fasce Pranzo / Cena** — campi `lunchSlot` e `dinnerSlot` (Group)
+
+Definisce i range temporali per la logica di selezione menu del frontend:
+
+```typescript
+lunchSlot: {
+  start: string,   // default "12:00"
+  end: string,     // default "15:00"
+}
+dinnerSlot: {
+  start: string,   // default "19:00"
+  end: string,     // default "23:00"
+}
+```
+
+**Logica Frontend**:
+- Se `orarioCorrente >= lunchSlot.start && orarioCorrente <= lunchSlot.end` → mostra menu pranzo
+- Se `orarioCorrente >= dinnerSlot.start && orarioCorrente <= dinnerSlot.end` → mostra menu cena
+- Questi range sono **indipendenti** dagli orari di apertura (`scheduleWeekly`)
+
+---
+
+**Tab 3: Eccezioni & Festività** — campo `exceptions` (Array)
+
+Ogni eccezione sovrascrive gli orari settimanali standard per una data specifica:
+
+```typescript
+{
+  date: string,                              // ISO date (es. "2026-12-25T00:00:00.000Z")
+  type: 'chiusura-totale' | 'orario-variato',
+  reason?: string,                           // es. "Natale", "Ferie estive"
+  variedHours?: Array<{                      // solo se type === 'orario-variato'
+    start: string,
+    end: string,
+  }>
+}
+```
+
+**Priorità**: Le eccezioni hanno sempre priorità sugli orari settimanali. Il frontend deve verificare prima se esiste un'eccezione per la data corrente prima di consultare `scheduleWeekly`.
+
+#### Componente UI Personalizzato: `ImportaFestivitaButton`
+
+**File**: `src/components/ImportaFestivitaButton.tsx`
+
+Bottone React (`'use client'`) che appare in cima alla Tab "Eccezioni & Festività". Al click:
+1. Carica dinamicamente la libreria `date-holidays`
+2. Calcola le festività pubbliche italiane dell'anno corrente
+3. Filtra le date già presenti in `exceptions` (no duplicati)
+4. Popola l'array `exceptions` tramite `useField({ path: 'exceptions' })`
+5. Mostra feedback visivo (successo/errore)
+
+**Dipendenza**: `date-holidays` (npm package, installato come dipendenza del progetto)
+
+#### Algoritmo di Risoluzione Orari (per il Frontend)
+
+```
+1. Ottieni data/ora corrente
+2. Cerca in `exceptions` una entry con `date` == oggi
+   a. Se trovata e `type === 'chiusura-totale'` → ristorante CHIUSO
+   b. Se trovata e `type === 'orario-variato'` → usa `variedHours`
+3. Se nessuna eccezione, cerca in `scheduleWeekly` il giorno della settimana corrente
+   a. Se `isOpen === false` → ristorante CHIUSO
+   b. Se `isOpen === true` → usa `hours`
+4. Determina fascia attiva (pranzo/cena) confrontando ora corrente con `lunchSlot`/`dinnerSlot`
+```
+
+#### API REST
+
+```bash
+# Lettura (pubblica per utenti autenticati)
+GET /api/globals/generali
+
+# Aggiornamento (solo admin)
+POST /api/globals/generali
+```
+
 ## 🧠 Key Logic Patterns
 
 ### Smart Webhook (Traffic Cop)

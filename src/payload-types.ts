@@ -67,7 +67,6 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    media: Media;
     piatti: Piatti;
     'servizi-accessori': ServiziAccessori;
     'menu-fisso': MenuFisso;
@@ -87,6 +86,7 @@ export interface Config {
     nazioni: Nazioni;
     regioni: Regioni;
     zone: Zone;
+    media: Media;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -111,7 +111,6 @@ export interface Config {
     };
   };
   collectionsSelect: {
-    media: MediaSelect<false> | MediaSelect<true>;
     piatti: PiattiSelect<false> | PiattiSelect<true>;
     'servizi-accessori': ServiziAccessoriSelect<false> | ServiziAccessoriSelect<true>;
     'menu-fisso': MenuFissoSelect<false> | MenuFissoSelect<true>;
@@ -131,6 +130,7 @@ export interface Config {
     nazioni: NazioniSelect<false> | NazioniSelect<true>;
     regioni: RegioniSelect<false> | RegioniSelect<true>;
     zone: ZoneSelect<false> | ZoneSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -141,8 +141,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    generali: Generali;
+  };
+  globalsSelect: {
+    generali: GeneraliSelect<false> | GeneraliSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -169,25 +173,6 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -683,7 +668,7 @@ export interface Cocktail {
   /**
    * Nazione di origine del cocktail
    */
-  nazione: number | Nazioni;
+  nazione?: (number | null) | Nazioni;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -732,7 +717,7 @@ export interface Bevande {
   /**
    * Nazione di produzione
    */
-  nazione: number | Nazioni;
+  nazione?: (number | null) | Nazioni;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -751,6 +736,25 @@ export interface TipologieBevanda {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -788,10 +792,6 @@ export interface PayloadKv {
 export interface PayloadLockedDocument {
   id: number;
   document?:
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
     | ({
         relationTo: 'piatti';
         value: number | Piatti;
@@ -869,6 +869,10 @@ export interface PayloadLockedDocument {
         value: number | Zone;
       } | null)
     | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null);
@@ -913,24 +917,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1200,6 +1186,24 @@ export interface ZoneSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1248,6 +1252,156 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "generali".
+ */
+export interface Generali {
+  id: number;
+  /**
+   * Configura i 7 giorni della settimana. Ogni riga rappresenta un giorno.
+   */
+  scheduleWeekly?:
+    | {
+        day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+        /**
+         * Il ristorante è aperto questo giorno?
+         */
+        isOpen?: boolean | null;
+        /**
+         * Aggiungi una o più fasce orarie (es. 12:00-15:00 per pranzo, 19:00-23:00 per cena).
+         */
+        hours?:
+          | {
+              /**
+               * Formato HH:MM (24h)
+               */
+              start: string;
+              /**
+               * Formato HH:MM (24h)
+               */
+              end: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Intervallo di tempo in cui il ristorante serve il pranzo. Il frontend mostra il menu pranzo se l'orario corrente è compreso in questo range.
+   */
+  lunchSlot: {
+    /**
+     * Formato HH:MM (24h)
+     */
+    start: string;
+    /**
+     * Formato HH:MM (24h)
+     */
+    end: string;
+  };
+  /**
+   * Intervallo di tempo in cui il ristorante serve la cena. Il frontend mostra il menu cena se l'orario corrente è compreso in questo range.
+   */
+  dinnerSlot: {
+    /**
+     * Formato HH:MM (24h)
+     */
+    start: string;
+    /**
+     * Formato HH:MM (24h)
+     */
+    end: string;
+  };
+  /**
+   * Lista di date con comportamento speciale (chiusura totale o orario variato). Sovrascrivono gli orari settimanali.
+   */
+  exceptions?:
+    | {
+        /**
+         * Data dell'eccezione
+         */
+        date: string;
+        /**
+         * Tipo di eccezione
+         */
+        type: 'chiusura-totale' | 'orario-variato';
+        /**
+         * Descrizione opzionale del motivo
+         */
+        reason?: string | null;
+        /**
+         * Fasce orarie speciali per questo giorno (visibile solo se il tipo è "Orario Variato").
+         */
+        variedHours?:
+          | {
+              /**
+               * Formato HH:MM (24h)
+               */
+              start: string;
+              /**
+               * Formato HH:MM (24h)
+               */
+              end: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "generali_select".
+ */
+export interface GeneraliSelect<T extends boolean = true> {
+  scheduleWeekly?:
+    | T
+    | {
+        day?: T;
+        isOpen?: T;
+        hours?:
+          | T
+          | {
+              start?: T;
+              end?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  lunchSlot?:
+    | T
+    | {
+        start?: T;
+        end?: T;
+      };
+  dinnerSlot?:
+    | T
+    | {
+        start?: T;
+        end?: T;
+      };
+  exceptions?:
+    | T
+    | {
+        date?: T;
+        type?: T;
+        reason?: T;
+        variedHours?:
+          | T
+          | {
+              start?: T;
+              end?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

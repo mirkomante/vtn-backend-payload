@@ -31,7 +31,7 @@ export function createSimpleCollection(
     },
     admin: {
       useAsTitle: 'nome',
-      group: 'Ristorante impostazioni',
+      group: 'Ristorante configurazione',
       defaultColumns:
         options.defaultColumns || ['nome', 'descrizione', '_status', 'createdAt'],
     },
