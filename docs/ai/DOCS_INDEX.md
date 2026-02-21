@@ -323,7 +323,7 @@ hooks: {
 ### Storia Recente
 
 **Febbraio 2026**:
-- ✅ **Global `generali`**: Single Source of Truth per orari e aperture ristorante (Tab: Orari Settimanali, Fasce Pranzo/Cena, Eccezioni & Festività)
+- ✅ **Collection `generali` (Singleton)**: Single Source of Truth per orari e aperture ristorante (Tab: Orari Settimanali, Fasce Pranzo/Cena, Eccezioni & Festività) — convertita da Global a Collection per controllo ordinamento sidebar
 - ✅ **Componente `ImportaFestivitaButton`**: UI field per importare automaticamente festività italiane via `date-holidays`
 - ✅ **Smart Webhook System**: Implementazione logica Traffic Cop per aggiornamento menu
 - ✅ Fix ImportMap con plugin GCS condizionale
@@ -387,13 +387,14 @@ Quando aggiungi funzionalità o fix:
 - `traffic cop` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
 - `disponibilita.json` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
 - `pubsub` → [SMART_WEBHOOK_IMPLEMENTATION.md](./SMART_WEBHOOK_IMPLEMENTATION.md)
-- `generali` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `orari apertura` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `festività` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `date-holidays` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `lunchSlot` / `dinnerSlot` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `scheduleWeekly` → [AGENTS.md](./AGENTS.md) → sezione Globals
-- `exceptions` → [AGENTS.md](./AGENTS.md) → sezione Globals
+- `generali` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `singleton pattern` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `orari apertura` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `festività` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `date-holidays` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `lunchSlot` / `dinnerSlot` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `scheduleWeekly` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `exceptions` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
 
 ---
 

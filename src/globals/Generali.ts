@@ -15,16 +15,12 @@ import {
  *  - Tab 3 "Eccezioni & Festività": gestione di chiusure straordinarie e orari
  *    variati, con bottone per importare automaticamente le festività italiane.
  *
- * Group: "Ristorante impostazioni" — appare come prima voce del gruppo (ordine
- * alfabetico: "Generali" precede tutte le altre voci del gruppo).
+ * Group: "Ristorante impostazioni" — voce dedicata, gruppo separato dalle collections.
  */
 export const Generali: GlobalConfig = {
   slug: 'generali',
   label: 'Generali',
   admin: {
-    // Payload v3 inserisce sempre le collections prima dei globals nello stesso gruppo.
-    // Per garantire che "Generali" appaia come prima voce nella sezione impostazioni,
-    // usiamo un gruppo dedicato che precede alfabeticamente "Ristorante impostazioni".
     group: 'Ristorante impostazioni',
   },
   access: {
@@ -138,7 +134,7 @@ export const Generali: GlobalConfig = {
         {
           label: 'Fasce Pranzo / Cena',
           description:
-            'Definisce i range temporali che il frontend usa per determinare se mostrare il menu "Solo Pranzo" o "Solo Cena". Questi valori sono indipendenti dagli orari di apertura.',
+            "Definisce i range temporali che il frontend usa per determinare se mostrare il menu \"Solo Pranzo\" o \"Solo Cena\". Questi valori sono indipendenti dagli orari di apertura.",
           fields: [
             {
               name: 'lunchSlot',
@@ -146,7 +142,7 @@ export const Generali: GlobalConfig = {
               label: 'Fascia Pranzo',
               admin: {
                 description:
-                  'Intervallo di tempo in cui il ristorante serve il pranzo. Il frontend mostra il menu pranzo se l\'orario corrente è compreso in questo range.',
+                  "Intervallo di tempo in cui il ristorante serve il pranzo. Il frontend mostra il menu pranzo se l'orario corrente è compreso in questo range.",
               },
               fields: [
                 {
@@ -186,7 +182,7 @@ export const Generali: GlobalConfig = {
               label: 'Fascia Cena',
               admin: {
                 description:
-                  'Intervallo di tempo in cui il ristorante serve la cena. Il frontend mostra il menu cena se l\'orario corrente è compreso in questo range.',
+                  "Intervallo di tempo in cui il ristorante serve la cena. Il frontend mostra il menu cena se l'orario corrente è compreso in questo range.",
               },
               fields: [
                 {
@@ -231,7 +227,6 @@ export const Generali: GlobalConfig = {
           description:
             'Gestisci chiusure straordinarie, festività e orari variati. Queste eccezioni hanno priorità sugli orari settimanali standard.',
           fields: [
-            // Componente UI personalizzato: bottone per importare le festività italiane
             {
               name: 'importaFestivitaUI',
               type: 'ui',
@@ -241,8 +236,6 @@ export const Generali: GlobalConfig = {
                 },
               },
             },
-
-            // Array delle eccezioni
             {
               name: 'exceptions',
               type: 'array',
@@ -267,7 +260,7 @@ export const Generali: GlobalConfig = {
                           pickerAppearance: 'dayOnly',
                           displayFormat: 'dd/MM/yyyy',
                         },
-                        description: 'Data dell\'eccezione',
+                        description: "Data dell'eccezione",
                       },
                     },
                     {

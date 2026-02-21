@@ -102,9 +102,7 @@ export default buildConfig({
     Nazione,
     Regione,
     Zona,
-    // Gruppo: Admin — in fondo per avvicinarsi all'ordine desiderato.
-    // Nota: in Payload v3 i globals vengono sempre dopo le collections nella
-    // navigazione, quindi "Ristorante impostazioni" (Global) appare dopo "Admin".
+    // Gruppo: Admin
     Users,
     Media,
   ],

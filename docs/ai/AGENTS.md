@@ -28,16 +28,19 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 - **`Users`**: RBAC (Admin/User).
 - **`Media`**: Image uploads (GCS).
 
-## 🌐 Globals
+## 🌐 Singleton Collections
 
 ### `generali` — Single Source of Truth per Orari e Aperture
 
-**File**: `src/globals/Generali.ts`  
+**File**: `src/collections/Generali.ts`  
 **Slug**: `generali`  
-**Group**: `Ristorante impostazioni` (prima voce del gruppo)  
-**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+**Tipo**: Collection (Singleton Pattern — massimo 1 documento)  
+**Group**: `Ristorante configurazione` (prima voce del gruppo)  
+**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess` / `create` bloccato se esiste già un documento / `delete` sempre bloccato
 
-Questo Global è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questo Global per determinare disponibilità e menu da mostrare.
+> **Perché Collection e non Global?** Payload v3 posiziona sempre i Globals *dopo* tutte le Collections nella sidebar. Usando il Singleton Pattern su una Collection, possiamo controllare liberamente l'ordine nel menu.
+
+Questa collection è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questa collection per determinare disponibilità e menu da mostrare.
 
 #### Struttura Dati
 
@@ -129,12 +132,25 @@ Bottone React (`'use client'`) che appare in cima alla Tab "Eccezioni & Festivit
 #### API REST
 
 ```bash
-# Lettura (pubblica per utenti autenticati)
-GET /api/globals/generali
+# Lettura del documento singleton (id=1)
+GET /api/generali/1
+
+# Lista (restituisce sempre al massimo 1 documento)
+GET /api/generali
 
 # Aggiornamento (solo admin)
-POST /api/globals/generali
+PATCH /api/generali/1
 ```
+
+#### Singleton Pattern — Regole per gli agenti AI
+
+- **Non creare mai un secondo documento** `generali`. L'`access.create` lo blocca a runtime, ma è bene saperlo.
+- **Per leggere i dati** dal frontend, usare sempre `GET /api/generali?limit=1` e prendere `docs[0]`.
+- **Non eliminare** il documento: `access.delete` è sempre `false`.
+
+#### Nota sull'ordinamento Sidebar
+
+Il gruppo `"Ristorante configurazione"` appare nella sidebar nell'ordine in cui le collections sono dichiarate in `payload.config.ts`. `Generali` è la prima collection del gruppo, quindi appare per prima. Questo è il motivo per cui è una Collection e non un Global.
 
 ## 🧠 Key Logic Patterns
 
