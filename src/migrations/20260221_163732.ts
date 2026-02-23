@@ -53,11 +53,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"categoria_piatti_id" integer
   );
   
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_generali_fk";
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT IF EXISTS "payload_locked_documents_rels_generali_fk";
   
-  DROP INDEX "generali_updated_at_idx";
-  DROP INDEX "generali_created_at_idx";
-  DROP INDEX "payload_locked_documents_rels_generali_id_idx";
+  DROP INDEX IF EXISTS "generali_updated_at_idx";
+  DROP INDEX IF EXISTS "generali_created_at_idx";
+  DROP INDEX IF EXISTS "payload_locked_documents_rels_generali_id_idx";
   ALTER TABLE "generali_schedule_weekly_hours" ALTER COLUMN "start" SET DATA TYPE "public"."enum_generali_schedule_weekly_hours_start" USING "start"::"public"."enum_generali_schedule_weekly_hours_start";
   ALTER TABLE "generali_schedule_weekly_hours" ALTER COLUMN "end" SET DATA TYPE "public"."enum_generali_schedule_weekly_hours_end" USING "end"::"public"."enum_generali_schedule_weekly_hours_end";
   ALTER TABLE "generali_exceptions_varied_hours" ALTER COLUMN "start" SET DATA TYPE "public"."enum_generali_exceptions_varied_hours_start" USING "start"::"public"."enum_generali_exceptions_varied_hours_start";
@@ -86,7 +86,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "menu_config_rels_parent_idx" ON "menu_config_rels" USING btree ("parent_id");
   CREATE INDEX "menu_config_rels_path_idx" ON "menu_config_rels" USING btree ("path");
   CREATE INDEX "menu_config_rels_categoria_piatti_id_idx" ON "menu_config_rels" USING btree ("categoria_piatti_id");
-  ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "generali_id";`)
+  ALTER TABLE "payload_locked_documents_rels" DROP COLUMN IF EXISTS "generali_id";`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
