@@ -199,6 +199,7 @@ function detectChangeType(
 
   // Collezione non coinvolta in nessun target -> skip
   if (!isSettingsCollection && !isMenuCollection) {
+    console.log(`🔥 DEBUG: detectChangeType → none (collezione "${collection}" non è in MENU_COLLECTIONS né SETTINGS_COLLECTIONS)`)
     return {
       type: 'none',
       reason: 'Collezione non monitorata',
@@ -271,6 +272,8 @@ function detectChangeType(
     }
   }
 
+  console.log(`🔥 DEBUG: detectChangeType → none (nessun campo rilevante cambiato tra doc e previousDoc)`)
+  console.log(`🔥 DEBUG: Tutti i campi confrontati: [${Object.keys(doc).filter(k => !k.startsWith('_') && k !== 'id' && k !== 'createdAt' && k !== 'updatedAt').join(', ')}]`)
   return {
     type: 'none',
     reason: 'Nessun cambiamento rilevante',
@@ -514,6 +517,8 @@ async function uploadToGCSTarget(
   const file = bucket.file(target.filename)
 
   const jsonContent = JSON.stringify(data, null, 2)
+  console.log(`🔥 DEBUG: uploadToGCSTarget - bucket: "${bucketName}", file: "${target.filename}", dimensione JSON: ${jsonContent.length} bytes`)
+  console.log(`🔥 DEBUG: uploadToGCSTarget - collezioni nel payload: [${Object.keys(data).map(k => `${k}(${data[k].length})`).join(', ')}]`)
 
   await file.save(jsonContent, {
     contentType: 'application/json',
@@ -603,6 +608,12 @@ export function createSmartWebhook(): CollectionAfterChangeHook {
     const timestamp = new Date().toISOString()
     const collectionSlug = collection.slug
 
+    // --- DEBUG ENTRY POINT ---
+    console.log(`🔥 DEBUG: Hook avviato! Collection: ${collectionSlug}, Operation: ${operation}, ID: ${doc.id}`)
+    console.log(`🔥 DEBUG: Env Vars - NODE_ENV: ${process.env.NODE_ENV}, GCS_MENU_BUCKET: ${process.env.GCS_MENU_BUCKET || '(non impostata)'}`)
+    console.log(`🔥 DEBUG: _status doc corrente: ${doc._status ?? '(assente)'}, _status previousDoc: ${previousDoc?._status ?? '(assente/nessun previousDoc)'}`)
+    console.log(`🔥 DEBUG: skipSmartWebhook context flag: ${req.context?.skipSmartWebhook ?? false}`)
+
     // Skip se siamo in un context che vuole evitare il webhook (prevenzione loop)
     if (req.context?.skipSmartWebhook) {
       console.log(`⏭️  [${timestamp}] Smart Webhook skipped per context flag`)
@@ -617,12 +628,14 @@ export function createSmartWebhook(): CollectionAfterChangeHook {
     const analysis = detectChangeType(collectionSlug, doc, previousDoc, operation)
 
     console.log(`   Analisi: ${analysis.type} - ${analysis.reason}`)
+    console.log(`🔥 DEBUG: Change analysis result: type="${analysis.type}", reason="${analysis.reason}", changedFields=[${analysis.changedFields.join(', ')}]`)
     if (analysis.changedFields.length > 0 && analysis.changedFields[0] !== '*') {
       console.log(`   Campi modificati: ${analysis.changedFields.join(', ')}`)
     }
 
     // Nessun cambiamento rilevante -> skip
     if (analysis.type === 'none') {
+      console.log(`🔥 DEBUG: Uscita con type=none - nessuna azione GCP verrà eseguita`)
       console.log(`   ✅ Nessuna azione necessaria\n`)
       return doc
     }
@@ -669,10 +682,12 @@ export function createSmartWebhook(): CollectionAfterChangeHook {
     for (const target of affectedTargets) {
       try {
         if (analysis.type === 'fast-path') {
+          console.log(`🔥 DEBUG: Entrando nel blocco Fast Path per target "${target.id}"...`)
           console.log(`   🚀 Fast Path [${target.id}]: Rigenero ${target.filename}...`)
 
           // Verifica che la variabile d'ambiente del bucket sia configurata
           const bucketName = process.env[target.bucketEnv]
+          console.log(`🔥 DEBUG: Tentativo upload su bucket: ${bucketName || `(${target.bucketEnv} non impostata)`}`)
           if (!bucketName) {
             console.warn(
               `   ⚠️  [${target.id}] Variabile d'ambiente ${target.bucketEnv} non impostata - skip target`,
