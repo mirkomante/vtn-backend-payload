@@ -1,41 +1,64 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  // ADD VALUE IF NOT EXISTS — in produzione i valori già esistono nell'ENUM
+  // creato dalla migrazione 163732, quindi li saltiamo silenziosamente.
+  for (const typeName of [
+    'enum_menu_config_standard_items_source_collection',
+    'enum_menu_config_special_items_source_collection',
+  ]) {
+    for (const value of ['birre', 'liquori', 'cocktail', 'bevande', 'servizi-accessori', 'menu-fisso']) {
+      await db.execute(sql.raw(`ALTER TYPE "public"."${typeName}" ADD VALUE IF NOT EXISTS '${value}'`))
+    }
+  }
+
+  // Crea tabelle pivot per hasMany (IF NOT EXISTS)
   await db.execute(sql`
-   ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'birre';
-  ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'liquori';
-  ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'cocktail';
-  ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'bevande';
-  ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'servizi-accessori';
-  ALTER TYPE "public"."enum_menu_config_standard_items_source_collection" ADD VALUE 'menu-fisso';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'birre';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'liquori';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'cocktail';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'bevande';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'servizi-accessori';
-  ALTER TYPE "public"."enum_menu_config_special_items_source_collection" ADD VALUE 'menu-fisso';
-  CREATE TABLE "menu_config_standard_items_source_collection" (
-  	"order" integer NOT NULL,
-  	"parent_id" varchar NOT NULL,
-  	"value" "enum_menu_config_standard_items_source_collection",
-  	"id" serial PRIMARY KEY NOT NULL
-  );
-  
-  CREATE TABLE "menu_config_special_items_source_collection" (
-  	"order" integer NOT NULL,
-  	"parent_id" varchar NOT NULL,
-  	"value" "enum_menu_config_special_items_source_collection",
-  	"id" serial PRIMARY KEY NOT NULL
-  );
-  
-  ALTER TABLE "menu_config_standard_items_source_collection" ADD CONSTRAINT "menu_config_standard_items_source_collection_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."menu_config_standard_items"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "menu_config_special_items_source_collection" ADD CONSTRAINT "menu_config_special_items_source_collection_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."menu_config_special_items"("id") ON DELETE cascade ON UPDATE no action;
-  CREATE INDEX "menu_config_standard_items_source_collection_order_idx" ON "menu_config_standard_items_source_collection" USING btree ("order");
-  CREATE INDEX "menu_config_standard_items_source_collection_parent_idx" ON "menu_config_standard_items_source_collection" USING btree ("parent_id");
-  CREATE INDEX "menu_config_special_items_source_collection_order_idx" ON "menu_config_special_items_source_collection" USING btree ("order");
-  CREATE INDEX "menu_config_special_items_source_collection_parent_idx" ON "menu_config_special_items_source_collection" USING btree ("parent_id");
-  ALTER TABLE "menu_config_standard_items" DROP COLUMN "source_collection";
-  ALTER TABLE "menu_config_special_items" DROP COLUMN "source_collection";`)
+    CREATE TABLE IF NOT EXISTS "menu_config_standard_items_source_collection" (
+      "order" integer NOT NULL,
+      "parent_id" varchar NOT NULL,
+      "value" "enum_menu_config_standard_items_source_collection",
+      "id" serial PRIMARY KEY NOT NULL
+    )
+  `)
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS "menu_config_special_items_source_collection" (
+      "order" integer NOT NULL,
+      "parent_id" varchar NOT NULL,
+      "value" "enum_menu_config_special_items_source_collection",
+      "id" serial PRIMARY KEY NOT NULL
+    )
+  `)
+
+  // Foreign keys (idempotenti)
+  await db.execute(sql.raw(`
+    DO $$ BEGIN
+      ALTER TABLE "menu_config_standard_items_source_collection"
+        ADD CONSTRAINT "menu_config_standard_items_source_collection_parent_fk"
+        FOREIGN KEY ("parent_id") REFERENCES "public"."menu_config_standard_items"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+  `))
+
+  await db.execute(sql.raw(`
+    DO $$ BEGIN
+      ALTER TABLE "menu_config_special_items_source_collection"
+        ADD CONSTRAINT "menu_config_special_items_source_collection_parent_fk"
+        FOREIGN KEY ("parent_id") REFERENCES "public"."menu_config_special_items"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+  `))
+
+  // Indici (IF NOT EXISTS)
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS "menu_config_standard_items_source_collection_order_idx" ON "menu_config_standard_items_source_collection" USING btree ("order")`)
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS "menu_config_standard_items_source_collection_parent_idx" ON "menu_config_standard_items_source_collection" USING btree ("parent_id")`)
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS "menu_config_special_items_source_collection_order_idx" ON "menu_config_special_items_source_collection" USING btree ("order")`)
+  await db.execute(sql`CREATE INDEX IF NOT EXISTS "menu_config_special_items_source_collection_parent_idx" ON "menu_config_special_items_source_collection" USING btree ("parent_id")`)
+
+  // Rimuovi colonna source_collection singola (IF EXISTS — in produzione non esiste mai stata)
+  await db.execute(sql`ALTER TABLE "menu_config_standard_items" DROP COLUMN IF EXISTS "source_collection"`)
+  await db.execute(sql`ALTER TABLE "menu_config_special_items" DROP COLUMN IF EXISTS "source_collection"`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
