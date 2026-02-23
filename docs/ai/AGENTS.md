@@ -162,12 +162,33 @@ GET /api/globals/menu-config
 POST /api/globals/menu-config
 ```
 
+#### Componenti UI Personalizzati
+
+**`MenuItemRowLabel`** — `src/components/MenuItemRowLabel.tsx`
+
+Componente React Client (`'use client'`) che personalizza l'etichetta di ogni riga negli array `standardItems` e `specialItems` nell'admin panel. Usa l'hook `useRowLabel` di Payload.
+
+- Se il campo `label` (Titolo Sezione) ha un valore → mostra il titolo direttamente nella riga collassata
+- Fallback: "Sezione 01", "Sezione 02", ecc. per item senza titolo
+
+```typescript
+// Collegato in MenuConfig.ts tramite:
+admin: {
+  components: {
+    RowLabel: '@/components/MenuItemRowLabel',
+  },
+}
+```
+
+Registrato in `src/app/(payload)/admin/importMap.js` con la chiave `"@/components/MenuItemRowLabel#default"`.
+
 #### Note per gli Agenti AI
 
 - **`targetCategories`** punta alla collection `categoria-piatti` (slug: `categoria-piatti`), non a una collection generica `categories`.
-- **`sourceCollection`** usa i slug reali del progetto: `piatti` e `vini` (non `dishes`/`wines`).
+- **`sourceCollection`** usa i slug reali del progetto: `piatti`, `vini`, `birre`, `liquori`, `cocktail`, `bevande`, `servizi-accessori`, `menu-fisso` (non `dishes`/`wines`).
 - Il campo `activeRange` e `specialItems` sono **condizionali**: visibili nell'admin solo se `isActive === true`.
 - Non ci sono hooks o webhooks su questo Global (la configurazione del menu non richiede rebuild immediati).
+- Il componente `MenuItemRowLabel` è condiviso tra `standardItems` e `specialItems` — legge sempre il campo `label` del sibling data.
 
 ---
 
@@ -241,6 +262,34 @@ Ogni eccezione sovrascrive gli orari settimanali standard per una data specifica
 ```
 
 **Priorità**: Le eccezioni hanno sempre priorità sugli orari settimanali. Il frontend deve verificare prima se esiste un'eccezione per la data corrente prima di consultare `scheduleWeekly`.
+
+#### Componenti UI Personalizzati: RowLabel
+
+I componenti RowLabel personalizzano l'etichetta delle righe collassate negli array dell'admin panel. Tutti usano l'hook `useRowLabel<T>()` di `@payloadcms/ui` e seguono lo stesso pattern:
+
+1. Leggi il campo significativo dal `data` dell'item
+2. Se presente → mostra quel valore
+3. Fallback → etichetta generica con numero progressivo (`rowNumber + 1` con zero-padding)
+
+| Componente | File | Usato in | Campo letto | Fallback |
+|---|---|---|---|---|
+| `CambioOrarioRowLabel` | `src/components/CambioOrarioRowLabel.tsx` | `generali` → `scheduleWeekly[].hours` | `start` + `end` | "Cambio orario 01" |
+| `ChiusuraRowLabel` | `src/components/ChiusuraRowLabel.tsx` | `generali` → `exceptions` | `reason` | "Chiusura 01" |
+| `MenuItemRowLabel` | `src/components/MenuItemRowLabel.tsx` | `menu-config` → `standardItems`, `specialItems` | `label` | "Sezione 01" |
+
+**Pattern di registrazione in `payload.config.ts` / config della collection o global:**
+
+```typescript
+admin: {
+  components: {
+    RowLabel: '@/components/NomeRowLabel',
+  },
+}
+```
+
+**Tutti i componenti RowLabel sono Client Components** (`'use client'`) e vengono registrati automaticamente nell'`importMap.js` da Payload.
+
+---
 
 #### Componente UI Personalizzato: `ImportaFestivitaButton`
 

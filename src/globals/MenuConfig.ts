@@ -146,6 +146,9 @@ export const MenuConfig: GlobalConfig = {
                 description:
                   'Ogni riga rappresenta una sezione del menu (es. "Antipasti", "Vini Rossi").',
                 initCollapsed: true,
+                components: {
+                  RowLabel: '@/components/MenuItemRowLabel',
+                },
               },
               fields: menuItemFields,
             },
@@ -221,6 +224,9 @@ export const MenuConfig: GlobalConfig = {
                   'Sezioni del menu speciale. Struttura identica al Menu Standard.',
                 initCollapsed: true,
                 condition: (_data, siblingData) => siblingData?.isActive === true,
+                components: {
+                  RowLabel: '@/components/MenuItemRowLabel',
+                },
               },
               fields: menuItemFields,
             },
