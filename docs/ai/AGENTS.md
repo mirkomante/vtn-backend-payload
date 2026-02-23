@@ -104,7 +104,7 @@ Disponibile **solo con una singola sorgente dati**.
 | `include` | Mostra solo gli elementi con categoria/tipologia in `targetCategories` |
 | `exclude` | Mostra tutti gli elementi TRANNE quelli con categoria/tipologia in `targetCategories` |
 
-#### `targetCategories` — Relationship Polimorfica
+#### `targetCategories` — Relationship Polimorfica con Filtro Dinamico
 
 Il campo usa `relationTo` come array (relationship polimorfica Payload). Ogni elemento ha la forma:
 
@@ -124,11 +124,23 @@ Il campo usa `relationTo` come array (relationship polimorfica Payload). Ogni el
 | `cocktail` | `tipologie-cocktail` |
 | `bevande` | `tipologie-bevanda` |
 | `menu-fisso` | `categoria-menu-fisso` |
-| `servizi-accessori` | — (nessuna categoria, non usare filtro) |
+| `servizi-accessori` | — (nessuna categoria disponibile) |
+
+**Filtro dinamico nell'admin (UX)**: il campo usa `filterOptions` come funzione che riceve `{ relationTo, siblingData }`. In base al valore di `sourceCollection` nel sibling data, restituisce `true` solo per la collection corrispondente e `false` per tutte le altre. Questo fa sì che il dropdown mostri **solo le categorie/tipologie pertinenti** alla sorgente selezionata.
+
+```typescript
+filterOptions: ({ relationTo, siblingData }) => {
+  const sourceToRelation = { piatti: 'categoria-piatti', vini: 'tipologie-vino', ... }
+  const src = siblingData?.sourceCollection
+  const selectedSource = Array.isArray(src) ? src[0] : src
+  const expectedRelation = sourceToRelation[selectedSource]
+  return relationTo === expectedRelation ? true : false
+}
+```
 
 > **Nota per il frontend**: il campo è polimorfico, quindi ogni elemento di `targetCategories` include `relationTo` per discriminare il tipo. Filtra solo gli elementi la cui `relationTo` corrisponde alla `sourceCollection` attiva.
 
-> **Nota per gli agenti AI**: l'admin non impedisce tecnicamente di selezionare categorie di una collection diversa dalla sorgente. La coerenza è affidata alla `description` del campo e alla disciplina dell'utente. In futuro si potrà rafforzare con un custom field component.
+> **Nota per gli agenti AI**: il filtro dinamico è implementato tramite `filterOptions` nativo di Payload (non un componente custom). Funziona sia per la validazione lato server che per il rendering del dropdown nell'admin. Non è necessario un componente React custom per questa funzionalità.
 
 #### Logica `visibility` — Collegamento con `generali`
 

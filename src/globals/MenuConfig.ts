@@ -88,9 +88,29 @@ const menuItemFields: Field[] = [
     ],
     hasMany: true,
     maxDepth: 1,
+    // Mostra solo la collection di categorie coerente con la sorgente dati selezionata.
+    // Le collection non pertinenti vengono nascoste restituendo `false`.
+    filterOptions: ({ relationTo, siblingData }) => {
+      const sourceToRelation: Record<string, string> = {
+        piatti:              'categoria-piatti',
+        vini:                'tipologie-vino',
+        birre:               'tipologie-birra',
+        liquori:             'tipologie-liquore',
+        cocktail:            'tipologie-cocktail',
+        bevande:             'tipologie-bevanda',
+        'menu-fisso':        'categoria-menu-fisso',
+        'servizi-accessori': '', // nessuna categoria disponibile
+      }
+      const sibling = siblingData as { sourceCollection?: string | string[] }
+      const src = sibling?.sourceCollection
+      const selectedSource = Array.isArray(src) ? src[0] : src
+      const expectedRelation = sourceToRelation[selectedSource as string]
+      // Se la collection corrente non corrisponde alla sorgente selezionata, nascondila
+      return relationTo === expectedRelation ? true : false
+    },
     admin: {
       description:
-        'Seleziona le categorie o tipologie da includere/escludere. Scegli quelle coerenti con la sorgente dati selezionata (es. "Tipologie Vino" se la sorgente è Vini).',
+        'Mostra solo le categorie/tipologie della sorgente dati selezionata.',
       condition: (_data, siblingData) => {
         const src = siblingData?.sourceCollection
         const isSingle = Array.isArray(src) ? src.length <= 1 : Boolean(src)

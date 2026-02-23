@@ -2132,7 +2132,7 @@ export interface MenuConfig {
          */
         filterMode?: ('all' | 'include' | 'exclude') | null;
         /**
-         * Seleziona le categorie o tipologie da includere/escludere. Scegli quelle coerenti con la sorgente dati selezionata (es. "Tipologie Vino" se la sorgente è Vini).
+         * Mostra solo le categorie/tipologie della sorgente dati selezionata.
          */
         targetCategories?:
           | (
@@ -2217,7 +2217,7 @@ export interface MenuConfig {
          */
         filterMode?: ('all' | 'include' | 'exclude') | null;
         /**
-         * Seleziona le categorie o tipologie da includere/escludere. Scegli quelle coerenti con la sorgente dati selezionata (es. "Tipologie Vino" se la sorgente è Vini).
+         * Mostra solo le categorie/tipologie della sorgente dati selezionata.
          */
         targetCategories?:
           | (
