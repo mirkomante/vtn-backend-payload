@@ -1,10 +1,13 @@
 /**
  * Smart Webhook Hook - Sistema di aggiornamento intelligente per disponibilita.json
- * 
+ *
  * Pattern "Traffic Cop": analizza i cambiamenti nei documenti e decide tra:
- * - Fast Path: Rigenera disponibilita.json (cambio inLista o collezioni impostazioni)
+ * - Fast Path: Rigenera il JSON del target interessato (cambio inLista o collezioni impostazioni)
  * - Slow Path: Invia messaggio Pub/Sub per rebuild completo (cambio campi pesanti)
- * 
+ *
+ * Architettura Multi-Frontend: ogni frontend ha il suo bucket GCS dedicato e riceve
+ * solo i dati delle collezioni pertinenti, definiti in FRONTEND_TARGETS.
+ *
  * @see https://cloud.google.com/storage/docs/uploading-objects
  * @see https://cloud.google.com/pubsub/docs/publisher
  */
@@ -14,7 +17,56 @@ import { Storage } from '@google-cloud/storage'
 import { PubSub } from '@google-cloud/pubsub'
 
 // =============================================================================
-// CONFIGURAZIONE COLLEZIONI
+// CONFIGURAZIONE MULTI-FRONTEND (FRONTEND_TARGETS)
+// =============================================================================
+
+/**
+ * Definisce un target frontend con il suo bucket GCS dedicato e le collezioni di pertinenza.
+ * Estendibile: aggiungere nuovi target (es. 'corporate', 'shop') senza toccare la logica core.
+ */
+type FrontendTarget = {
+  id: string
+  bucketEnv: string
+  filename: string
+  collections: string[]
+}
+
+/**
+ * Mappa dei target frontend attivi.
+ * Ogni target definisce:
+ * - bucketEnv: nome della variabile d'ambiente che contiene il nome del bucket GCS
+ * - filename: nome del file JSON da generare nel bucket
+ * - collections: slug delle collezioni Payload da includere nel JSON
+ */
+const FRONTEND_TARGETS: FrontendTarget[] = [
+  {
+    id: 'menu',
+    bucketEnv: 'GCS_MENU_BUCKET',
+    filename: 'disponibilita.json',
+    collections: [
+      'piatti',
+      'vini',
+      'birre',
+      'cocktail',
+      'liquori',
+      'bevande',
+      'menu-fisso',
+      'allergeni',
+      'categoria-piatti',
+      'categoria-menu-fisso',
+      'tipologie-vino',
+      'tipologie-birra',
+      'tipologie-liquore',
+      'tipologie-cocktail',
+      'tipologie-bevanda',
+      'servizi-accessori',
+    ],
+  },
+  // Futuri target: 'corporate', 'shop', ecc.
+]
+
+// =============================================================================
+// CONFIGURAZIONE COLLEZIONI (per logica Traffic Cop)
 // =============================================================================
 
 /**
@@ -72,10 +124,8 @@ const HEAVY_FIELDS = [
 // =============================================================================
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-const GCS_BUCKET = process.env.GCS_FRONTEND_BUCKET || ''
 const GCP_PROJECT_ID = process.env.GCP_PROJECT_ID || ''
 const PUBSUB_TOPIC = 'rebuild-menu'
-const OUTPUT_FILENAME = 'disponibilita.json'
 
 // =============================================================================
 // CLIENT GCP (Singleton - inizializzati solo in produzione)
@@ -92,7 +142,7 @@ function getGCPClients() {
     return { storage: null, pubsub: null }
   }
 
-  if (!storageClient && GCS_BUCKET) {
+  if (!storageClient && GCP_PROJECT_ID) {
     storageClient = new Storage({
       projectId: GCP_PROJECT_ID,
     })
@@ -125,7 +175,7 @@ interface ChangeAnalysis {
 
 /**
  * Analizza i cambiamenti tra doc e previousDoc per determinare il percorso da seguire
- * 
+ *
  * Fast Path: inLista changed OR settings collection
  * Slow Path: heavy fields changed (nome, descrizione, prezzo, relazioni)
  */
@@ -147,7 +197,7 @@ function detectChangeType(
     }
   }
 
-  // Collezione non coinvolta -> skip
+  // Collezione non coinvolta in nessun target -> skip
   if (!isSettingsCollection && !isMenuCollection) {
     return {
       type: 'none',
@@ -389,61 +439,45 @@ const COLLECTION_FIELDS: Record<string, Record<string, boolean>> = {
 }
 
 /**
- * Aggrega dati da tutte le collezioni coinvolte
+ * Aggrega dati dalle collezioni specificate per un determinato target frontend.
  * Menu collections: filtra per inLista: true
  * Settings collections: prende tutti i documenti pubblicati
  */
-async function aggregateData(req: PayloadRequest): Promise<Record<string, any[]>> {
+async function aggregateDataForTarget(
+  req: PayloadRequest,
+  targetCollections: string[],
+): Promise<Record<string, any[]>> {
   const { payload } = req
   const result: Record<string, any[]> = {}
 
-  // Query parallele per tutte le collezioni
-  const queries = [
-    // Menu Collections (con filtro inLista)
-    ...MENU_COLLECTIONS.map(async (slug) => {
-      try {
-        const { docs } = await payload.find({
-          collection: slug,
-          where: {
-            and: [{ _status: { equals: 'published' } }, { inLista: { equals: true } }],
-          },
-          limit: 0, // Tutti i documenti
-          depth: 1, // Popola relazioni di primo livello
-          select: COLLECTION_FIELDS[slug] || {},
-          req, // Mantiene la transazione
-        })
-        return { slug, docs }
-      } catch (error) {
-        console.error(`❌ Errore query ${slug}:`, error)
-        return { slug, docs: [] }
-      }
-    }),
+  const queries = targetCollections.map(async (slug) => {
+    const isMenu = MENU_COLLECTIONS.includes(slug as CollectionSlug)
+    const isSettings = SETTINGS_COLLECTIONS.includes(slug as CollectionSlug)
 
-    // Settings Collections (tutti i documenti pubblicati)
-    ...SETTINGS_COLLECTIONS.map(async (slug) => {
-      try {
-        const { docs } = await payload.find({
-          collection: slug,
-          where: {
-            _status: { equals: 'published' },
-          },
-          limit: 0,
-          depth: 0, // Non serve popolare relazioni
-          select: COLLECTION_FIELDS[slug] || {},
-          req,
-        })
-        return { slug, docs }
-      } catch (error) {
-        console.error(`❌ Errore query ${slug}:`, error)
-        return { slug, docs: [] }
-      }
-    }),
-  ]
+    if (!isMenu && !isSettings) {
+      return { slug, docs: [] }
+    }
 
-  // Esegui tutte le query in parallelo
+    try {
+      const { docs } = await payload.find({
+        collection: slug as CollectionSlug,
+        where: isMenu
+          ? { and: [{ _status: { equals: 'published' } }, { inLista: { equals: true } }] }
+          : { _status: { equals: 'published' } },
+        limit: 0,
+        depth: isMenu ? 1 : 0,
+        select: COLLECTION_FIELDS[slug] || {},
+        req,
+      })
+      return { slug, docs }
+    } catch (error) {
+      console.error(`❌ Errore query ${slug}:`, error)
+      return { slug, docs: [] }
+    }
+  })
+
   const results = await Promise.all(queries)
 
-  // Costruisci l'oggetto risultato
   for (const { slug, docs } of results) {
     result[slug] = docs
   }
@@ -452,22 +486,32 @@ async function aggregateData(req: PayloadRequest): Promise<Record<string, any[]>
 }
 
 // =============================================================================
-// UPLOAD GCS
+// UPLOAD GCS (per target specifico)
 // =============================================================================
 
 /**
- * Carica il JSON aggregato su Google Cloud Storage
+ * Carica il JSON aggregato su Google Cloud Storage nel bucket del target specificato.
  * Cache-Control: public, max-age=0 per forzare revalidation
  */
-async function uploadToGCS(data: Record<string, any[]>): Promise<void> {
+async function uploadToGCSTarget(
+  data: Record<string, any[]>,
+  target: FrontendTarget,
+): Promise<void> {
   const { storage } = getGCPClients()
+  const bucketName = process.env[target.bucketEnv]
 
-  if (!storage || !GCS_BUCKET) {
-    throw new Error('GCS non configurato (manca GCS_FRONTEND_BUCKET o GCP_PROJECT_ID)')
+  if (!storage) {
+    throw new Error('GCS Storage client non inizializzato (manca GCP_PROJECT_ID)')
   }
 
-  const bucket = storage.bucket(GCS_BUCKET)
-  const file = bucket.file(OUTPUT_FILENAME)
+  if (!bucketName) {
+    throw new Error(
+      `Variabile d'ambiente ${target.bucketEnv} non configurata per il target "${target.id}"`,
+    )
+  }
+
+  const bucket = storage.bucket(bucketName)
+  const file = bucket.file(target.filename)
 
   const jsonContent = JSON.stringify(data, null, 2)
 
@@ -476,10 +520,10 @@ async function uploadToGCS(data: Record<string, any[]>): Promise<void> {
     metadata: {
       cacheControl: 'public, max-age=0',
     },
-    resumable: false, // File piccolo, upload diretto
+    resumable: false,
   })
 
-  console.log(`✅ Upload GCS completato: gs://${GCS_BUCKET}/${OUTPUT_FILENAME}`)
+  console.log(`✅ Upload GCS completato: gs://${bucketName}/${target.filename} (target: ${target.id})`)
 }
 
 // =============================================================================
@@ -517,16 +561,35 @@ async function sendPubSubMessage(
 }
 
 // =============================================================================
+// ROUTING MULTI-TARGET
+// =============================================================================
+
+/**
+ * Identifica i target frontend interessati dalla modifica di una collezione.
+ * Restituisce solo i target che includono la collezione modificata.
+ */
+function getAffectedTargets(collectionSlug: string): FrontendTarget[] {
+  return FRONTEND_TARGETS.filter((target) => target.collections.includes(collectionSlug))
+}
+
+// =============================================================================
 // HOOK PRINCIPALE
 // =============================================================================
 
 /**
- * Hook afterChange che implementa la logica "Traffic Cop"
- * 
+ * Hook afterChange che implementa la logica "Traffic Cop" con routing multi-frontend.
+ *
+ * Per ogni modifica a una collezione monitorata:
+ * 1. Determina il tipo di cambiamento (fast-path / slow-path / none)
+ * 2. Identifica i target frontend interessati (tramite FRONTEND_TARGETS)
+ * 3. Per ogni target interessato:
+ *    - Fast Path: aggrega i dati delle collezioni del target e carica il JSON nel suo bucket
+ *    - Slow Path: invia messaggio Pub/Sub per rebuild completo
+ *
  * Uso:
  * ```typescript
  * import { createSmartWebhook } from '../hooks/smartWebhook'
- * 
+ *
  * export const Piatti: CollectionConfig = {
  *   slug: 'piatti',
  *   hooks: {
@@ -564,56 +627,87 @@ export function createSmartWebhook(): CollectionAfterChangeHook {
       return doc
     }
 
+    // Identifica i target frontend interessati da questa collezione
+    const affectedTargets = getAffectedTargets(collectionSlug)
+
+    if (affectedTargets.length === 0) {
+      console.log(`   ⚠️  Nessun target frontend configurato per la collezione "${collectionSlug}"\n`)
+      return doc
+    }
+
+    console.log(`   🎯 Target interessati: ${affectedTargets.map((t) => t.id).join(', ')}`)
+
     // DEVELOPMENT MODE: Mock delle operazioni GCP
     if (!IS_PRODUCTION) {
       console.log(`   🔧 [DEV MODE] Mock attivo - nessuna operazione GCP reale`)
 
-      if (analysis.type === 'fast-path') {
-        console.log(`   📦 [MOCK] Aggregazione dati da ${MENU_COLLECTIONS.length + SETTINGS_COLLECTIONS.length} collezioni`)
-        console.log(`   ☁️  [MOCK] Upload su gs://${GCS_BUCKET || 'NOT_CONFIGURED'}/${OUTPUT_FILENAME}`)
-      }
+      for (const target of affectedTargets) {
+        const bucketName = process.env[target.bucketEnv] || 'NOT_CONFIGURED'
 
-      if (analysis.type === 'slow-path') {
-        console.log(`   📤 [MOCK] Invio messaggio Pub/Sub al topic: ${PUBSUB_TOPIC}`)
-        console.log(`   📤 [MOCK] Payload: ${JSON.stringify({ collection: collectionSlug, docId: doc.id, changedFields: analysis.changedFields })}`)
+        if (analysis.type === 'fast-path') {
+          console.log(
+            `   📦 [MOCK][${target.id}] Aggregazione dati da ${target.collections.length} collezioni`,
+          )
+          console.log(
+            `   ☁️  [MOCK][${target.id}] Upload su gs://${bucketName}/${target.filename}`,
+          )
+        }
+
+        if (analysis.type === 'slow-path') {
+          console.log(`   📤 [MOCK][${target.id}] Invio messaggio Pub/Sub al topic: ${PUBSUB_TOPIC}`)
+          console.log(
+            `   📤 [MOCK][${target.id}] Payload: ${JSON.stringify({ collection: collectionSlug, docId: doc.id, changedFields: analysis.changedFields })}`,
+          )
+        }
       }
 
       console.log(`   ✅ Mock completato\n`)
       return doc
     }
 
-    // PRODUCTION MODE: Operazioni reali
-    try {
-      if (analysis.type === 'fast-path') {
-        console.log(`   🚀 Fast Path: Rigenero disponibilita.json...`)
+    // PRODUCTION MODE: Operazioni reali per ogni target interessato
+    for (const target of affectedTargets) {
+      try {
+        if (analysis.type === 'fast-path') {
+          console.log(`   🚀 Fast Path [${target.id}]: Rigenero ${target.filename}...`)
 
-        // Aggrega dati
-        const aggregatedData = await aggregateData(req)
+          // Verifica che la variabile d'ambiente del bucket sia configurata
+          const bucketName = process.env[target.bucketEnv]
+          if (!bucketName) {
+            console.warn(
+              `   ⚠️  [${target.id}] Variabile d'ambiente ${target.bucketEnv} non impostata - skip target`,
+            )
+            continue
+          }
 
-        // Conta totale documenti
-        const totalDocs = Object.values(aggregatedData).reduce(
-          (sum, docs) => sum + docs.length,
-          0,
-        )
-        console.log(`   📦 Dati aggregati: ${totalDocs} documenti totali`)
+          // Aggrega dati solo per le collezioni di questo target
+          const aggregatedData = await aggregateDataForTarget(req, target.collections)
 
-        // Upload su GCS
-        await uploadToGCS(aggregatedData)
-        console.log(`   ✅ Fast Path completato\n`)
+          const totalDocs = Object.values(aggregatedData).reduce(
+            (sum, docs) => sum + docs.length,
+            0,
+          )
+          console.log(`   📦 [${target.id}] Dati aggregati: ${totalDocs} documenti totali`)
+
+          // Upload nel bucket dedicato al target
+          await uploadToGCSTarget(aggregatedData, target)
+          console.log(`   ✅ Fast Path [${target.id}] completato`)
+        }
+
+        if (analysis.type === 'slow-path') {
+          console.log(`   🐌 Slow Path [${target.id}]: Invio messaggio Pub/Sub...`)
+
+          await sendPubSubMessage(collectionSlug, doc.id, analysis.changedFields)
+          console.log(`   ✅ Slow Path [${target.id}] completato`)
+        }
+      } catch (error) {
+        // Log errore per questo target ma continua con gli altri (graceful skip)
+        console.error(`   ❌ Errore durante ${analysis.type} per target "${target.id}":`, error)
+        console.error(`   ⚠️  Gli altri target e l'operazione sul documento continuano normalmente`)
       }
-
-      if (analysis.type === 'slow-path') {
-        console.log(`   🐌 Slow Path: Invio messaggio Pub/Sub...`)
-
-        await sendPubSubMessage(collectionSlug, doc.id, analysis.changedFields)
-        console.log(`   ✅ Slow Path completato\n`)
-      }
-    } catch (error) {
-      // Log errore ma non bloccare l'operazione
-      console.error(`   ❌ Errore durante ${analysis.type}:`, error)
-      console.error(`   ⚠️  L'operazione sul documento è comunque completata\n`)
     }
 
+    console.log()
     return doc
   }
 }

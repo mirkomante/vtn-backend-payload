@@ -341,11 +341,64 @@ POST /api/globals/generali
 
 ## 🧠 Key Logic Patterns
 
-### Smart Webhook (Traffic Cop)
+### Smart Webhook (Traffic Cop — Multi-Frontend)
 Located in `src/hooks/smartWebhook.ts`.
 - **Fast Path**: Regenerates JSON on GCS for simple availability toggles.
 - **Slow Path**: Triggers full rebuilds via Pub/Sub for structural changes.
 - **Mock Mode**: Simulates GCP in local dev.
+- **Multi-Frontend Architecture**: Each frontend has its own dedicated GCS bucket and receives only the data from its relevant collections, defined in `FRONTEND_TARGETS`.
+
+#### FRONTEND_TARGETS Configuration
+
+The `FRONTEND_TARGETS` array in `smartWebhook.ts` is the single source of truth for multi-frontend routing:
+
+```typescript
+type FrontendTarget = {
+  id: string          // Target identifier (e.g. 'menu')
+  bucketEnv: string   // Name of the env var holding the GCS bucket name
+  filename: string    // Output JSON filename in the bucket
+  collections: string[] // Collection slugs included in this target's JSON
+}
+```
+
+#### Active Targets
+
+| Target ID | Env Variable | Output File | Collections |
+|---|---|---|---|
+| `menu` | `GCS_MENU_BUCKET` | `disponibilita.json` | 16 (all menu + settings) |
+
+#### Routing Logic
+
+When a collection changes, the hook:
+1. Calls `getAffectedTargets(collectionSlug)` — filters `FRONTEND_TARGETS` by `target.collections.includes(slug)`
+2. For each affected target:
+   - **Fast Path**: calls `aggregateDataForTarget(req, target.collections)` then `uploadToGCSTarget(data, target)`
+   - **Slow Path**: calls `sendPubSubMessage(collection, docId, changedFields)`
+3. If a target's `bucketEnv` variable is missing → logs a warning and **skips gracefully** (does not throw)
+
+#### Required Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `GCP_PROJECT_ID` | ✅ Yes | Google Cloud project ID |
+| `GCS_MENU_BUCKET` | ✅ Yes (menu target) | GCS bucket name for the menu frontend |
+
+> **Breaking Change**: `GCS_FRONTEND_BUCKET` has been **replaced** by `GCS_MENU_BUCKET`. Update Cloud Run env vars and `.env.example`.
+
+#### Adding a New Frontend Target
+
+Add an entry to `FRONTEND_TARGETS` in `src/hooks/smartWebhook.ts`:
+
+```typescript
+{
+  id: 'corporate',
+  bucketEnv: 'GCS_CORPORATE_BUCKET',
+  filename: 'corporate-data.json',
+  collections: ['piatti', 'allergeni'], // Only relevant collections
+}
+```
+
+No other code changes needed — routing is automatic.
 
 ### Collection Factory: `createBevandaCollection`
 
