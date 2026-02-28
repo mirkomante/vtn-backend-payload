@@ -78,6 +78,9 @@ export const Generali: GlobalConfig = {
                 description:
                   'Configura i 7 giorni della settimana. Ogni riga rappresenta un giorno.',
                 initCollapsed: false,
+                components: {
+                  RowLabel: './components/ScheduleWeeklyRowLabel',
+                },
               },
               fields: [
                 {
@@ -121,6 +124,9 @@ export const Generali: GlobalConfig = {
                     description:
                       'Aggiungi una o più fasce orarie (es. 12:00–15:00 per pranzo, 19:00–23:00 per cena).',
                     condition: (data, siblingData) => siblingData?.isOpen === true,
+                    components: {
+                      RowLabel: './components/CambioOrarioRowLabel',
+                    },
                   },
                   fields: [
                     {

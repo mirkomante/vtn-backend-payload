@@ -1,8 +1,9 @@
 import { InListaToggleCell as InListaToggleCell_8ae1794987006f3ccd7e87432107173e } from '../../../components/InListaToggleCell'
 import { PrezzoCell as PrezzoCell_993d8ee45a5a91c87db0d8a63f883fea } from '../../../components/PrezzoCell'
 import { default as default_405c47bfdfc9db75e29d868a2ab7e763 } from '../../../components/SaveDraftButtonWithCancel'
-import { default as default_cee45fd03c67cf7c9a3a7f26ca93c14c } from '../../../components/ImportaFestivitaButton'
 import { default as default_86305cbbd9af61402dc0055e29e10273 } from '../../../components/CambioOrarioRowLabel'
+import { default as default_74ced15caec121d77d9ee1cc46d1112f } from '../../../components/ScheduleWeeklyRowLabel'
+import { default as default_cee45fd03c67cf7c9a3a7f26ca93c14c } from '../../../components/ImportaFestivitaButton'
 import { default as default_a2e9fae9d810f7e9153151f5295a12ae } from '../../../components/ChiusuraRowLabel'
 import { default as default_d1bb5ba248ee16932fa7188fe96ba87f } from '@/components/MenuItemRowLabel'
 import { default as default_635e10ec35c3eeac3d03da87b06f8618 } from '../../../components/NavFooter'
@@ -15,8 +16,9 @@ export const importMap = {
   "/components/InListaToggleCell#InListaToggleCell": InListaToggleCell_8ae1794987006f3ccd7e87432107173e,
   "/components/PrezzoCell#PrezzoCell": PrezzoCell_993d8ee45a5a91c87db0d8a63f883fea,
   "./components/SaveDraftButtonWithCancel#default": default_405c47bfdfc9db75e29d868a2ab7e763,
-  "./components/ImportaFestivitaButton#default": default_cee45fd03c67cf7c9a3a7f26ca93c14c,
   "./components/CambioOrarioRowLabel#default": default_86305cbbd9af61402dc0055e29e10273,
+  "./components/ScheduleWeeklyRowLabel#default": default_74ced15caec121d77d9ee1cc46d1112f,
+  "./components/ImportaFestivitaButton#default": default_cee45fd03c67cf7c9a3a7f26ca93c14c,
   "./components/ChiusuraRowLabel#default": default_a2e9fae9d810f7e9153151f5295a12ae,
   "@/components/MenuItemRowLabel#default": default_d1bb5ba248ee16932fa7188fe96ba87f,
   "./components/NavFooter#default": default_635e10ec35c3eeac3d03da87b06f8618,

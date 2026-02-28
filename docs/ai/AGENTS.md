@@ -233,6 +233,8 @@ Ogni elemento rappresenta un giorno della settimana:
 
 **Regola**: `hours` è visibile nell'admin solo se `isOpen === true`. Il frontend deve ignorare `hours` se `isOpen === false`.
 
+**UX Admin**: `scheduleWeekly` usa `ScheduleWeeklyRowLabel` per mostrare il nome del giorno (es. "Lunedì") nella riga collassata. Le fasce orarie in `hours` usano `CambioOrarioRowLabel` per mostrare il range "HH:MM - HH:MM".
+
 ---
 
 **Tab 2: Fasce Pranzo / Cena** — campi `lunchSlot` e `dinnerSlot` (Group)
@@ -285,7 +287,8 @@ I componenti RowLabel personalizzano l'etichetta delle righe collassate negli ar
 
 | Componente | File | Usato in | Campo letto | Fallback |
 |---|---|---|---|---|
-| `CambioOrarioRowLabel` | `src/components/CambioOrarioRowLabel.tsx` | `generali` → `scheduleWeekly[].hours` | `start` + `end` | "Cambio orario 01" |
+| `ScheduleWeeklyRowLabel` | `src/components/ScheduleWeeklyRowLabel.tsx` | `generali` → `scheduleWeekly` | `day` (mappato in italiano) | "Nuovo Giorno 01" |
+| `CambioOrarioRowLabel` | `src/components/CambioOrarioRowLabel.tsx` | `generali` → `scheduleWeekly[].hours`, `generali` → `exceptions[].variedHours` | `start` + `end` | "Cambio orario 01" |
 | `ChiusuraRowLabel` | `src/components/ChiusuraRowLabel.tsx` | `generali` → `exceptions` | `reason` | "Chiusura 01" |
 | `MenuItemRowLabel` | `src/components/MenuItemRowLabel.tsx` | `menu-config` → `standardItems`, `specialItems` | `label` | "Sezione 01" |
 
