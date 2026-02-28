@@ -41,6 +41,7 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 **Tipo**: Global (Payload GlobalConfig)
 **Group**: `Ristorante configurazione`
 **Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+**Versions/Drafts**: ✅ Abilitato (`versions: { drafts: true }`) — espone il campo `_status` (`draft` / `published`), necessario per la logica di accesso pubblico in `menuImpostazioniReadAccess`.
 
 Questo Global definisce **quali sezioni mostrare nel frontend** e con quali regole di visibilità. Non contiene i dati dei piatti/vini (che vivono nelle rispettive collections), ma la **struttura di presentazione** del menu.
 
@@ -211,6 +212,7 @@ Registrato in `src/app/(payload)/admin/importMap.js` con la chiave `"@/component
 **Tipo**: Global (Payload GlobalConfig)
 **Group**: `Ristorante impostazioni`
 **Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+**Versions/Drafts**: ✅ Abilitato (`versions: { drafts: true }`) — espone il campo `_status` (`draft` / `published`), necessario per la logica di accesso pubblico in `menuImpostazioniReadAccess`.
 
 Questo Global è la fonte primaria di verità per tutto ciò che riguarda la gestione del tempo del ristorante. Il frontend deve consultare questo Global per determinare disponibilità e menu da mostrare.
 

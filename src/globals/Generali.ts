@@ -49,6 +49,9 @@ const timeField = (name: 'start' | 'end', label: string) =>
 export const Generali: GlobalConfig = {
   slug: 'generali',
   label: 'Generali',
+  versions: {
+    drafts: true,
+  },
   admin: {
     group: 'Ristorante impostazioni',
   },

@@ -139,6 +139,9 @@ const menuItemFields: Field[] = [
 export const MenuConfig: GlobalConfig = {
   slug: 'menu-config',
   label: 'Layout',
+  versions: {
+    drafts: true,
+  },
   admin: {
     group: 'Ristorante configurazione',
   },
