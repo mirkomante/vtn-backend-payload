@@ -105,6 +105,7 @@ Sia `standardItems` che `specialItems` sono array di oggetti con questa struttur
   filterMode?: 'all' | 'include' | 'exclude',   // visibile solo se sourceCollection.length === 1
   targetCategories?: PolymorphicRelation[],      // visibile solo se filterMode != 'all' e sorgente singola
   visibility: 'always' | 'lunch_only' | 'dinner_only',
+  activeDays?: Array<'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'>,
   icona?: { id: number, url: string, alt: string },  // upload → media-ristorante (opzionale)
 }
 ```
@@ -161,27 +162,46 @@ filterOptions: ({ relationTo, siblingData }) => {
 
 > **Nota per gli agenti AI**: il filtro dinamico è implementato tramite `filterOptions` nativo di Payload (non un componente custom). Funziona sia per la validazione lato server che per il rendering del dropdown nell'admin. Non è necessario un componente React custom per questa funzionalità.
 
+#### Logica `activeDays` — Filtro per Giorno della Settimana
+
+Il campo `activeDays` è un array opzionale di giorni della settimana (valori in inglese lowercase, coerenti con `generali.scheduleWeekly`).
+
+| Valore campo | Comportamento Frontend |
+|---|---|
+| `undefined` / `null` / `[]` | Sezione visibile **tutti i giorni** (retrocompatibilità) |
+| Array con uno o più giorni | Visibile **solo** nei giorni elencati |
+
 #### Logica `visibility` — Collegamento con `generali`
 
 I valori di `visibility` sono **chiavi logiche** che il frontend mappa sugli orari reali del Global `generali`:
 
 | Valore | Comportamento Frontend |
 |--------|------------------------|
-| `always` | Sezione sempre visibile |
+| `always` | Sezione sempre visibile (nella fascia oraria) |
 | `lunch_only` | Visibile solo se `orarioCorrente` è compreso in `generali.lunchSlot` |
 | `dinner_only` | Visibile solo se `orarioCorrente` è compreso in `generali.dinnerSlot` |
 
-**Algoritmo frontend per la visibilità di una sezione:**
+**Algoritmo frontend completo per la visibilità di una sezione** (`activeDays` + `visibility`):
 
 ```
-1. Leggi generali.lunchSlot e generali.dinnerSlot
-2. Per ogni item nel menu attivo (standard o speciale):
-   - Se item.visibility === 'always' → mostra sempre
+1. Ottieni giorno corrente (es. 'monday') e ora corrente
+2. Leggi generali.lunchSlot e generali.dinnerSlot
+3. Per ogni item nel menu attivo (standard o speciale):
+
+   STEP A — Verifica giorni (activeDays):
+   - Se item.activeDays è definito E non vuoto
+     E il giorno corrente NON è in item.activeDays → NASCONDI (salta al prossimo item)
+   - Altrimenti (vuoto/null/undefined) → prosegui
+
+   STEP B — Verifica fascia oraria (visibility):
+   - Se item.visibility === 'always' → MOSTRA
    - Se item.visibility === 'lunch_only':
-       mostra se orarioCorrente >= lunchSlot.start && orarioCorrente <= lunchSlot.end
+       MOSTRA se orarioCorrente >= lunchSlot.start && orarioCorrente <= lunchSlot.end
    - Se item.visibility === 'dinner_only':
-       mostra se orarioCorrente >= dinnerSlot.start && orarioCorrente <= dinnerSlot.end
+       MOSTRA se orarioCorrente >= dinnerSlot.start && orarioCorrente <= dinnerSlot.end
 ```
+
+> **Nota**: I due filtri sono indipendenti e si applicano in sequenza. Un item con `activeDays: ['saturday', 'sunday']` e `visibility: 'lunch_only'` sarà visibile solo il sabato e la domenica durante la fascia pranzo.
 
 #### API REST
 

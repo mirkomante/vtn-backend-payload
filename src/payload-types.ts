@@ -2242,6 +2242,10 @@ export interface MenuConfig {
          */
         visibility: 'always' | 'lunch_only' | 'dinner_only';
         /**
+         * Seleziona i giorni in cui mostrare questa sezione. Se lasciato vuoto, la sezione sarà visibile tutti i giorni.
+         */
+        activeDays?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] | null;
+        /**
          * Icona opzionale da mostrare accanto al titolo della sezione nel frontend.
          */
         icona?: (number | null) | MediaRistorante;
@@ -2313,6 +2317,10 @@ export interface MenuConfig {
          * Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.
          */
         visibility: 'always' | 'lunch_only' | 'dinner_only';
+        /**
+         * Seleziona i giorni in cui mostrare questa sezione. Se lasciato vuoto, la sezione sarà visibile tutti i giorni.
+         */
+        activeDays?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] | null;
         /**
          * Icona opzionale da mostrare accanto al titolo della sezione nel frontend.
          */
@@ -2411,6 +2419,7 @@ export interface MenuConfigSelect<T extends boolean = true> {
         filterMode?: T;
         targetCategories?: T;
         visibility?: T;
+        activeDays?: T;
         icona?: T;
         id?: T;
       };
@@ -2422,6 +2431,7 @@ export interface MenuConfigSelect<T extends boolean = true> {
         filterMode?: T;
         targetCategories?: T;
         visibility?: T;
+        activeDays?: T;
         icona?: T;
         id?: T;
       };

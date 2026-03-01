@@ -145,6 +145,25 @@ const menuItemFields: Field[] = [
     },
   },
   {
+    name: 'activeDays',
+    type: 'select',
+    label: 'Giorni Attivi',
+    hasMany: true,
+    options: [
+      { label: 'Lunedì',    value: 'monday'    },
+      { label: 'Martedì',   value: 'tuesday'   },
+      { label: 'Mercoledì', value: 'wednesday' },
+      { label: 'Giovedì',   value: 'thursday'  },
+      { label: 'Venerdì',   value: 'friday'    },
+      { label: 'Sabato',    value: 'saturday'  },
+      { label: 'Domenica',  value: 'sunday'    },
+    ],
+    admin: {
+      description:
+        'Seleziona i giorni in cui mostrare questa sezione. Se lasciato vuoto, la sezione sarà visibile tutti i giorni.',
+    },
+  },
+  {
     name: 'icona',
     type: 'upload',
     label: 'Icona Sezione',
