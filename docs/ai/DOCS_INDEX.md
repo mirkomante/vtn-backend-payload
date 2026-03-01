@@ -323,6 +323,8 @@ hooks: {
 ### Storia Recente
 
 **Marzo 2026**:
+- ✅ **UX Standard Lexical**: Definito standard di progetto per i campi `richText` — Fixed Toolbar obbligatoria, set minimo di feature (Bold, Italic, Underline, UnorderedList, Link). Documentato in `AGENTS.md` → UX Standards.
+- ✅ **Global `menu-config` — Refactoring UI**: Tab "Identità" rinominata "Generale", aggiunto campo `title`, sidebar con `logo`/`isActive`/`activeRange` spostata al root (fuori dai tabs). Campo `annotazione` aggiornato con `UnorderedListFeature` e `LinkFeature`.
 - ✅ **Multi-bucket GCS**: `Media` usa `GCS_BUCKET` via `gcsPluginMedia`; `MediaRistorante` usa `GCS_MENU_BUCKET` via `gcsPluginMenuMedia`. Due plugin `gcsStorage` separati in `payload.config.ts`. `adminThumbnail` e hook `afterRead` di `MediaRistorante` aggiornati per usare `GCS_MENU_BUCKET`.
 - ✅ **Collection `MediaRistorante`** (`media-ristorante`): Upload dedicato alle immagini del menu ristorante (logo, icone sezioni). Separata da `Media` generica. Group: `Ristorante impostazioni`. Registrata nel plugin GCS dedicato `gcsPluginMenuMedia`.
 - ✅ **Global `menu-config` — Tab "Identità"**: Nuova prima tab con campo `logo` (upload → `media-ristorante`) e campo `annotazione` (richText Lexical ristretto: solo bold/italic/underline).
@@ -408,6 +410,9 @@ Quando aggiungi funzionalità o fix:
 - `gcsPluginMedia` / `gcsPluginMenuMedia` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage
 - `logo menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
 - `annotazione menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
+- `richText` / `lexical` / `toolbar` → [AGENTS.md](./AGENTS.md) → UX Standards
+- `LinkFeature` / `UnorderedListFeature` → [AGENTS.md](./AGENTS.md) → UX Standards
+- `sidebar tabs` / `position sidebar` → [AGENTS.md](./AGENTS.md) → UX Standards
 - `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray
 
 ---

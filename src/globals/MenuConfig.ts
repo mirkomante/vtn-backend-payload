@@ -1,5 +1,13 @@
 import type { GlobalConfig, Field } from 'payload'
-import { lexicalEditor, BoldFeature, ItalicFeature, UnderlineFeature } from '@payloadcms/richtext-lexical'
+import {
+  lexicalEditor,
+  BoldFeature,
+  ItalicFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
+  LinkFeature,
+  FixedToolbarFeature,
+} from '@payloadcms/richtext-lexical'
 import {
   menuImpostazioniReadAccess,
   menuImpostazioniUpdateAccess,
@@ -13,8 +21,9 @@ import {
  * le mappa sugli orari reali definiti nel Global `generali` (lunchSlot / dinnerSlot).
  *
  * Struttura:
- *  - Tab 1 "Menu Standard (Default)": array `standardItems` — sezioni sempre attive.
- *  - Tab 2 "Menu Speciale (Override)": flag `isActive`, range date `activeRange`,
+ *  - Tab 1 "Generale": campo `title`, richText `annotazione`, upload `logo` (sidebar).
+ *  - Tab 2 "Menu Standard (Default)": array `standardItems` — sezioni sempre attive.
+ *  - Tab 3 "Menu Speciale (Override)": flag `isActive` (sidebar), range date `activeRange` (sidebar),
  *    array `specialItems` — sovrascrive il menu standard nel periodo indicato.
  *
  * Group: "Ristorante configurazione"
@@ -160,25 +169,26 @@ export const MenuConfig: GlobalConfig = {
     update: menuImpostazioniUpdateAccess,
   },
   fields: [
+    // ─────────────────────────────────────────────────────────────────────────
+    // TABS (area principale)
+    // ─────────────────────────────────────────────────────────────────────────
     {
       type: 'tabs',
       tabs: [
         // ─────────────────────────────────────────────────────────────────────
-        // TAB 1: Identità
+        // TAB 1: Generale
         // ─────────────────────────────────────────────────────────────────────
         {
-          label: 'Identità',
+          label: 'Generale',
           description:
-            'Elementi di branding del menu: logo del ristorante e annotazione introduttiva.',
+            'Informazioni generali del menu: titolo e annotazione introduttiva.',
           fields: [
             {
-              name: 'logo',
-              type: 'upload',
-              label: 'Logo',
-              relationTo: 'media-ristorante',
+              name: 'title',
+              type: 'text',
+              label: 'Titolo',
               admin: {
-                description:
-                  'Logo del ristorante da mostrare nell\'intestazione del menu digitale.',
+                description: 'Titolo del menu digitale mostrato nel frontend.',
               },
             },
             {
@@ -187,14 +197,17 @@ export const MenuConfig: GlobalConfig = {
               label: 'Annotazione',
               editor: lexicalEditor({
                 features: [
+                  FixedToolbarFeature(),
                   BoldFeature(),
                   ItalicFeature(),
                   UnderlineFeature(),
+                  UnorderedListFeature(),
+                  LinkFeature({}),
                 ],
               }),
               admin: {
                 description:
-                  'Testo introduttivo del menu. Supporta solo grassetto, corsivo e sottolineato.',
+                  'Testo introduttivo del menu. Supporta grassetto, corsivo, sottolineato, liste puntate e link.',
               },
             },
           ],
@@ -226,65 +239,13 @@ export const MenuConfig: GlobalConfig = {
         },
 
         // ─────────────────────────────────────────────────────────────────────
-        // TAB 2: Menu Speciale
+        // TAB 3: Menu Speciale
         // ─────────────────────────────────────────────────────────────────────
         {
           label: 'Menu Speciale (Override)',
           description:
-            'Menu temporaneo che sovrascrive il Menu Standard nel periodo indicato. Utile per eventi, festività o periodi stagionali.',
+            'Menu temporaneo che sovrascrive il Menu Standard nel periodo indicato. Utile per eventi, festività o periodi stagionali. Attiva e configura il periodo dalla sidebar →',
           fields: [
-            {
-              name: 'isActive',
-              type: 'checkbox',
-              label: 'Attiva Menu Speciale',
-              defaultValue: false,
-              admin: {
-                description:
-                  'Se abilitato e la data corrente è compresa nel range, il frontend usa specialItems al posto di standardItems.',
-              },
-            },
-            {
-              name: 'activeRange',
-              type: 'group',
-              label: 'Periodo di Attivazione',
-              admin: {
-                description: 'Intervallo di date in cui il Menu Speciale è attivo.',
-                condition: (_data, siblingData) => siblingData?.isActive === true,
-              },
-              fields: [
-                {
-                  type: 'row',
-                  fields: [
-                    {
-                      name: 'start',
-                      type: 'date',
-                      label: 'Dal...',
-                      admin: {
-                        width: '50%',
-                        date: {
-                          pickerAppearance: 'dayOnly',
-                          displayFormat: 'dd/MM/yyyy',
-                        },
-                        description: 'Data di inizio del Menu Speciale (inclusa)',
-                      },
-                    },
-                    {
-                      name: 'end',
-                      type: 'date',
-                      label: 'Al...',
-                      admin: {
-                        width: '50%',
-                        date: {
-                          pickerAppearance: 'dayOnly',
-                          displayFormat: 'dd/MM/yyyy',
-                        },
-                        description: 'Data di fine del Menu Speciale (inclusa)',
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
             {
               name: 'specialItems',
               type: 'array',
@@ -293,7 +254,7 @@ export const MenuConfig: GlobalConfig = {
                 description:
                   'Sezioni del menu speciale. Struttura identica al Menu Standard.',
                 initCollapsed: true,
-                condition: (_data, siblingData) => siblingData?.isActive === true,
+                condition: (data) => data?.isActive === true,
                 components: {
                   RowLabel: '@/components/MenuItemRowLabel',
                 },
@@ -301,6 +262,68 @@ export const MenuConfig: GlobalConfig = {
               fields: menuItemFields,
             },
           ],
+        },
+      ],
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SIDEBAR — visibile su tutte le tab
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      name: 'logo',
+      type: 'upload',
+      label: 'Logo',
+      relationTo: 'media-ristorante',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Logo del ristorante da mostrare nell\'intestazione del menu digitale.',
+      },
+    },
+    {
+      name: 'isActive',
+      type: 'checkbox',
+      label: 'Attiva Menu Speciale',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description:
+          'Se abilitato e la data corrente è compresa nel range, il frontend usa specialItems al posto di standardItems.',
+      },
+    },
+    {
+      name: 'activeRange',
+      type: 'group',
+      label: 'Periodo di Attivazione',
+      admin: {
+        position: 'sidebar',
+        description: 'Intervallo di date in cui il Menu Speciale è attivo.',
+        condition: (data) => data?.isActive === true,
+      },
+      fields: [
+        {
+          name: 'start',
+          type: 'date',
+          label: 'Dal...',
+          admin: {
+            date: {
+              pickerAppearance: 'dayOnly',
+              displayFormat: 'dd/MM/yyyy',
+            },
+            description: 'Data di inizio del Menu Speciale (inclusa)',
+          },
+        },
+        {
+          name: 'end',
+          type: 'date',
+          label: 'Al...',
+          admin: {
+            date: {
+              pickerAppearance: 'dayOnly',
+              displayFormat: 'dd/MM/yyyy',
+            },
+            description: 'Data di fine del Menu Speciale (inclusa)',
+          },
         },
       ],
     },

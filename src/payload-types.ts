@@ -2155,11 +2155,11 @@ export interface Generali {
 export interface MenuConfig {
   id: number;
   /**
-   * Logo del ristorante da mostrare nell'intestazione del menu digitale.
+   * Titolo del menu digitale mostrato nel frontend.
    */
-  logo?: (number | null) | MediaRistorante;
+  title?: string | null;
   /**
-   * Testo introduttivo del menu. Supporta solo grassetto, corsivo e sottolineato.
+   * Testo introduttivo del menu. Supporta grassetto, corsivo, sottolineato, liste puntate e link.
    */
   annotazione?: {
     root: {
@@ -2249,23 +2249,6 @@ export interface MenuConfig {
       }[]
     | null;
   /**
-   * Se abilitato e la data corrente è compresa nel range, il frontend usa specialItems al posto di standardItems.
-   */
-  isActive?: boolean | null;
-  /**
-   * Intervallo di date in cui il Menu Speciale è attivo.
-   */
-  activeRange?: {
-    /**
-     * Data di inizio del Menu Speciale (inclusa)
-     */
-    start?: string | null;
-    /**
-     * Data di fine del Menu Speciale (inclusa)
-     */
-    end?: string | null;
-  };
-  /**
    * Sezioni del menu speciale. Struttura identica al Menu Standard.
    */
   specialItems?:
@@ -2337,6 +2320,27 @@ export interface MenuConfig {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Logo del ristorante da mostrare nell'intestazione del menu digitale.
+   */
+  logo?: (number | null) | MediaRistorante;
+  /**
+   * Se abilitato e la data corrente è compresa nel range, il frontend usa specialItems al posto di standardItems.
+   */
+  isActive?: boolean | null;
+  /**
+   * Intervallo di date in cui il Menu Speciale è attivo.
+   */
+  activeRange?: {
+    /**
+     * Data di inizio del Menu Speciale (inclusa)
+     */
+    start?: string | null;
+    /**
+     * Data di fine del Menu Speciale (inclusa)
+     */
+    end?: string | null;
+  };
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2397,7 +2401,7 @@ export interface GeneraliSelect<T extends boolean = true> {
  * via the `definition` "menu-config_select".
  */
 export interface MenuConfigSelect<T extends boolean = true> {
-  logo?: T;
+  title?: T;
   annotazione?: T;
   standardItems?:
     | T
@@ -2410,13 +2414,6 @@ export interface MenuConfigSelect<T extends boolean = true> {
         icona?: T;
         id?: T;
       };
-  isActive?: T;
-  activeRange?:
-    | T
-    | {
-        start?: T;
-        end?: T;
-      };
   specialItems?:
     | T
     | {
@@ -2427,6 +2424,14 @@ export interface MenuConfigSelect<T extends boolean = true> {
         visibility?: T;
         icona?: T;
         id?: T;
+      };
+  logo?: T;
+  isActive?: T;
+  activeRange?:
+    | T
+    | {
+        start?: T;
+        end?: T;
       };
   _status?: T;
   updatedAt?: T;

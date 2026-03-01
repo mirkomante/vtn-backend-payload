@@ -31,7 +31,7 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 
 ### Globals
 - **`generali`** (`Ristorante impostazioni`): Orari settimanali, fasce pranzo/cena, chiusure e festività.
-- **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria). Include anche branding (logo, annotazione).
+- **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria). Include branding (logo in sidebar, annotazione) e titolo del menu.
 
 ## 🌐 Globals
 
@@ -61,29 +61,36 @@ Il frontend deve applicare questa logica per determinare quale array di sezioni 
 
 #### Struttura Dati
 
-**Tab 1: Identità** — campi `logo` e `annotazione`
+**Tab 1: Generale** — campi `title`, `annotazione`
 
 **Tab 2: Menu Standard (Default)** — campo `standardItems` (Array)
 
-**Tab 3: Menu Speciale (Override)** — campi `isActive`, `activeRange`, `specialItems`
+**Tab 3: Menu Speciale (Override)** — campo `specialItems` (Array, condizionale)
+
+**Sidebar (root, visibile su tutte le tab)** — `logo`, `isActive`, `activeRange`
+
+> **Nota tecnica**: In Payload CMS v3, `admin: { position: 'sidebar' }` funziona **solo per campi definiti al root del global**, fuori dall'array `tabs`. Campi con `position: 'sidebar'` annidati dentro un tab vengono ignorati e renderizzati nell'area principale. Per questo motivo `logo`, `isActive` e `activeRange` sono definiti come campi root dopo il campo `tabs`.
 
 ```typescript
 // Struttura del documento menu-config
 {
-  // Tab Identità
-  logo?: { id: number, url: string, alt: string },   // upload → media-ristorante
-  annotazione?: SerializedEditorState,               // richText Lexical (solo bold/italic/underline)
+  // Tab Generale
+  title?: string,                                    // testo — titolo del menu digitale
+  annotazione?: SerializedEditorState,               // richText Lexical (bold/italic/underline/list/link)
 
   // Tab Menu Standard
   standardItems: MenuItemArray,
 
   // Tab Menu Speciale
+  specialItems: MenuItemArray,                       // visibile nell'admin solo se isActive === true
+
+  // Sidebar root (visibili su tutte le tab)
+  logo?: { id: number, url: string, alt: string },   // upload → media-ristorante
   isActive: boolean,
   activeRange: {
     start: string,   // ISO date
     end: string,     // ISO date
   },
-  specialItems: MenuItemArray,
 }
 ```
 
@@ -214,8 +221,10 @@ Registrato in `src/app/(payload)/admin/importMap.js` con la chiave `"@/component
 - Non ci sono hooks o webhooks su questo Global (la configurazione del menu non richiede rebuild immediati).
 - Il componente `MenuItemRowLabel` è condiviso tra `standardItems` e `specialItems` — legge sempre il campo `label` del sibling data.
 - Il campo `logo` e il campo `icona` puntano entrambi alla collection `media-ristorante` (NON a `media`).
-- Il campo `annotazione` usa un editor Lexical **ristretto**: solo `BoldFeature`, `ItalicFeature`, `UnderlineFeature`. Non supporta heading, link, liste o altri elementi.
-- Le tab sono ora 3: **Identità** (Tab 1), **Menu Standard** (Tab 2), **Menu Speciale** (Tab 3).
+- Il campo `annotazione` usa un editor Lexical con toolbar fissa e queste feature: `BoldFeature`, `ItalicFeature`, `UnderlineFeature`, `UnorderedListFeature`, `LinkFeature`. Non supporta heading, immagini inline o altri elementi avanzati.
+- Le tab sono 3: **Generale** (Tab 1), **Menu Standard** (Tab 2), **Menu Speciale** (Tab 3).
+- **UX Sidebar**: `logo`, `isActive` e `activeRange` sono definiti come campi **root** (fuori dal campo `tabs`) con `admin: { position: 'sidebar' }` — appaiono nella colonna destra dell'editor Payload su tutte le tab. In Payload v3, `position: 'sidebar'` funziona solo a livello root, non dentro un tab annidato.
+- Il campo `title` (Tab 1) è un campo `text` opzionale che rappresenta il titolo del menu digitale mostrato nel frontend.
 
 ---
 
@@ -592,6 +601,58 @@ You are an expert Payload CMS developer. When working with Payload projects, fol
 4. **Transaction Safety**: Always pass `req` to nested operations in hooks
 5. **Access Control**: Understand Local API bypasses access control by default
 6. **Access Control**: Ensure roles exist when modifiyng collection or globals with access controls
+
+## UX Standards
+
+### Rich Text Editor (Lexical)
+
+Per i campi `richText` con editor Lexical, seguire queste regole:
+
+1. **Privilegiare sempre la Fixed Toolbar** con icone esplicite rispetto ai soli comandi slash (`/`). La toolbar fissa è il comportamento di default di Lexical — non disabilitarla.
+
+2. **Set minimo di feature standard** da includere salvo restrizioni specifiche:
+   ```typescript
+   editor: lexicalEditor({
+     features: [
+       FixedToolbarFeature(),   // toolbar fissa sempre visibile con icone
+       BoldFeature(),
+       ItalicFeature(),
+       UnderlineFeature(),
+       UnorderedListFeature(),
+       LinkFeature({}),
+     ],
+   })
+   ```
+
+3. **Deroghe accettabili**: ridurre il set solo se il campo ha vincoli editoriali espliciti (es. un campo note tecnico dove i link non hanno senso, o un campo tag dove la formattazione è indesiderata). Documentare sempre il motivo della restrizione nel campo `admin.description`.
+
+4. **Import**: tutte le feature si importano da `@payloadcms/richtext-lexical`:
+   ```typescript
+   import {
+     lexicalEditor,
+     FixedToolbarFeature,
+     BoldFeature,
+     ItalicFeature,
+     UnderlineFeature,
+     UnorderedListFeature,
+     LinkFeature,
+     // OrderedListFeature, HeadingFeature, BlockquoteFeature, ecc.
+   } from '@payloadcms/richtext-lexical'
+   ```
+
+### Sidebar nei Global/Collection con Tabs
+
+In Payload CMS v3, `admin: { position: 'sidebar' }` funziona **solo per campi definiti al root** del global/collection, fuori dall'array `tabs`. Campi con `position: 'sidebar'` annidati dentro un tab vengono ignorati e renderizzati nell'area principale.
+
+**Pattern corretto**:
+```typescript
+fields: [
+  { type: 'tabs', tabs: [ /* ... tab fields ... */ ] },
+  // Campi sidebar DOPO il blocco tabs, al root:
+  { name: 'logo', type: 'upload', admin: { position: 'sidebar' } },
+  { name: 'isActive', type: 'checkbox', admin: { position: 'sidebar' } },
+]
+```
 
 ### Code Validation
 
