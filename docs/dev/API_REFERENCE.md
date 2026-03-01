@@ -741,43 +741,126 @@ GET /api/globals/ordinamento-menu?depth=1
 }
 ```
 
-#### Pattern di utilizzo consigliato
+#### Pattern di utilizzo — Next.js SSG (App Router)
+
+> **⚠️ SSG: URL assoluto obbligatorio**
+> Le fetch eseguite a build-time in Server Components / `generateStaticParams` non hanno contesto browser. L'URL relativo `/api/...` non funziona: usare sempre l'URL assoluto del backend (`process.env.NEXT_PUBLIC_API_URL`).
 
 ```typescript
-// 1. Carica il global all'avvio (una sola volta, cacheable)
-const ordinamento = await fetch('/api/globals/ordinamento-menu?depth=1').then(r => r.json())
+// lib/api.ts — helper riutilizzabile
+const API_URL = process.env.NEXT_PUBLIC_API_URL // es. 'https://backend.example.com'
 
-// 2. Ordine categorie piatti
-const categorieOrdinate = ordinamento.categoriePiatti  // già nell'ordine corretto
-
-// 3. Per ogni categoria, carica i piatti con il sort corretto
-const sortParam = ordinamento.piattiOrderDirection === 'desc'
-  ? `-${ordinamento.piattiOrderBy}`
-  : ordinamento.piattiOrderBy
-
-const piatti = await fetch(
-  `/api/piatti?where[categoria][equals]=${categoriaId}&where[inLista][equals]=true&sort=${sortParam}&depth=1`
-).then(r => r.json())
-
-// 4. Raggruppamento (se necessario)
-if (ordinamento.piattiGroupBy !== 'nessuno') {
-  const grouped = Object.groupBy(piatti.docs, item => item[ordinamento.piattiGroupBy])
+export async function getOrdinamentoMenu() {
+  const res = await fetch(
+    `${API_URL}/api/globals/ordinamento-menu?depth=1`,
+    { next: { tags: ['ordinamento-menu'] } }  // tag per revalidazione manuale
+  )
+  if (!res.ok) throw new Error('Failed to fetch ordinamento-menu')
+  return res.json()
 }
 
-// 5. Stesso pattern per vini (con groupBy regione di default)
+export async function getPiatti(categoriaId: number, sortParam: string) {
+  const res = await fetch(
+    `${API_URL}/api/piatti?where[categoria][equals]=${categoriaId}&where[inLista][equals]=true&sort=${sortParam}&depth=1`,
+    { next: { tags: ['piatti'] } }
+  )
+  return res.json()
+}
+```
+
+```typescript
+// app/menu/page.tsx — Server Component (SSG)
+import { getOrdinamentoMenu, getPiatti } from '@/lib/api'
+
+export const dynamic = 'force-static'  // SSG esplicito
+
+export default async function MenuPage() {
+  // 1. Carica configurazione ordinamento (build-time)
+  const ordinamento = await getOrdinamentoMenu()
+
+  // 2. Costruisci sort param (Payload: prefisso '-' per DESC)
+  const sortParam = ordinamento.piattiOrderDirection === 'desc'
+    ? `-${ordinamento.piattiOrderBy}`
+    : ordinamento.piattiOrderBy
+
+  // 3. Categorie già nell'ordine editoriale corretto
+  const categorieOrdinate = ordinamento.categoriePiatti  // [{ id, nome }, ...]
+
+  // 4. Carica piatti per ogni categoria (build-time, in parallelo)
+  const piattiPerCategoria = await Promise.all(
+    categorieOrdinate.map(async (cat) => {
+      const { docs } = await getPiatti(cat.id, sortParam)
+      return { categoria: cat, piatti: docs }
+    })
+  )
+
+  // 5. Raggruppamento (se configurato) — senza Object.groupBy (compatibilità)
+  const piattiConGruppi = piattiPerCategoria.map(({ categoria, piatti }) => {
+    const groupField = ordinamento.piattiGroupBy
+    if (groupField === 'nessuno') return { categoria, gruppi: null, piatti }
+
+    const gruppi = piatti.reduce<Record<string, typeof piatti>>((acc, item) => {
+      const key = item[groupField] ?? 'Altro'
+      if (!acc[key]) acc[key] = []
+      acc[key].push(item)
+      return acc
+    }, {})
+    return { categoria, gruppi, piatti: null }
+  })
+
+  return <MenuView dati={piattiConGruppi} />
+}
+```
+
+```typescript
+// Stesso pattern per vini (groupBy su campo relationship → depth=2)
 const viniSortParam = ordinamento.viniOrderDirection === 'desc'
   ? `-${ordinamento.viniOrderBy}`
   : ordinamento.viniOrderBy
 
-const vini = await fetch(`/api/vino?where[inLista][equals]=true&sort=${viniSortParam}&depth=2`).then(r => r.json())
+const { docs: vini } = await fetch(
+  `${API_URL}/api/vino?where[inLista][equals]=true&sort=${viniSortParam}&depth=2`,
+  { next: { tags: ['vini'] } }
+).then(r => r.json())
 
-if (ordinamento.viniGroupBy !== 'nessuno') {
-  // es. groupBy 'regione' → item.regione.nome (depth=2 necessario)
-  const grouped = Object.groupBy(vini.docs, item => item[ordinamento.viniGroupBy]?.nome ?? 'Altro')
+// groupBy 'regione' → item.regione è un oggetto { id, nome } (depth=2)
+const groupField = ordinamento.viniGroupBy
+const viniPerGruppo = groupField !== 'nessuno'
+  ? vini.reduce<Record<string, typeof vini>>((acc, vino) => {
+      const key = typeof vino[groupField] === 'object'
+        ? vino[groupField]?.nome ?? 'Altro'  // campo relationship
+        : vino[groupField] ?? 'Altro'         // campo stringa
+      if (!acc[key]) acc[key] = []
+      acc[key].push(vino)
+      return acc
+    }, {})
+  : null
+```
+
+#### Revalidazione (quando il backend cambia)
+
+Con SSG, le pagine vengono ricostruite solo a build-time o su revalidazione esplicita. Configurare il backend per chiamare `revalidateTag` quando `ordinamento-menu` viene aggiornato:
+
+```typescript
+// Nel backend: hook afterChange su OrdinamentoMenu
+// oppure: endpoint dedicato chiamato dal webhook
+
+// Nel frontend Next.js — app/api/revalidate/route.ts
+import { revalidateTag } from 'next/cache'
+import { NextRequest } from 'next/server'
+
+export async function POST(req: NextRequest) {
+  const secret = req.nextUrl.searchParams.get('secret')
+  if (secret !== process.env.REVALIDATION_SECRET) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const { tag } = await req.json()
+  revalidateTag(tag)  // es. 'ordinamento-menu', 'piatti', 'vini'
+  return Response.json({ revalidated: true })
 }
 ```
 
-> **Caching**: questo global cambia raramente. È consigliabile cacheare la risposta (es. `revalidate: 3600` in Next.js) e invalidare il cache tramite webhook quando viene aggiornato.
+> **Nota**: `revalidateTag` richiede Next.js App Router. Con Pages Router (`getStaticProps`) usare invece `res.revalidate('/menu')` in un API route dedicato (`/api/revalidate`).
 
 ---
 
