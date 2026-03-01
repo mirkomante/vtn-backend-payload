@@ -86,6 +86,7 @@ export interface Config {
     nazioni: Nazioni;
     regioni: Regioni;
     zone: Zone;
+    'media-ristorante': MediaRistorante;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -130,6 +131,7 @@ export interface Config {
     nazioni: NazioniSelect<false> | NazioniSelect<true>;
     regioni: RegioniSelect<false> | RegioniSelect<true>;
     zone: ZoneSelect<false> | ZoneSelect<true>;
+    'media-ristorante': MediaRistoranteSelect<false> | MediaRistoranteSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -740,6 +742,30 @@ export interface TipologieBevanda {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Immagini e media utilizzati nel menu del ristorante (logo, icone sezioni).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-ristorante".
+ */
+export interface MediaRistorante {
+  id: number;
+  /**
+   * Descrizione dell'immagine per accessibilità e SEO (es. "Logo ristorante").
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
@@ -869,6 +895,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'zone';
         value: number | Zone;
+      } | null)
+    | ({
+        relationTo: 'media-ristorante';
+        value: number | MediaRistorante;
       } | null)
     | ({
         relationTo: 'media';
@@ -1185,6 +1215,24 @@ export interface ZoneSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-ristorante_select".
+ */
+export interface MediaRistoranteSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2107,6 +2155,28 @@ export interface Generali {
 export interface MenuConfig {
   id: number;
   /**
+   * Logo del ristorante da mostrare nell'intestazione del menu digitale.
+   */
+  logo?: (number | null) | MediaRistorante;
+  /**
+   * Testo introduttivo del menu. Supporta solo grassetto, corsivo e sottolineato.
+   */
+  annotazione?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
    * Ogni riga rappresenta una sezione del menu (es. "Antipasti", "Vini Rossi").
    */
   standardItems?:
@@ -2171,6 +2241,10 @@ export interface MenuConfig {
          * Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.
          */
         visibility: 'always' | 'lunch_only' | 'dinner_only';
+        /**
+         * Icona opzionale da mostrare accanto al titolo della sezione nel frontend.
+         */
+        icona?: (number | null) | MediaRistorante;
         id?: string | null;
       }[]
     | null;
@@ -2256,6 +2330,10 @@ export interface MenuConfig {
          * Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.
          */
         visibility: 'always' | 'lunch_only' | 'dinner_only';
+        /**
+         * Icona opzionale da mostrare accanto al titolo della sezione nel frontend.
+         */
+        icona?: (number | null) | MediaRistorante;
         id?: string | null;
       }[]
     | null;
@@ -2319,6 +2397,8 @@ export interface GeneraliSelect<T extends boolean = true> {
  * via the `definition` "menu-config_select".
  */
 export interface MenuConfigSelect<T extends boolean = true> {
+  logo?: T;
+  annotazione?: T;
   standardItems?:
     | T
     | {
@@ -2327,6 +2407,7 @@ export interface MenuConfigSelect<T extends boolean = true> {
         filterMode?: T;
         targetCategories?: T;
         visibility?: T;
+        icona?: T;
         id?: T;
       };
   isActive?: T;
@@ -2344,6 +2425,7 @@ export interface MenuConfigSelect<T extends boolean = true> {
         filterMode?: T;
         targetCategories?: T;
         visibility?: T;
+        icona?: T;
         id?: T;
       };
   _status?: T;

@@ -322,6 +322,11 @@ hooks: {
 
 ### Storia Recente
 
+**Marzo 2026**:
+- ✅ **Collection `MediaRistorante`** (`media-ristorante`): Upload dedicato alle immagini del menu ristorante (logo, icone sezioni). Separata da `Media` generica. Group: `Ristorante impostazioni`. Registrata nel plugin GCS con stesso pattern di `Media`.
+- ✅ **Global `menu-config` — Tab "Identità"**: Nuova prima tab con campo `logo` (upload → `media-ristorante`) e campo `annotazione` (richText Lexical ristretto: solo bold/italic/underline).
+- ✅ **Global `menu-config` — Campo `icona` in `menuItemFields`**: Campo upload opzionale (→ `media-ristorante`) aggiunto a ogni elemento di `standardItems` e `specialItems`.
+
 **Febbraio 2026**:
 - ✅ **Collection `generali` (Singleton)**: Single Source of Truth per orari e aperture ristorante (Tab: Orari Settimanali, Fasce Pranzo/Cena, Eccezioni & Festività) — convertita da Global a Collection per controllo ordinamento sidebar
 - ✅ **Componente `ImportaFestivitaButton`**: UI field per importare automaticamente festività italiane via `date-holidays`
@@ -395,8 +400,13 @@ Quando aggiungi funzionalità o fix:
 - `lunchSlot` / `dinnerSlot` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
 - `scheduleWeekly` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
 - `exceptions` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
+- `media-ristorante` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage, [API_REFERENCE.md](../dev/API_REFERENCE.md) → Media Ristorante
+- `MediaRistorante` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage
+- `logo menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
+- `annotazione menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
+- `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray
 
 ---
 
-**Ultimo aggiornamento**: Febbraio 2026  
-**Versione**: 1.0.0
+**Ultimo aggiornamento**: Marzo 2026  
+**Versione**: 1.1.0

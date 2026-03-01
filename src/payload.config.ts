@@ -15,6 +15,7 @@ import { MenuConfig } from './globals/MenuConfig'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
+import { MediaRistorante } from './collections/MediaRistorante'
 import { migrateDataEndpoint } from './endpoints/migrateData'
 import { CategoriaMenuFisso } from './collections/CategoriaMenuFisso'
 import { CategoriaPiatti } from './collections/CategoriaPiatti'
@@ -57,6 +58,7 @@ const gcsPlugin = gcsStorage({
     // evita il problema build-time dove Boolean(process.env.GCS_BUCKET) = false
     // perché qui il valore viene valutato a runtime, non compilato nel bundle.
     media: gcsEnabled ? { disableLocalStorage: true } : true,
+    'media-ristorante': gcsEnabled ? { disableLocalStorage: true } : true,
   },
   bucket: process.env.GCS_BUCKET || 'not-configured',
   options: {
@@ -116,6 +118,8 @@ export default buildConfig({
     Nazione,
     Regione,
     Zona,
+    // Gruppo: Ristorante impostazioni
+    MediaRistorante,
     // Gruppo: Admin
     Users,
     Media,

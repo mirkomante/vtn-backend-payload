@@ -1,4 +1,5 @@
 import type { GlobalConfig, Field } from 'payload'
+import { lexicalEditor, BoldFeature, ItalicFeature, UnderlineFeature } from '@payloadcms/richtext-lexical'
 import {
   menuImpostazioniReadAccess,
   menuImpostazioniUpdateAccess,
@@ -134,6 +135,15 @@ const menuItemFields: Field[] = [
         'Fascia oraria in cui mostrare questa sezione. "Solo Pranzo" e "Solo Cena" si basano sui range definiti in Generali → Fasce Pranzo/Cena.',
     },
   },
+  {
+    name: 'icona',
+    type: 'upload',
+    label: 'Icona Sezione',
+    relationTo: 'media-ristorante',
+    admin: {
+      description: 'Icona opzionale da mostrare accanto al titolo della sezione nel frontend.',
+    },
+  },
 ]
 
 export const MenuConfig: GlobalConfig = {
@@ -154,7 +164,44 @@ export const MenuConfig: GlobalConfig = {
       type: 'tabs',
       tabs: [
         // ─────────────────────────────────────────────────────────────────────
-        // TAB 1: Menu Standard
+        // TAB 1: Identità
+        // ─────────────────────────────────────────────────────────────────────
+        {
+          label: 'Identità',
+          description:
+            'Elementi di branding del menu: logo del ristorante e annotazione introduttiva.',
+          fields: [
+            {
+              name: 'logo',
+              type: 'upload',
+              label: 'Logo',
+              relationTo: 'media-ristorante',
+              admin: {
+                description:
+                  'Logo del ristorante da mostrare nell\'intestazione del menu digitale.',
+              },
+            },
+            {
+              name: 'annotazione',
+              type: 'richText',
+              label: 'Annotazione',
+              editor: lexicalEditor({
+                features: [
+                  BoldFeature(),
+                  ItalicFeature(),
+                  UnderlineFeature(),
+                ],
+              }),
+              admin: {
+                description:
+                  'Testo introduttivo del menu. Supporta solo grassetto, corsivo e sottolineato.',
+              },
+            },
+          ],
+        },
+
+        // ─────────────────────────────────────────────────────────────────────
+        // TAB 2: Menu Standard
         // ─────────────────────────────────────────────────────────────────────
         {
           label: 'Menu Standard (Default)',

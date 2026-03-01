@@ -5,6 +5,12 @@ import { default as default_86305cbbd9af61402dc0055e29e10273 } from '../../../co
 import { default as default_74ced15caec121d77d9ee1cc46d1112f } from '../../../components/ScheduleWeeklyRowLabel'
 import { default as default_cee45fd03c67cf7c9a3a7f26ca93c14c } from '../../../components/ImportaFestivitaButton'
 import { default as default_a2e9fae9d810f7e9153151f5295a12ae } from '../../../components/ChiusuraRowLabel'
+import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
+import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
+import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
+import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_d1bb5ba248ee16932fa7188fe96ba87f } from '@/components/MenuItemRowLabel'
 import { default as default_635e10ec35c3eeac3d03da87b06f8618 } from '../../../components/NavFooter'
 import { GcsClientUploadHandler as GcsClientUploadHandler_06e62ca02c7c441053a9b643e5545934 } from '@payloadcms/storage-gcs/client'
@@ -20,6 +26,12 @@ export const importMap = {
   "./components/ScheduleWeeklyRowLabel#default": default_74ced15caec121d77d9ee1cc46d1112f,
   "./components/ImportaFestivitaButton#default": default_cee45fd03c67cf7c9a3a7f26ca93c14c,
   "./components/ChiusuraRowLabel#default": default_a2e9fae9d810f7e9153151f5295a12ae,
+  "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
+  "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
+  "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
+  "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/MenuItemRowLabel#default": default_d1bb5ba248ee16932fa7188fe96ba87f,
   "./components/NavFooter#default": default_635e10ec35c3eeac3d03da87b06f8618,
   "@payloadcms/storage-gcs/client#GcsClientUploadHandler": GcsClientUploadHandler_06e62ca02c7c441053a9b643e5545934,

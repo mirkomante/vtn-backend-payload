@@ -16,6 +16,7 @@ Documentazione completa delle API REST e GraphQL del backend Payload CMS.
   - [Categorie](#categorie)
   - [Allergeni](#allergeni)
   - [Media](#media)
+  - [Media Ristorante](#media-ristorante)
 - [Querying](#querying)
 - [GraphQL](#graphql)
 - [Webhook & Events](#webhook--events)
@@ -450,6 +451,8 @@ GET /api/allergeni?sort=codice
 **Slug**: `media`  
 **Endpoint**: `/api/media`
 
+Media generici del sito (futuro). Attualmente usato come collection di upload generica di Payload.
+
 #### Upload Media
 
 ```bash
@@ -480,6 +483,64 @@ alt: "Descrizione immagine"
 
 ```bash
 GET /api/media/MEDIA_ID
+```
+
+---
+
+### Media Ristorante
+
+**Slug**: `media-ristorante`  
+**Endpoint**: `/api/media-ristorante`  
+**Group**: `Ristorante impostazioni`  
+**Access**: lettura pubblica, scrittura/eliminazione solo admin
+
+Collection di upload dedicata alle immagini del menu ristorante. Separata da `media` per isolamento dei permessi e separazione semantica. Usata da:
+- `menu-config` → Tab "Identità" → campo `logo`
+- `menu-config` → `standardItems[].icona` e `specialItems[].icona`
+
+#### Schema
+
+| Campo | Tipo | Descrizione | Required |
+|-------|------|-------------|----------|
+| `alt` | `string` | Testo alternativo per accessibilità | ✅ |
+| `filename` | `string` | Nome file (auto-generato) | — |
+| `url` | `string` | URL pubblico GCS (auto-generato) | — |
+| `mimeType` | `string` | Tipo MIME del file | — |
+| `filesize` | `number` | Dimensione in byte | — |
+| `width` | `number` | Larghezza in pixel (se immagine) | — |
+| `height` | `number` | Altezza in pixel (se immagine) | — |
+
+#### Upload Media Ristorante
+
+```bash
+POST /api/media-ristorante
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: multipart/form-data
+
+file: [binary data]
+alt: "Logo del ristorante"
+```
+
+**Response**:
+```json
+{
+  "doc": {
+    "id": "mr123",
+    "filename": "logo-ristorante.png",
+    "mimeType": "image/png",
+    "filesize": 45678,
+    "width": 400,
+    "height": 200,
+    "url": "https://storage.googleapis.com/your-bucket/logo-ristorante.png",
+    "alt": "Logo del ristorante"
+  }
+}
+```
+
+#### Get Media Ristorante
+
+```bash
+GET /api/media-ristorante/MEDIA_ID
 ```
 
 ---

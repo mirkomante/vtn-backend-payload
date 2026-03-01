@@ -26,11 +26,12 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 
 ### System
 - **`Users`**: RBAC (Admin/User).
-- **`Media`**: Image uploads (GCS).
+- **`Media`**: Image uploads (GCS) — media generici del sito (futuro).
+- **`MediaRistorante`**: Image uploads (GCS) dedicati al menu ristorante (logo, icone sezioni). Slug: `media-ristorante`. Group: `Ristorante impostazioni`.
 
 ### Globals
 - **`generali`** (`Ristorante impostazioni`): Orari settimanali, fasce pranzo/cena, chiusure e festività.
-- **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria).
+- **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria). Include anche branding (logo, annotazione).
 
 ## 🌐 Globals
 
@@ -60,14 +61,23 @@ Il frontend deve applicare questa logica per determinare quale array di sezioni 
 
 #### Struttura Dati
 
-**Tab 1: Menu Standard (Default)** — campo `standardItems` (Array)
+**Tab 1: Identità** — campi `logo` e `annotazione`
 
-**Tab 2: Menu Speciale (Override)** — campi `isActive`, `activeRange`, `specialItems`
+**Tab 2: Menu Standard (Default)** — campo `standardItems` (Array)
+
+**Tab 3: Menu Speciale (Override)** — campi `isActive`, `activeRange`, `specialItems`
 
 ```typescript
 // Struttura del documento menu-config
 {
+  // Tab Identità
+  logo?: { id: number, url: string, alt: string },   // upload → media-ristorante
+  annotazione?: SerializedEditorState,               // richText Lexical (solo bold/italic/underline)
+
+  // Tab Menu Standard
   standardItems: MenuItemArray,
+
+  // Tab Menu Speciale
   isActive: boolean,
   activeRange: {
     start: string,   // ISO date
@@ -88,6 +98,7 @@ Sia `standardItems` che `specialItems` sono array di oggetti con questa struttur
   filterMode?: 'all' | 'include' | 'exclude',   // visibile solo se sourceCollection.length === 1
   targetCategories?: PolymorphicRelation[],      // visibile solo se filterMode != 'all' e sorgente singola
   visibility: 'always' | 'lunch_only' | 'dinner_only',
+  icona?: { id: number, url: string, alt: string },  // upload → media-ristorante (opzionale)
 }
 ```
 
@@ -202,6 +213,9 @@ Registrato in `src/app/(payload)/admin/importMap.js` con la chiave `"@/component
 - Il campo `activeRange` e `specialItems` sono **condizionali**: visibili nell'admin solo se `isActive === true`.
 - Non ci sono hooks o webhooks su questo Global (la configurazione del menu non richiede rebuild immediati).
 - Il componente `MenuItemRowLabel` è condiviso tra `standardItems` e `specialItems` — legge sempre il campo `label` del sibling data.
+- Il campo `logo` e il campo `icona` puntano entrambi alla collection `media-ristorante` (NON a `media`).
+- Il campo `annotazione` usa un editor Lexical **ristretto**: solo `BoldFeature`, `ItalicFeature`, `UnderlineFeature`. Non supporta heading, link, liste o altri elementi.
+- Le tab sono ora 3: **Identità** (Tab 1), **Menu Standard** (Tab 2), **Menu Speciale** (Tab 3).
 
 ---
 
@@ -489,6 +503,24 @@ Three things must be set on the bucket (`Cloud Storage → Bucket → [name]`):
 [GCS Storage] Plugin abilitato: true
 ```
 If you see `(non impostato)` or `false`, env vars are missing in Cloud Run service configuration.
+
+### GCS Media Storage — `MediaRistorante` (CRITICAL — same pattern as `Media`)
+
+La collection `media-ristorante` segue **lo stesso pattern GCS** della collection `media`. Entrambe devono essere registrate nel plugin `gcsStorage` in `payload.config.ts`:
+
+```typescript
+const gcsPlugin = gcsStorage({
+  collections: {
+    media: gcsEnabled ? { disableLocalStorage: true } : true,
+    'media-ristorante': gcsEnabled ? { disableLocalStorage: true } : true,
+  },
+  ...
+})
+```
+
+La collection ha `afterRead` hook e `adminThumbnail` identici a `Media`. Se aggiungi nuove collection upload in futuro, segui lo stesso pattern.
+
+---
 
 **Root cause summary** (confirmed in production): The most common reason uploads go to `/api/media/file/` instead of GCS is a combination of:
 1. `disableLocalStorage` placed in the collection instead of the plugin config (build-time vs runtime compilation)
