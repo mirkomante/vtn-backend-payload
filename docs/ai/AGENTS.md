@@ -440,20 +440,56 @@ createBevandaCollection({ slug: 'vini', ... })
 ### Import Map & Conditional Plugins
 **CRITICAL**: When regenerating import maps (`pnpm generate:importmap`), ensure `GCS_BUCKET` is handled correctly to avoid "PayloadComponent not found" errors in production. See `docs/dev/TROUBLESHOOTING.md`.
 
-### GCS Media Storage (CRITICAL)
-The `Media` collection uses Google Cloud Storage in production. There are **two independent but both required** configurations:
+### GCS Media Storage (CRITICAL) — Architettura a Doppio Plugin
 
-**1. Plugin in `payload.config.ts`** (handles upload routing to GCS):
+Le collection upload usano **due plugin `gcsStorage` separati**, uno per bucket:
+
+| Collection | Plugin | Variabile d'ambiente | Bucket |
+|---|---|---|---|
+| `media` | `gcsPluginMedia` | `GCS_BUCKET` | Media generici del sito |
+| `media-ristorante` | `gcsPluginMenuMedia` | `GCS_MENU_BUCKET` | Media dedicati al menu ristorante |
+
+**CRITICAL**: Non usare mai un singolo plugin per entrambe le collection — ogni collection deve puntare al proprio bucket tramite un'istanza separata.
+
+**1. Plugin in `payload.config.ts`** (gestisce il routing degli upload verso GCS):
 ```typescript
-const gcsPlugin = gcsStorage({
-  collections: { media: true },
+const gcsEnabled = Boolean(process.env.GCS_BUCKET)
+const gcsMenuEnabled = Boolean(process.env.GCS_MENU_BUCKET)
+
+// Plugin per Media generici → GCS_BUCKET
+const gcsPluginMedia = gcsStorage({
+  collections: {
+    media: gcsEnabled ? { disableLocalStorage: true } : true,
+  },
   bucket: process.env.GCS_BUCKET || 'not-configured',
-  options: { projectId: process.env.GCP_PROJECT_ID },
-  enabled: Boolean(process.env.GCS_BUCKET), // runtime toggle
+  options: {
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
+  },
+  enabled: gcsEnabled,
+})
+
+// Plugin per MediaRistorante → GCS_MENU_BUCKET
+const gcsPluginMenuMedia = gcsStorage({
+  collections: {
+    'media-ristorante': gcsMenuEnabled ? { disableLocalStorage: true } : true,
+  },
+  bucket: process.env.GCS_MENU_BUCKET || 'not-configured',
+  options: {
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
+  },
+  enabled: gcsMenuEnabled,
+})
+
+export default buildConfig({
+  plugins: [
+    gcsPluginMedia,
+    gcsPluginMenuMedia,
+    // ...altri plugin
+  ],
 })
 ```
 
-**2. `disableLocalStorage` inside the plugin config in `src/payload.config.ts`** (NOT in the collection):
+**2. `disableLocalStorage` inside the plugin config** (NOT in the collection):
 ```typescript
 // ✅ CORRECT: evaluated at runtime by Node.js
 media: gcsEnabled ? { disableLocalStorage: true } : true,
@@ -462,7 +498,9 @@ media: gcsEnabled ? { disableLocalStorage: true } : true,
 // upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }
 ```
 
-**3. `afterRead` hook + `adminThumbnail` in `src/collections/Media.ts`** (absolute guarantee):
+**3. `afterRead` hook + `adminThumbnail`** — ogni collection usa la propria variabile bucket:
+
+`src/collections/Media.ts` (usa `GCS_BUCKET`):
 ```typescript
 upload: {
   adminThumbnail: ({ doc }) => {
@@ -480,16 +518,34 @@ hooks: {
 },
 ```
 
+`src/collections/MediaRistorante.ts` (usa `GCS_MENU_BUCKET`):
+```typescript
+upload: {
+  adminThumbnail: ({ doc }) => {
+    if (process.env.GCS_MENU_BUCKET && doc.filename)
+      return `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`
+    return null
+  },
+},
+hooks: {
+  afterRead: [({ doc }) => {
+    if (doc.filename && process.env.GCS_MENU_BUCKET)
+      doc.url = `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`
+    return doc
+  }],
+},
+```
+
 **WHY ALL THREE ARE NEEDED**:
 - `disableLocalStorage` in plugin config: prevents writing file to local disk on Cloud Run
 - `afterRead` hook: overwrites `doc.url` at every read — works even if the plugin falls back to local URLs (e.g. with Uniform Bucket Level Access active on the bucket, which blocks per-file ACL and causes the plugin to silently fall back to local URLs)
 - `adminThumbnail`: ensures Admin Panel previews load from GCS
 
-**CRITICAL - Build-time vs Runtime trap**: `disableLocalStorage` in the collection's `upload` config is compiled into the Next.js bundle during `next build` in Docker (where `GCS_BUCKET` is undefined → `false`). In the plugin config it's evaluated at runtime by Node.js. Always put it in the plugin config.
+**CRITICAL - Build-time vs Runtime trap**: `disableLocalStorage` in the collection's `upload` config is compiled into the Next.js bundle during `next build` in Docker (where env vars are undefined → `false`). In the plugin config it's evaluated at runtime by Node.js. Always put it in the plugin config.
 
 **4. GCS Bucket configuration** (verified via Google Cloud Console GUI):
 
-Three things must be set on the bucket (`Cloud Storage → Bucket → [name]`):
+Three things must be set on **each** bucket (`Cloud Storage → Bucket → [name]`):
 
 | Tab | Setting | Required value | Effect if wrong |
 |---|---|---|---|
@@ -500,25 +556,19 @@ Three things must be set on the bucket (`Cloud Storage → Bucket → [name]`):
 **Verification**: At startup, check Cloud Run logs for:
 ```
 [GCS Storage] GCS_BUCKET: <bucket-name>
-[GCS Storage] Plugin abilitato: true
+[GCS Storage] GCS_MENU_BUCKET: <menu-bucket-name>
+[GCS Storage] Plugin media abilitato: true
+[GCS Storage] Plugin media-ristorante abilitato: true
 ```
 If you see `(non impostato)` or `false`, env vars are missing in Cloud Run service configuration.
 
-### GCS Media Storage — `MediaRistorante` (CRITICAL — same pattern as `Media`)
+**Required environment variables**:
 
-La collection `media-ristorante` segue **lo stesso pattern GCS** della collection `media`. Entrambe devono essere registrate nel plugin `gcsStorage` in `payload.config.ts`:
-
-```typescript
-const gcsPlugin = gcsStorage({
-  collections: {
-    media: gcsEnabled ? { disableLocalStorage: true } : true,
-    'media-ristorante': gcsEnabled ? { disableLocalStorage: true } : true,
-  },
-  ...
-})
-```
-
-La collection ha `afterRead` hook e `adminThumbnail` identici a `Media`. Se aggiungi nuove collection upload in futuro, segui lo stesso pattern.
+| Variable | Required | Description |
+|---|---|---|
+| `GCS_BUCKET` | ✅ Yes (media) | GCS bucket for generic site media |
+| `GCS_MENU_BUCKET` | ✅ Yes (media-ristorante) | GCS bucket for restaurant menu media |
+| `GCP_PROJECT_ID` | ✅ Yes | Google Cloud project ID (shared by both plugins) |
 
 ---
 
@@ -526,6 +576,7 @@ La collection ha `afterRead` hook e `adminThumbnail` identici a `Media`. Se aggi
 1. `disableLocalStorage` placed in the collection instead of the plugin config (build-time vs runtime compilation)
 2. Missing `allUsers:objectViewer` on the bucket (files reach GCS but URLs return 403)
 3. `afterRead` hook missing (no fallback URL override when plugin fails silently with Uniform Bucket Level Access)
+4. Wrong bucket variable used in `afterRead`/`adminThumbnail` (e.g. `GCS_BUCKET` instead of `GCS_MENU_BUCKET` in `MediaRistorante`)
 
 ---
 

@@ -17,8 +17,8 @@ import {
  * - `menu-config` → `standardItems[].icona` e `specialItems[].icona`
  *
  * Group: "Ristorante impostazioni"
- * Storage: GCS in produzione (via plugin gcsStorage in payload.config.ts),
- *          locale in sviluppo.
+ * Storage: GCS in produzione sul bucket GCS_MENU_BUCKET (via plugin gcsPluginMenuMedia
+ *          in payload.config.ts), locale in sviluppo.
  */
 export const MediaRistorante: CollectionConfig = {
   slug: 'media-ristorante',
@@ -50,9 +50,10 @@ export const MediaRistorante: CollectionConfig = {
   ],
   upload: {
     // Genera l'URL pubblico GCS per le anteprime nell'Admin Panel.
+    // Usa GCS_MENU_BUCKET (bucket dedicato al menu ristorante).
     adminThumbnail: ({ doc }) => {
-      if (process.env.GCS_BUCKET && doc.filename) {
-        return `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+      if (process.env.GCS_MENU_BUCKET && doc.filename) {
+        return `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`
       }
       return null
     },
@@ -61,8 +62,9 @@ export const MediaRistorante: CollectionConfig = {
     afterRead: [
       ({ doc }) => {
         // Sovrascrive doc.url con l'URL pubblico GCS ad ogni lettura.
-        if (doc.filename && process.env.GCS_BUCKET) {
-          doc.url = `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+        // Usa GCS_MENU_BUCKET (bucket dedicato al menu ristorante).
+        if (doc.filename && process.env.GCS_MENU_BUCKET) {
+          doc.url = `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`
         }
         return doc
       },

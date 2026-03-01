@@ -103,26 +103,28 @@ export default buildConfig({
 ```typescript
 import { gcsStorage } from '@payloadcms/storage-gcs'
 
-// GCS Storage Plugin - attivo solo in produzione quando GCS_BUCKET è configurato
-// In locale i media vengono salvati nella cartella /media del progetto
-// Il plugin è SEMPRE incluso nella config (con enabled condizionale) per garantire
-// che il componente GcsClientUploadHandler sia sempre presente nell'importMap,
-// evitando pagine bianche in produzione.
-const gcsPlugin = gcsStorage({
-  collections: {
-    media: true,
-  },
+// Due plugin separati: uno per bucket.
+// Entrambi SEMPRE inclusi (con enabled condizionale) per garantire
+// che GcsClientUploadHandler sia sempre nell'importMap.
+const gcsPluginMedia = gcsStorage({
+  collections: { media: true },
   bucket: process.env.GCS_BUCKET || 'not-configured',
-  options: {
-    projectId: process.env.GCP_PROJECT_ID,
-  },
+  options: { projectId: process.env.GCP_PROJECT_ID },
   enabled: Boolean(process.env.GCS_BUCKET),
+})
+
+const gcsPluginMenuMedia = gcsStorage({
+  collections: { 'media-ristorante': true },
+  bucket: process.env.GCS_MENU_BUCKET || 'not-configured',
+  options: { projectId: process.env.GCP_PROJECT_ID },
+  enabled: Boolean(process.env.GCS_MENU_BUCKET),
 })
 
 export default buildConfig({
   // ...
   plugins: [
-    gcsPlugin,  // Cambiato da: ...gcsPlugin (spread condizionale)
+    gcsPluginMedia,
+    gcsPluginMenuMedia,
     cancelButtonPlugin(),
     // ...
   ],
@@ -490,12 +492,14 @@ Error: Migration xyz failed to execute
 
 **✅ Soluzione Definitiva**: Due meccanismi combinati
 
-**1. In `src/payload.config.ts`** — `disableLocalStorage` nella config del plugin (non nella collection):
+**1. In `src/payload.config.ts`** — due plugin separati, `disableLocalStorage` nella config del plugin (non nella collection):
 
 ```typescript
 const gcsEnabled = Boolean(process.env.GCS_BUCKET)
+const gcsMenuEnabled = Boolean(process.env.GCS_MENU_BUCKET)
 
-const gcsPlugin = gcsStorage({
+// Plugin per Media generici → GCS_BUCKET
+const gcsPluginMedia = gcsStorage({
   collections: {
     // CRITICO: disableLocalStorage va qui nel plugin, NON nella collection.
     // Qui viene valutato a runtime (non compilato nel bundle da Next.js).
@@ -506,6 +510,18 @@ const gcsPlugin = gcsStorage({
     ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
   },
   enabled: gcsEnabled,
+})
+
+// Plugin per MediaRistorante → GCS_MENU_BUCKET (bucket separato)
+const gcsPluginMenuMedia = gcsStorage({
+  collections: {
+    'media-ristorante': gcsMenuEnabled ? { disableLocalStorage: true } : true,
+  },
+  bucket: process.env.GCS_MENU_BUCKET || 'not-configured',
+  options: {
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
+  },
+  enabled: gcsMenuEnabled,
 })
 ```
 
@@ -573,8 +589,10 @@ Se messo nella collection (`upload: { disableLocalStorage: Boolean(process.env.G
 4. **Verifica log all'avvio**: Cerca nei log di Cloud Run le righe di debug:
    ```
    [GCS Storage] GCS_BUCKET: your-bucket-name
+   [GCS Storage] GCS_MENU_BUCKET: your-menu-bucket-name
    [GCS Storage] GCP_PROJECT_ID: your-project-id
-   [GCS Storage] Plugin abilitato: true
+   [GCS Storage] Plugin media abilitato: true
+   [GCS Storage] Plugin media-ristorante abilitato: true
    ```
    Se vedi `(non impostato)` o `false`, le env vars non sono configurate correttamente.
 
@@ -587,20 +605,27 @@ Se messo nella collection (`upload: { disableLocalStorage: Boolean(process.env.G
 Usa questa checklist per verificare che tutto sia configurato correttamente.
 
 **`src/payload.config.ts`**:
-- [ ] Plugin `gcsStorage` sempre incluso (non in spread condizionale)
-- [ ] `media: gcsEnabled ? { disableLocalStorage: true } : true` nella config del plugin
-- [ ] `enabled: Boolean(process.env.GCS_BUCKET)` per controllo runtime
-- [ ] `bucket: process.env.GCS_BUCKET || 'not-configured'` (valore dummy per build)
-- [ ] Log di debug presenti per verificare le env vars
+- [ ] Due plugin `gcsStorage` separati: `gcsPluginMedia` (→ `GCS_BUCKET`) e `gcsPluginMenuMedia` (→ `GCS_MENU_BUCKET`)
+- [ ] Entrambi i plugin sempre inclusi nell'array `plugins` (non in spread condizionale)
+- [ ] `media: gcsEnabled ? { disableLocalStorage: true } : true` nel plugin `gcsPluginMedia`
+- [ ] `'media-ristorante': gcsMenuEnabled ? { disableLocalStorage: true } : true` nel plugin `gcsPluginMenuMedia`
+- [ ] `enabled: Boolean(process.env.GCS_BUCKET)` per `gcsPluginMedia`
+- [ ] `enabled: Boolean(process.env.GCS_MENU_BUCKET)` per `gcsPluginMenuMedia`
+- [ ] Log di debug presenti per verificare entrambe le env vars
 
 **`src/collections/Media.ts`**:
-- [ ] Hook `afterRead` presente che sovrascrive `doc.url` con URL GCS
-- [ ] `adminThumbnail` configurato per generare URL GCS
+- [ ] Hook `afterRead` usa `process.env.GCS_BUCKET` per sovrascrivere `doc.url`
+- [ ] `adminThumbnail` usa `process.env.GCS_BUCKET`
+
+**`src/collections/MediaRistorante.ts`**:
+- [ ] Hook `afterRead` usa `process.env.GCS_MENU_BUCKET` per sovrascrivere `doc.url`
+- [ ] `adminThumbnail` usa `process.env.GCS_MENU_BUCKET`
 
 **Cloud Run — Variabili d'ambiente**:
 - [ ] `GCS_BUCKET` impostato nelle env vars del servizio
+- [ ] `GCS_MENU_BUCKET` impostato nelle env vars del servizio
 - [ ] `GCP_PROJECT_ID` impostato nelle env vars del servizio
-- [ ] Service Account ha ruolo `Storage Object Admin` sul bucket
+- [ ] Service Account ha ruolo `Storage Object Admin` su **entrambi** i bucket
 
 **Bucket GCS — GUI Cloud Storage** (le tre cose da verificare):
 

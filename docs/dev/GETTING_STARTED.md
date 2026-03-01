@@ -17,15 +17,27 @@
    ```bash
    cp .env.example .env
    ```
-   
-   Configura nel file `.env`:
+
+   Variabili **obbligatorie** in locale:
    ```env
    DATABASE_URL=postgresql://user:password@localhost:5432/database
-   PAYLOAD_SECRET=your-secret-key
+   PAYLOAD_SECRET=your-secret-key-min-32-chars
    PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
    ```
+
+   Variabili **GCS — opzionali in locale, obbligatorie in produzione**:
+
+   | Variabile | Usata da | Descrizione |
+   |-----------|----------|-------------|
+   | `GCS_BUCKET` | collection `media` | Bucket GCS per media generici del sito |
+   | `GCS_MENU_BUCKET` | collection `media-ristorante` + Smart Webhook | Bucket GCS per logo/icone menu ristorante e per `disponibilita.json` |
+   | `GCP_PROJECT_ID` | entrambi i plugin GCS | ID progetto Google Cloud |
+
+   Se non impostate, i media vengono salvati nella cartella locale `/media` e il Smart Webhook opera in mock mode.
+
+   > **Architettura multi-bucket**: `media` e `media-ristorante` usano bucket separati, gestiti da due istanze distinte del plugin `gcsStorage` in `payload.config.ts`. Non usare `GCS_BUCKET` per `media-ristorante` o viceversa.
 
 3. **Installa le dipendenze:**
    ```bash

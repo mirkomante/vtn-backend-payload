@@ -323,7 +323,8 @@ hooks: {
 ### Storia Recente
 
 **Marzo 2026**:
-- ✅ **Collection `MediaRistorante`** (`media-ristorante`): Upload dedicato alle immagini del menu ristorante (logo, icone sezioni). Separata da `Media` generica. Group: `Ristorante impostazioni`. Registrata nel plugin GCS con stesso pattern di `Media`.
+- ✅ **Multi-bucket GCS**: `Media` usa `GCS_BUCKET` via `gcsPluginMedia`; `MediaRistorante` usa `GCS_MENU_BUCKET` via `gcsPluginMenuMedia`. Due plugin `gcsStorage` separati in `payload.config.ts`. `adminThumbnail` e hook `afterRead` di `MediaRistorante` aggiornati per usare `GCS_MENU_BUCKET`.
+- ✅ **Collection `MediaRistorante`** (`media-ristorante`): Upload dedicato alle immagini del menu ristorante (logo, icone sezioni). Separata da `Media` generica. Group: `Ristorante impostazioni`. Registrata nel plugin GCS dedicato `gcsPluginMenuMedia`.
 - ✅ **Global `menu-config` — Tab "Identità"**: Nuova prima tab con campo `logo` (upload → `media-ristorante`) e campo `annotazione` (richText Lexical ristretto: solo bold/italic/underline).
 - ✅ **Global `menu-config` — Campo `icona` in `menuItemFields`**: Campo upload opzionale (→ `media-ristorante`) aggiunto a ogni elemento di `standardItems` e `specialItems`.
 
@@ -402,6 +403,9 @@ Quando aggiungi funzionalità o fix:
 - `exceptions` → [AGENTS.md](./AGENTS.md) → sezione Singleton Collections
 - `media-ristorante` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage, [API_REFERENCE.md](../dev/API_REFERENCE.md) → Media Ristorante
 - `MediaRistorante` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage
+- `GCS_MENU_BUCKET` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage, [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) → Problemi Storage e Media
+- `multi-bucket` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage
+- `gcsPluginMedia` / `gcsPluginMenuMedia` → [AGENTS.md](./AGENTS.md) → sezione GCS Media Storage
 - `logo menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
 - `annotazione menu` → [AGENTS.md](./AGENTS.md) → sezione menu-config struttura dati
 - `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray

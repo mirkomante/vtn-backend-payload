@@ -285,9 +285,9 @@ Per testare il sistema:
 ### File Modificati (1)
 - `src/hooks/smartWebhook.ts` — Refactoring completo con architettura multi-target
 
-### File da Aggiornare (Ambiente)
-- `.env.example` — Sostituire `GCS_FRONTEND_BUCKET` con `GCS_MENU_BUCKET`
-- Cloud Run service configuration — Aggiornare variabile d'ambiente
+### File Aggiornati (Ambiente)
+- `.env.example` — ✅ `GCS_FRONTEND_BUCKET` sostituito con `GCS_MENU_BUCKET`
+- Cloud Run service configuration — Aggiornare variabile d'ambiente se ancora presente
 
 ---
 

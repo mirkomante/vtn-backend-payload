@@ -42,29 +42,45 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// GCS Storage Plugin - attivo solo in produzione quando GCS_BUCKET è configurato
-// In locale i media vengono salvati nella cartella /media del progetto
-// Il plugin è SEMPRE incluso nella config (con enabled condizionale) per garantire
+// GCS Storage — due plugin separati per bucket distinti:
+//   - gcsPluginMedia      → collection `media`           → GCS_BUCKET
+//   - gcsPluginMenuMedia  → collection `media-ristorante` → GCS_MENU_BUCKET
+//
+// Entrambi sono SEMPRE inclusi nella config (con enabled condizionale) per garantire
 // che il componente GcsClientUploadHandler sia sempre presente nell'importMap,
-// evitando pagine bianche in produzione.
+// evitando pagine bianche in produzione (build-time vs runtime trap).
+//
+// disableLocalStorage va nel plugin (non nella collection): qui viene valutato a
+// runtime da Node.js, non compilato nel bundle da Next.js durante docker build.
 const gcsEnabled = Boolean(process.env.GCS_BUCKET)
-console.log('[GCS Storage] GCS_BUCKET:', process.env.GCS_BUCKET || '(non impostato)')
-console.log('[GCS Storage] GCP_PROJECT_ID:', process.env.GCP_PROJECT_ID || '(non impostato)')
-console.log('[GCS Storage] Plugin abilitato:', gcsEnabled)
+const gcsMenuEnabled = Boolean(process.env.GCS_MENU_BUCKET)
 
-const gcsPlugin = gcsStorage({
+console.log('[GCS Storage] GCS_BUCKET:', process.env.GCS_BUCKET || '(non impostato)')
+console.log('[GCS Storage] GCS_MENU_BUCKET:', process.env.GCS_MENU_BUCKET || '(non impostato)')
+console.log('[GCS Storage] GCP_PROJECT_ID:', process.env.GCP_PROJECT_ID || '(non impostato)')
+console.log('[GCS Storage] Plugin media abilitato:', gcsEnabled)
+console.log('[GCS Storage] Plugin media-ristorante abilitato:', gcsMenuEnabled)
+
+const gcsPluginMedia = gcsStorage({
   collections: {
-    // disableLocalStorage condizionale nel plugin (non nella collection):
-    // evita il problema build-time dove Boolean(process.env.GCS_BUCKET) = false
-    // perché qui il valore viene valutato a runtime, non compilato nel bundle.
     media: gcsEnabled ? { disableLocalStorage: true } : true,
-    'media-ristorante': gcsEnabled ? { disableLocalStorage: true } : true,
   },
   bucket: process.env.GCS_BUCKET || 'not-configured',
   options: {
     ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
   },
   enabled: gcsEnabled,
+})
+
+const gcsPluginMenuMedia = gcsStorage({
+  collections: {
+    'media-ristorante': gcsMenuEnabled ? { disableLocalStorage: true } : true,
+  },
+  bucket: process.env.GCS_MENU_BUCKET || 'not-configured',
+  options: {
+    ...(process.env.GCP_PROJECT_ID && { projectId: process.env.GCP_PROJECT_ID }),
+  },
+  enabled: gcsMenuEnabled,
 })
 
 export default buildConfig({
@@ -144,7 +160,8 @@ export default buildConfig({
   sharp,
   endpoints: [migrateDataEndpoint],
   plugins: [
-    gcsPlugin,
+    gcsPluginMedia,
+    gcsPluginMenuMedia,
     cancelButtonPlugin(),
     OAuth2Plugin({
       strategyName: 'google',
