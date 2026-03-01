@@ -17,8 +17,9 @@ export const Piatti: CollectionConfig = {
   admin: {
     useAsTitle: 'nome',
     group: 'Ristorante menu',
-    defaultColumns: ['nome', 'inLista', 'categoria', 'prezzo', '_status'],
+    defaultColumns: ['nome', 'inLista', 'order', 'categoria', 'prezzo', '_status'],
   },
+  defaultSort: 'order',
   fields: [
     // Sidebar: campi di stato/configurazione
     {
@@ -45,6 +46,17 @@ export const Piatti: CollectionConfig = {
         position: 'sidebar',
         description: 'Se il piatto è disponibile solo nei menu fissi (non nel menu pubblico)',
       },
+    },
+    {
+      name: 'order',
+      type: 'number',
+      label: 'Priorità di Ordinamento',
+      admin: {
+        description:
+          'Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).',
+        position: 'sidebar',
+      },
+      index: true,
     },
 
     // Tabs: contenuti organizzati per sezioni

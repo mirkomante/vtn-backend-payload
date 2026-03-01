@@ -18,6 +18,18 @@ interface CategoriaCollectionOptions {
   relatedCollection?: string // Slug della collezione che usa questa categoria
 }
 
+const orderField = {
+  name: 'order',
+  type: 'number' as const,
+  label: 'Priorità di Ordinamento',
+  admin: {
+    description:
+      'Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).',
+    position: 'sidebar' as const,
+  },
+  index: true,
+}
+
 /**
  * Factory function per creare collections di categoria con nome + descrizione + inLista
  * Usata per: CategoriaMenuFisso, CategoriaPiatti
@@ -35,8 +47,9 @@ export function createCategoriaCollection(
       useAsTitle: 'nome',
       group: 'Ristorante configurazione',
       defaultColumns:
-        options.defaultColumns || ['nome', 'inLista', 'descrizione', '_status'],
+        options.defaultColumns || ['nome', 'inLista', 'order', 'descrizione', '_status'],
     },
+    defaultSort: 'order',
     fields: [
       // Sidebar: campo di stato
       {
@@ -52,6 +65,8 @@ export function createCategoriaCollection(
           position: 'sidebar',
         },
       } as Field,
+      // Sidebar: campo ordinamento manuale
+      orderField,
 
       // Tabs: contenuti organizzati
       {

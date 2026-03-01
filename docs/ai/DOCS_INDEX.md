@@ -323,6 +323,7 @@ hooks: {
 ### Storia Recente
 
 **Marzo 2026**:
+- ✅ **Ordinamento Manuale (`order` field)**: Aggiunto campo numerico `order` a tutte le collection principali del menu (`Piatti`, `MenuFisso`, `CategoriaPiatti`, `CategoriaMenuFisso`, tutte le `Tipologie*`, tutte le bevande via factory). `defaultSort: 'order'` impostato su ogni collection. Migrazione DB generata: `20260301_131512_add_order_fields`. Documentato in `AGENTS.md` → Domain Model.
 - ✅ **UX Standard Lexical**: Definito standard di progetto per i campi `richText` — Fixed Toolbar obbligatoria, set minimo di feature (Bold, Italic, Underline, UnorderedList, Link). Documentato in `AGENTS.md` → UX Standards.
 - ✅ **Global `menu-config` — Refactoring UI**: Tab "Identità" rinominata "Generale", aggiunto campo `title`, sidebar con `logo`/`isActive`/`activeRange` spostata al root (fuori dai tabs). Campo `annotazione` aggiornato con `UnorderedListFeature` e `LinkFeature`.
 - ✅ **Multi-bucket GCS**: `Media` usa `GCS_BUCKET` via `gcsPluginMedia`; `MediaRistorante` usa `GCS_MENU_BUCKET` via `gcsPluginMenuMedia`. Due plugin `gcsStorage` separati in `payload.config.ts`. `adminThumbnail` e hook `afterRead` di `MediaRistorante` aggiornati per usare `GCS_MENU_BUCKET`.
@@ -414,6 +415,8 @@ Quando aggiungi funzionalità o fix:
 - `LinkFeature` / `UnorderedListFeature` → [AGENTS.md](./AGENTS.md) → UX Standards
 - `sidebar tabs` / `position sidebar` → [AGENTS.md](./AGENTS.md) → UX Standards
 - `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray
+- `order` / `ordinamento` / `sort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
+- `defaultSort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
 
 ---
 

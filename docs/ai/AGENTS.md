@@ -5,23 +5,51 @@ This project is a Payload CMS (v3.0) backend for managing a restaurant's digital
 
 ## 🏗 Domain Model (Collections)
 
+### Manual Ordering (`order` field)
+
+Le seguenti collection supportano un **ordinamento manuale** tramite il campo numerico `order`:
+
+| Collection | File | Implementazione |
+|---|---|---|
+| `Piatti` | `src/collections/Piatti.ts` | Campo diretto |
+| `MenuFisso` | `src/collections/MenuFisso.ts` | Campo diretto |
+| `CategoriaPiatti` | via `createCategoriaCollection` factory | Tramite factory |
+| `CategoriaMenuFisso` | via `createCategoriaCollection` factory | Tramite factory |
+| `TipologiaVino/Birra/Liquore/Cocktail/Bevanda` | via `createSimpleCollection` factory | Tramite factory |
+| `Vino/Birra/Liquore/Cocktail/Bevanda` | via `createBevandaCollection` factory | Tramite factory |
+
+**Comportamento**:
+- Il campo `order` è **opzionale** (`required: false`). Se non popolato, l'ordinamento dipende dal DB (solitamente per ID o data creazione).
+- `defaultSort: 'order'` è impostato su tutte le collection sopra — l'admin panel mostra gli elementi già ordinati per `order`.
+- Il campo è indicizzato (`index: true`) per performance ottimali nelle query di sort.
+- Il campo appare nella **sidebar** dell'editor Payload (fuori dai tabs), per non interferire con i contenuti principali.
+
+**Nota per il frontend**: Le query al backend dovrebbero includere `sort=order` per rispettare l'ordinamento editoriale definito dall'editor. Elementi con `order` non impostato (`null`) vengono tipicamente restituiti dopo quelli con valore numerico (comportamento PostgreSQL per `ORDER BY ASC NULLS LAST`). Il frontend può trattare `null` come `Infinity` per posizionarli in coda.
+
+```bash
+# Esempio query con ordinamento editoriale
+GET /api/piatti?sort=order
+GET /api/categoria-piatti?sort=order
+GET /api/vini?sort=order
+```
+
 ### Menu Management
-- **`Piatti`**: Dishes with descriptions, prices, allergens, and relationships to categories.
-- **`MenuFisso`**: Fixed menus / Tasting menus.
-- **`CategoriaPiatti`**: Hierarchical organization of courses (e.g., Antipasti, Primi).
-- **`CategoriaMenuFisso`**: Types of fixed menus.
+- **`Piatti`**: Dishes with descriptions, prices, allergens, and relationships to categories. Supports `order` field.
+- **`MenuFisso`**: Fixed menus / Tasting menus. Supports `order` field.
+- **`CategoriaPiatti`**: Hierarchical organization of courses (e.g., Antipasti, Primi). Supports `order` field.
+- **`CategoriaMenuFisso`**: Types of fixed menus. Supports `order` field.
 
 ### Beverage Management (Cantina)
-- **`Vino`**: Detailed wine sheets (Red, White, Rosé, Sparkling). Nation **required**.
-- **`Birra`**: Craft and industrial beers. Nation **required**.
-- **`Cocktail`**: Cocktails and mixed drinks. Nation **optional** (international cocktails like Mojito may have no origin).
-- **`Liquore`**: Spirits and bitters. Nation **required**.
-- **`Bevanda`**: Water, soft drinks, coffee. Nation **optional** (generic items like Water or Coffee have no origin).
+- **`Vino`**: Detailed wine sheets (Red, White, Rosé, Sparkling). Nation **required**. Supports `order` field.
+- **`Birra`**: Craft and industrial beers. Nation **required**. Supports `order` field.
+- **`Cocktail`**: Cocktails and mixed drinks. Nation **optional** (international cocktails like Mojito may have no origin). Supports `order` field.
+- **`Liquore`**: Spirits and bitters. Nation **required**. Supports `order` field.
+- **`Bevanda`**: Water, soft drinks, coffee. Nation **optional** (generic items like Water or Coffee have no origin). Supports `order` field.
 
 ### Configuration & Locations
 - **`Allergene`**: Centralized allergen management.
 - **`Nazione`, `Regione`, `Zona`**: Geographic data for product origins.
-- **`Tipologie`**: Cross-cutting classifications.
+- **`Tipologie`**: Cross-cutting classifications. All tipologia collections (`TipologiaVino`, `TipologiaBirra`, `TipologiaLiquore`, `TipologiaCocktail`, `TipologiaBevanda`) support `order` field.
 - **`ServiziAccessorio`**: Extra services.
 
 ### System

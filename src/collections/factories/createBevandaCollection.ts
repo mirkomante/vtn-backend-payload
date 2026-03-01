@@ -45,6 +45,20 @@ export function createBevandaCollection(
   const nazioneRequired = options.nazioneOptional !== true
   const fields: Field[] = []
 
+  // Sidebar: campo ordinamento manuale
+  const orderFieldDef = {
+    name: 'order',
+    type: 'number' as const,
+    label: 'Priorità di Ordinamento',
+    admin: {
+      description:
+        'Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).',
+      position: 'sidebar' as const,
+    },
+    index: true,
+  }
+  fields.push(orderFieldDef)
+
   // Sidebar: campo inLista
   const inListaFieldBase = inListaField({
     description: `Se ${options.singular.toLowerCase()} è visibile nel menu pubblico`,
@@ -300,11 +314,13 @@ export function createBevandaCollection(
       defaultColumns: options.defaultColumns || [
         'nome',
         'inLista',
+        'order',
         'nazione',
         'prezzo',
         '_status',
       ],
     },
+    defaultSort: 'order',
     fields,
     hooks: {
       // Quando una bevanda viene modificata, aggiorna disponibilita.json o trigge rebuild
