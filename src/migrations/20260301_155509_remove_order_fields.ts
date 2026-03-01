@@ -1,0 +1,123 @@
+import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+   DROP INDEX "piatti_order_idx";
+  DROP INDEX "_piatti_v_version_version_order_idx";
+  DROP INDEX "menu_fisso_order_idx";
+  DROP INDEX "_menu_fisso_v_version_version_order_idx";
+  DROP INDEX "vini_order_idx";
+  DROP INDEX "_vini_v_version_version_order_idx";
+  DROP INDEX "birre_order_idx";
+  DROP INDEX "_birre_v_version_version_order_idx";
+  DROP INDEX "liquori_order_idx";
+  DROP INDEX "_liquori_v_version_version_order_idx";
+  DROP INDEX "cocktail_order_idx";
+  DROP INDEX "_cocktail_v_version_version_order_idx";
+  DROP INDEX "bevande_order_idx";
+  DROP INDEX "_bevande_v_version_version_order_idx";
+  DROP INDEX "categoria_menu_fisso_order_idx";
+  DROP INDEX "_categoria_menu_fisso_v_version_version_order_idx";
+  DROP INDEX "categoria_piatti_order_idx";
+  DROP INDEX "_categoria_piatti_v_version_version_order_idx";
+  DROP INDEX "tipologie_vino_order_idx";
+  DROP INDEX "_tipologie_vino_v_version_version_order_idx";
+  DROP INDEX "tipologie_birra_order_idx";
+  DROP INDEX "_tipologie_birra_v_version_version_order_idx";
+  DROP INDEX "tipologie_liquore_order_idx";
+  DROP INDEX "_tipologie_liquore_v_version_version_order_idx";
+  DROP INDEX "tipologie_cocktail_order_idx";
+  DROP INDEX "_tipologie_cocktail_v_version_version_order_idx";
+  DROP INDEX "tipologie_bevanda_order_idx";
+  DROP INDEX "_tipologie_bevanda_v_version_version_order_idx";
+  ALTER TABLE "ordinamento_menu" ADD COLUMN IF NOT EXISTS "note_ordinamento" varchar;
+  ALTER TABLE "piatti" DROP COLUMN "order";
+  ALTER TABLE "_piatti_v" DROP COLUMN "version_order";
+  ALTER TABLE "menu_fisso" DROP COLUMN "order";
+  ALTER TABLE "_menu_fisso_v" DROP COLUMN "version_order";
+  ALTER TABLE "vini" DROP COLUMN "order";
+  ALTER TABLE "_vini_v" DROP COLUMN "version_order";
+  ALTER TABLE "birre" DROP COLUMN "order";
+  ALTER TABLE "_birre_v" DROP COLUMN "version_order";
+  ALTER TABLE "liquori" DROP COLUMN "order";
+  ALTER TABLE "_liquori_v" DROP COLUMN "version_order";
+  ALTER TABLE "cocktail" DROP COLUMN "order";
+  ALTER TABLE "_cocktail_v" DROP COLUMN "version_order";
+  ALTER TABLE "bevande" DROP COLUMN "order";
+  ALTER TABLE "_bevande_v" DROP COLUMN "version_order";
+  ALTER TABLE "categoria_menu_fisso" DROP COLUMN "order";
+  ALTER TABLE "_categoria_menu_fisso_v" DROP COLUMN "version_order";
+  ALTER TABLE "categoria_piatti" DROP COLUMN "order";
+  ALTER TABLE "_categoria_piatti_v" DROP COLUMN "version_order";
+  ALTER TABLE "tipologie_vino" DROP COLUMN "order";
+  ALTER TABLE "_tipologie_vino_v" DROP COLUMN "version_order";
+  ALTER TABLE "tipologie_birra" DROP COLUMN "order";
+  ALTER TABLE "_tipologie_birra_v" DROP COLUMN "version_order";
+  ALTER TABLE "tipologie_liquore" DROP COLUMN "order";
+  ALTER TABLE "_tipologie_liquore_v" DROP COLUMN "version_order";
+  ALTER TABLE "tipologie_cocktail" DROP COLUMN "order";
+  ALTER TABLE "_tipologie_cocktail_v" DROP COLUMN "version_order";
+  ALTER TABLE "tipologie_bevanda" DROP COLUMN "order";
+  ALTER TABLE "_tipologie_bevanda_v" DROP COLUMN "version_order";`)
+}
+
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+  await db.execute(sql`
+   ALTER TABLE "piatti" ADD COLUMN "order" numeric;
+  ALTER TABLE "_piatti_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "menu_fisso" ADD COLUMN "order" numeric;
+  ALTER TABLE "_menu_fisso_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "vini" ADD COLUMN "order" numeric;
+  ALTER TABLE "_vini_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "birre" ADD COLUMN "order" numeric;
+  ALTER TABLE "_birre_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "liquori" ADD COLUMN "order" numeric;
+  ALTER TABLE "_liquori_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "cocktail" ADD COLUMN "order" numeric;
+  ALTER TABLE "_cocktail_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "bevande" ADD COLUMN "order" numeric;
+  ALTER TABLE "_bevande_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "categoria_menu_fisso" ADD COLUMN "order" numeric;
+  ALTER TABLE "_categoria_menu_fisso_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "categoria_piatti" ADD COLUMN "order" numeric;
+  ALTER TABLE "_categoria_piatti_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "tipologie_vino" ADD COLUMN "order" numeric;
+  ALTER TABLE "_tipologie_vino_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "tipologie_birra" ADD COLUMN "order" numeric;
+  ALTER TABLE "_tipologie_birra_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "tipologie_liquore" ADD COLUMN "order" numeric;
+  ALTER TABLE "_tipologie_liquore_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "tipologie_cocktail" ADD COLUMN "order" numeric;
+  ALTER TABLE "_tipologie_cocktail_v" ADD COLUMN "version_order" numeric;
+  ALTER TABLE "tipologie_bevanda" ADD COLUMN "order" numeric;
+  ALTER TABLE "_tipologie_bevanda_v" ADD COLUMN "version_order" numeric;
+  CREATE INDEX "piatti_order_idx" ON "piatti" USING btree ("order");
+  CREATE INDEX "_piatti_v_version_version_order_idx" ON "_piatti_v" USING btree ("version_order");
+  CREATE INDEX "menu_fisso_order_idx" ON "menu_fisso" USING btree ("order");
+  CREATE INDEX "_menu_fisso_v_version_version_order_idx" ON "_menu_fisso_v" USING btree ("version_order");
+  CREATE INDEX "vini_order_idx" ON "vini" USING btree ("order");
+  CREATE INDEX "_vini_v_version_version_order_idx" ON "_vini_v" USING btree ("version_order");
+  CREATE INDEX "birre_order_idx" ON "birre" USING btree ("order");
+  CREATE INDEX "_birre_v_version_version_order_idx" ON "_birre_v" USING btree ("version_order");
+  CREATE INDEX "liquori_order_idx" ON "liquori" USING btree ("order");
+  CREATE INDEX "_liquori_v_version_version_order_idx" ON "_liquori_v" USING btree ("version_order");
+  CREATE INDEX "cocktail_order_idx" ON "cocktail" USING btree ("order");
+  CREATE INDEX "_cocktail_v_version_version_order_idx" ON "_cocktail_v" USING btree ("version_order");
+  CREATE INDEX "bevande_order_idx" ON "bevande" USING btree ("order");
+  CREATE INDEX "_bevande_v_version_version_order_idx" ON "_bevande_v" USING btree ("version_order");
+  CREATE INDEX "categoria_menu_fisso_order_idx" ON "categoria_menu_fisso" USING btree ("order");
+  CREATE INDEX "_categoria_menu_fisso_v_version_version_order_idx" ON "_categoria_menu_fisso_v" USING btree ("version_order");
+  CREATE INDEX "categoria_piatti_order_idx" ON "categoria_piatti" USING btree ("order");
+  CREATE INDEX "_categoria_piatti_v_version_version_order_idx" ON "_categoria_piatti_v" USING btree ("version_order");
+  CREATE INDEX "tipologie_vino_order_idx" ON "tipologie_vino" USING btree ("order");
+  CREATE INDEX "_tipologie_vino_v_version_version_order_idx" ON "_tipologie_vino_v" USING btree ("version_order");
+  CREATE INDEX "tipologie_birra_order_idx" ON "tipologie_birra" USING btree ("order");
+  CREATE INDEX "_tipologie_birra_v_version_version_order_idx" ON "_tipologie_birra_v" USING btree ("version_order");
+  CREATE INDEX "tipologie_liquore_order_idx" ON "tipologie_liquore" USING btree ("order");
+  CREATE INDEX "_tipologie_liquore_v_version_version_order_idx" ON "_tipologie_liquore_v" USING btree ("version_order");
+  CREATE INDEX "tipologie_cocktail_order_idx" ON "tipologie_cocktail" USING btree ("order");
+  CREATE INDEX "_tipologie_cocktail_v_version_version_order_idx" ON "_tipologie_cocktail_v" USING btree ("version_order");
+  CREATE INDEX "tipologie_bevanda_order_idx" ON "tipologie_bevanda" USING btree ("order");
+  CREATE INDEX "_tipologie_bevanda_v_version_version_order_idx" ON "_tipologie_bevanda_v" USING btree ("version_order");
+  ALTER TABLE "ordinamento_menu" DROP COLUMN "note_ordinamento";`)
+}

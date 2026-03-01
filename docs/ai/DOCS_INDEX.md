@@ -323,8 +323,10 @@ hooks: {
 ### Storia Recente
 
 **Marzo 2026**:
-- ✅ **Global `OrdinamentoMenu`**: Nuovo Global `ordinamento-menu` nel gruppo `Ristorante configurazione`. Definisce l'ordine drag & drop delle categorie/tipologie (6 tab: Piatti, Vini, Liquori, Birre, Cocktail, Bevande) e le regole di sort/groupBy per il frontend. Sidebar con campo `noteOrdinamento`. Migrazione DB generata: `20260301_150108_create_ordinamento_menu` (tabelle `ordinamento_menu` + `ordinamento_menu_rels`). Documentato in `AGENTS.md` → Globals e `API_REFERENCE.md` → Globals API.
-- ✅ **Ordinamento Manuale (`order` field)**: Aggiunto campo numerico `order` a tutte le collection principali del menu (`Piatti`, `MenuFisso`, `CategoriaPiatti`, `CategoriaMenuFisso`, tutte le `Tipologie*`, tutte le bevande via factory). `defaultSort: 'order'` impostato su ogni collection. Migrazione DB generata: `20260301_131512_add_order_fields`. Documentato in `AGENTS.md` → Domain Model.
+- ✅ **Global `OrdinamentoMenu`**: Nuovo Global `ordinamento-menu` nel gruppo `Ristorante configurazione`. Definisce l'ordine drag & drop delle categorie/tipologie (6 tab: Piatti, Vini, Liquori, Birre, Cocktail, Bevande) e le regole di sort/groupBy per il frontend. Sidebar con campo `noteOrdinamento`. `versions: { drafts: true }` abilitato (obbligatorio per `menuImpostazioniReadAccess`). Migrazione DB: `20260301_150108_create_ordinamento_menu`. Documentato in `AGENTS.md` → Globals e `API_REFERENCE.md` → Globals API.
+- ✅ **Fix crash `_status` su OrdinamentoMenu**: Aggiunto `versions: { drafts: true }` al Global `ordinamento-menu`. Aggiunta regola critica in `AGENTS.md` → Access Control: qualsiasi Collection/Global che usa funzioni di accesso con filtro su `_status` deve avere i drafts abilitati.
+- ✅ **Rimozione campo `order` dalle collection**: Il campo `order` è stato rimosso da tutte le collection (Piatti, MenuFisso, CategoriaPiatti, CategoriaMenuFisso, Tipologie*, bevande). L'ordinamento è ora gestito esclusivamente dal Global `ordinamento-menu`. `defaultSort` ripristinato a `updatedAt`. Migrazione DB: `20260301_155509_remove_order_fields`.
+- ~~**Ordinamento Manuale (`order` field)**~~: Sostituito dal Global `ordinamento-menu` (vedi sopra).
 - ✅ **UX Standard Lexical**: Definito standard di progetto per i campi `richText` — Fixed Toolbar obbligatoria, set minimo di feature (Bold, Italic, Underline, UnorderedList, Link). Documentato in `AGENTS.md` → UX Standards.
 - ✅ **Global `menu-config` — Refactoring UI**: Tab "Identità" rinominata "Generale", aggiunto campo `title`, sidebar con `logo`/`isActive`/`activeRange` spostata al root (fuori dai tabs). Campo `annotazione` aggiornato con `UnorderedListFeature` e `LinkFeature`.
 - ✅ **Multi-bucket GCS**: `Media` usa `GCS_BUCKET` via `gcsPluginMedia`; `MediaRistorante` usa `GCS_MENU_BUCKET` via `gcsPluginMenuMedia`. Due plugin `gcsStorage` separati in `payload.config.ts`. `adminThumbnail` e hook `afterRead` di `MediaRistorante` aggiornati per usare `GCS_MENU_BUCKET`.
@@ -416,9 +418,10 @@ Quando aggiungi funzionalità o fix:
 - `LinkFeature` / `UnorderedListFeature` → [AGENTS.md](./AGENTS.md) → UX Standards
 - `sidebar tabs` / `position sidebar` → [AGENTS.md](./AGENTS.md) → UX Standards
 - `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray
-- `order` / `ordinamento` / `sort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
-- `defaultSort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
+- `ordinamento` / `sort` / `groupBy` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
+- `defaultSort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model (rimosso campo `order`, ora `updatedAt`)
 - `ordinamento-menu` / `OrdinamentoMenu` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
+- `Cannot find field for path at _status` / `_status crash` / `drafts obbligatori` → [AGENTS.md](./AGENTS.md) → Access Control → regola critica
 - `groupBy` / `orderBy` / `drag and drop categorie` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
 - `ordinamento_menu_rels` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
 

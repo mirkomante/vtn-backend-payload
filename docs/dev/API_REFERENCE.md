@@ -179,28 +179,27 @@ Tutte le collections seguono lo stesso pattern REST:
 | `vegan` | `boolean` | Vegano | ❌ (default: `false`) |
 | `categoria` | `relationship` | Categoria piatto (`categoria-piatti`) | ✅ |
 | `allergeni` | `relationship[]` | Lista allergeni | ❌ |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
-> **Nota ordinamento**: Il backend restituisce i piatti ordinati per `order` di default (`defaultSort: 'order'`). Elementi senza `order` vengono restituiti in coda. Per rispettare l'ordinamento editoriale, usa sempre `sort=order` nelle query frontend.
+> **Nota ordinamento**: L'ordinamento dei piatti è definito nel Global `ordinamento-menu` (`piattiOrderBy` + `piattiOrderDirection`). Il frontend deve leggere quel global per costruire il parametro `sort` corretto. Il `defaultSort` della collection è `updatedAt`.
 
 #### Esempi
 
-**Lista piatti pubblicati e visibili (con ordinamento editoriale)**:
+**Lista piatti pubblicati e visibili**:
 
 ```bash
-GET /api/piatti?where[_status][equals]=published&where[inLista][equals]=true&sort=order&limit=20
+GET /api/piatti?where[_status][equals]=published&where[inLista][equals]=true&limit=20
 ```
 
 **Piatti senza glutine**:
 
 ```bash
-GET /api/piatti?where[glutenFree][equals]=true&sort=order
+GET /api/piatti?where[glutenFree][equals]=true
 ```
 
 **Piatti di una categoria specifica**:
 
 ```bash
-GET /api/piatti?where[categoria][equals]=CATEGORIA_ID&sort=order
+GET /api/piatti?where[categoria][equals]=CATEGORIA_ID
 ```
 
 **Crea nuovo piatto** (admin only):
@@ -252,14 +251,13 @@ Content-Type: application/json
 | `categoria` | `relationship` | Categoria menu (`categoria-menu-fisso`) | ✅ |
 | `piatti` | `relationship[]` | Piatti inclusi | ❌ |
 | `servizi` | `relationship[]` | Servizi accessori inclusi | ❌ |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 #### Esempi
 
-**Lista menu pubblicati (con ordinamento editoriale)**:
+**Lista menu pubblicati**:
 
 ```bash
-GET /api/menu-fisso?where[_status][equals]=published&where[inLista][equals]=true&sort=order&depth=2
+GET /api/menu-fisso?where[_status][equals]=published&where[inLista][equals]=true&depth=2
 ```
 
 **Menu con piatti popolati**:
@@ -318,20 +316,19 @@ GET /api/menu-fisso/MENU_ID?depth=2
 | `nazione` | `relationship` | Nazione di produzione (`nazioni`) | ✅ |
 | `regione` | `relationship` | Regione di produzione (`regioni`) | ❌ |
 | `zona` | `relationship` | Zona di produzione (`zone`) | ❌ |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 #### Esempi
 
-**Vini con ordinamento editoriale**:
+**Vini pubblicati**:
 
 ```bash
-GET /api/vini?where[_status][equals]=published&where[inLista][equals]=true&sort=order&depth=1
+GET /api/vino?where[_status][equals]=published&where[inLista][equals]=true&depth=1
 ```
 
 **Vini per fascia di prezzo**:
 
 ```bash
-GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50&sort=order
+GET /api/vino?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
 ```
 
 ---
@@ -353,7 +350,6 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50&sort=or
 | `grado` | `string` | Grado alcolico (es. "5.2%") | ❌ |
 | `capacita` | `string` | Capacità (es. "33cl", "50cl") | ❌ |
 | `nazione` | `relationship` | Nazione di origine (`nazioni`) | ✅ |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ---
 
@@ -372,7 +368,6 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50&sort=or
 | `inLista` | `boolean` | Visibile | ✅ (default: `true`) |
 | `tipologia` | `relationship` | Tipologia cocktail (`tipologie-cocktail`) | ✅ |
 | `nazione` | `relationship` | Nazione di origine (`nazioni`) | ❌ (opzionale) |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ---
 
@@ -388,10 +383,9 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50&sort=or
 | `nome` | `string` | Nome della categoria | ✅ |
 | `descrizione` | `string` | Descrizione opzionale | ❌ |
 | `inLista` | `boolean` | Visibile nel menu pubblico | ✅ (default: `true`) |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ```bash
-GET /api/categoria-piatti?where[_status][equals]=published&sort=order
+GET /api/categoria-piatti?where[_status][equals]=published
 ```
 
 #### Categoria Menu Fisso
@@ -404,10 +398,9 @@ GET /api/categoria-piatti?where[_status][equals]=published&sort=order
 | `nome` | `string` | Nome della categoria | ✅ |
 | `descrizione` | `string` | Descrizione opzionale | ❌ |
 | `inLista` | `boolean` | Visibile nel menu | ✅ (default: `true`) |
-| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ```bash
-GET /api/categoria-menu-fisso?where[_status][equals]=published&sort=order
+GET /api/categoria-menu-fisso?where[_status][equals]=published
 ```
 
 ---
@@ -884,12 +877,12 @@ export async function POST(req: NextRequest) {
 ### Ordinamento
 
 ```bash
-GET /api/piatti?sort=-prezzo  # Decrescente per prezzo
-GET /api/piatti?sort=nome     # Crescente per nome
-GET /api/piatti?sort=order    # Ordinamento editoriale manuale (consigliato)
+GET /api/piatti?sort=-prezzo       # Decrescente per prezzo
+GET /api/piatti?sort=nome          # Crescente per nome
+GET /api/piatti?sort=-updatedAt    # Più recenti prima (default)
 ```
 
-> **Ordinamento editoriale**: Le collection principali del menu (`piatti`, `menu-fisso`, `vini`, `birre`, `liquori`, `cocktail`, `bevande`, `categoria-piatti`, `categoria-menu-fisso`, `tipologie-*`) hanno `defaultSort: 'order'` — vengono già restituite ordinate per `order` anche senza specificare il parametro `sort`. Tuttavia, è buona pratica includerlo esplicitamente nelle query frontend per chiarezza. Elementi con `order` non impostato (`null`) vengono restituiti in coda (PostgreSQL: `NULLS LAST`).
+> **Ordinamento editoriale**: L'ordinamento degli item nel menu è gestito dal Global `ordinamento-menu`. Il frontend deve leggere `GET /api/globals/ordinamento-menu` per ottenere `{sezione}OrderBy` e `{sezione}OrderDirection` da usare come parametro `sort`. Il `defaultSort` di tutte le collection è `updatedAt` — il campo `order` è stato rimosso.
 
 ### Paginazione
 

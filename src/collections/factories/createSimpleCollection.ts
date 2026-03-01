@@ -16,18 +16,6 @@ interface SimpleCollectionOptions {
   defaultColumns?: string[]
 }
 
-const orderField = {
-  name: 'order',
-  type: 'number' as const,
-  label: 'Priorità di Ordinamento',
-  admin: {
-    description:
-      'Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).',
-    position: 'sidebar' as const,
-  },
-  index: true,
-}
-
 /**
  * Factory function per creare collections semplici con solo nome + descrizione
  * Usata per: Allergene, TipologiaVino, TipologiaBirra, TipologiaLiquore, TipologiaCocktail, TipologiaBevanda
@@ -45,12 +33,10 @@ export function createSimpleCollection(
       useAsTitle: 'nome',
       group: 'Ristorante configurazione',
       defaultColumns:
-        options.defaultColumns || ['nome', 'order', 'descrizione', '_status'],
+        options.defaultColumns || ['nome', 'descrizione', '_status'],
     },
-    defaultSort: 'order',
+    defaultSort: 'updatedAt',
     fields: [
-      // Sidebar: campo ordinamento manuale
-      orderField,
       {
         type: 'tabs',
         tabs: [

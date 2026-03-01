@@ -30,6 +30,9 @@ export const OrdinamentoMenu: GlobalConfig = {
     read: menuImpostazioniReadAccess,
     update: menuImpostazioniUpdateAccess,
   },
+  versions: {
+    drafts: true,
+  },
   fields: [
     // ─────────────────────────────────────────────────────────────────────────
     // SIDEBAR — visibile su tutte le tab

@@ -195,10 +195,6 @@ export interface Piatti {
    */
   soloMenuFissi?: boolean | null;
   /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
-  /**
    * Nome del piatto
    */
   nome: string;
@@ -256,10 +252,6 @@ export interface CategoriaPiatti {
    * Se la categoria è visibile nel menu pubblico
    */
   inLista?: boolean | null;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Descrizione opzionale della categoria
@@ -314,10 +306,6 @@ export interface MenuFisso {
    */
   inLista?: boolean | null;
   /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
-  /**
    * Nome del menu fisso
    */
   nome: string;
@@ -355,10 +343,6 @@ export interface CategoriaMenuFisso {
    * Se la categoria è visibile nel menu
    */
   inLista?: boolean | null;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Descrizione opzionale della categoria
@@ -416,10 +400,6 @@ export interface ServiziAccessori {
  */
 export interface Vini {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   /**
    * Se vino è visibile nel menu pubblico
    */
@@ -486,10 +466,6 @@ export interface Vini {
  */
 export interface TipologieVino {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Testo lungo per descrizione dettagliata
@@ -558,10 +534,6 @@ export interface Zone {
 export interface Birre {
   id: number;
   /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
-  /**
    * Se birra è visibile nel menu pubblico
    */
   inLista?: boolean | null;
@@ -603,10 +575,6 @@ export interface Birre {
  */
 export interface TipologieBirra {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Testo lungo per descrizione dettagliata
@@ -622,10 +590,6 @@ export interface TipologieBirra {
  */
 export interface Liquori {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   /**
    * Se liquore è visibile nel menu pubblico
    */
@@ -672,10 +636,6 @@ export interface Liquori {
  */
 export interface TipologieLiquore {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Testo lungo per descrizione dettagliata
@@ -691,10 +651,6 @@ export interface TipologieLiquore {
  */
 export interface Cocktail {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   /**
    * Se cocktail è visibile nel menu pubblico
    */
@@ -729,10 +685,6 @@ export interface Cocktail {
  */
 export interface TipologieCocktail {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Testo lungo per descrizione dettagliata
@@ -748,10 +700,6 @@ export interface TipologieCocktail {
  */
 export interface Bevande {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   /**
    * Se bevanda è visibile nel menu pubblico
    */
@@ -786,10 +734,6 @@ export interface Bevande {
  */
 export interface TipologieBevanda {
   id: number;
-  /**
-   * Numero per ordinare manualmente gli elementi. Valori più bassi vengono mostrati prima (es. 10 prima di 20).
-   */
-  order?: number | null;
   nome: string;
   /**
    * Testo lungo per descrizione dettagliata
@@ -1015,7 +959,6 @@ export interface PayloadMigration {
 export interface PiattiSelect<T extends boolean = true> {
   inLista?: T;
   soloMenuFissi?: T;
-  order?: T;
   nome?: T;
   prezzo?: T;
   categoria?: T;
@@ -1050,7 +993,6 @@ export interface ServiziAccessoriSelect<T extends boolean = true> {
  */
 export interface MenuFissoSelect<T extends boolean = true> {
   inLista?: T;
-  order?: T;
   nome?: T;
   categoria?: T;
   prezzo?: T;
@@ -1066,7 +1008,6 @@ export interface MenuFissoSelect<T extends boolean = true> {
  * via the `definition` "vini_select".
  */
 export interface ViniSelect<T extends boolean = true> {
-  order?: T;
   inLista?: T;
   nome?: T;
   descrizione?: T;
@@ -1090,7 +1031,6 @@ export interface ViniSelect<T extends boolean = true> {
  * via the `definition` "birre_select".
  */
 export interface BirreSelect<T extends boolean = true> {
-  order?: T;
   inLista?: T;
   nome?: T;
   descrizione?: T;
@@ -1108,7 +1048,6 @@ export interface BirreSelect<T extends boolean = true> {
  * via the `definition` "liquori_select".
  */
 export interface LiquoriSelect<T extends boolean = true> {
-  order?: T;
   inLista?: T;
   nome?: T;
   descrizione?: T;
@@ -1127,7 +1066,6 @@ export interface LiquoriSelect<T extends boolean = true> {
  * via the `definition` "cocktail_select".
  */
 export interface CocktailSelect<T extends boolean = true> {
-  order?: T;
   inLista?: T;
   nome?: T;
   descrizione?: T;
@@ -1143,7 +1081,6 @@ export interface CocktailSelect<T extends boolean = true> {
  * via the `definition` "bevande_select".
  */
 export interface BevandeSelect<T extends boolean = true> {
-  order?: T;
   inLista?: T;
   nome?: T;
   descrizione?: T;
@@ -1172,7 +1109,6 @@ export interface AllergeniSelect<T extends boolean = true> {
  */
 export interface CategoriaMenuFissoSelect<T extends boolean = true> {
   inLista?: T;
-  order?: T;
   nome?: T;
   descrizione?: T;
   elementi?: T;
@@ -1186,7 +1122,6 @@ export interface CategoriaMenuFissoSelect<T extends boolean = true> {
  */
 export interface CategoriaPiattiSelect<T extends boolean = true> {
   inLista?: T;
-  order?: T;
   nome?: T;
   descrizione?: T;
   elementi?: T;
@@ -1199,7 +1134,6 @@ export interface CategoriaPiattiSelect<T extends boolean = true> {
  * via the `definition` "tipologie-vino_select".
  */
 export interface TipologieVinoSelect<T extends boolean = true> {
-  order?: T;
   nome?: T;
   descrizione?: T;
   updatedAt?: T;
@@ -1211,7 +1145,6 @@ export interface TipologieVinoSelect<T extends boolean = true> {
  * via the `definition` "tipologie-birra_select".
  */
 export interface TipologieBirraSelect<T extends boolean = true> {
-  order?: T;
   nome?: T;
   descrizione?: T;
   updatedAt?: T;
@@ -1223,7 +1156,6 @@ export interface TipologieBirraSelect<T extends boolean = true> {
  * via the `definition` "tipologie-liquore_select".
  */
 export interface TipologieLiquoreSelect<T extends boolean = true> {
-  order?: T;
   nome?: T;
   descrizione?: T;
   updatedAt?: T;
@@ -1235,7 +1167,6 @@ export interface TipologieLiquoreSelect<T extends boolean = true> {
  * via the `definition` "tipologie-cocktail_select".
  */
 export interface TipologieCocktailSelect<T extends boolean = true> {
-  order?: T;
   nome?: T;
   descrizione?: T;
   updatedAt?: T;
@@ -1247,7 +1178,6 @@ export interface TipologieCocktailSelect<T extends boolean = true> {
  * via the `definition` "tipologie-bevanda_select".
  */
 export interface TipologieBevandaSelect<T extends boolean = true> {
-  order?: T;
   nome?: T;
   descrizione?: T;
   updatedAt?: T;
@@ -2515,6 +2445,7 @@ export interface OrdinamentoMenu {
    * Se raggruppare le bevande per tipologia.
    */
   bevandeGroupBy?: ('nessuno' | 'tipologia') | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2643,6 +2574,7 @@ export interface OrdinamentoMenuSelect<T extends boolean = true> {
   bevandeOrderBy?: T;
   bevandeOrderDirection?: T;
   bevandeGroupBy?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
