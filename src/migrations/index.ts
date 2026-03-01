@@ -8,6 +8,7 @@ import * as migration_20260301_094851 from './20260301_094851';
 import * as migration_20260301_112246 from './20260301_112246';
 import * as migration_20260301_114921 from './20260301_114921';
 import * as migration_20260301_131512_add_order_fields from './20260301_131512_add_order_fields';
+import * as migration_20260301_150108_create_ordinamento_menu from './20260301_150108_create_ordinamento_menu';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20260301_131512_add_order_fields.up,
     down: migration_20260301_131512_add_order_fields.down,
-    name: '20260301_131512_add_order_fields'
+    name: '20260301_131512_add_order_fields',
+  },
+  {
+    up: migration_20260301_150108_create_ordinamento_menu.up,
+    down: migration_20260301_150108_create_ordinamento_menu.down,
+    name: '20260301_150108_create_ordinamento_menu'
   },
 ];

@@ -146,10 +146,12 @@ export interface Config {
   globals: {
     generali: Generali;
     'menu-config': MenuConfig;
+    'ordinamento-menu': OrdinamentoMenu;
   };
   globalsSelect: {
     generali: GeneraliSelect<false> | GeneraliSelect<true>;
     'menu-config': MenuConfigSelect<false> | MenuConfigSelect<true>;
+    'ordinamento-menu': OrdinamentoMenuSelect<false> | OrdinamentoMenuSelect<true>;
   };
   locale: null;
   user: User & {
@@ -2424,6 +2426,99 @@ export interface MenuConfig {
   createdAt?: string | null;
 }
 /**
+ * Configura l'ordine delle categorie nel menu e le regole di ordinamento/raggruppamento degli elementi.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ordinamento-menu".
+ */
+export interface OrdinamentoMenu {
+  id: number;
+  /**
+   * Note interne sull'ordinamento del menu (non visibili nel frontend).
+   */
+  noteOrdinamento?: string | null;
+  /**
+   * Trascina le categorie per definire l'ordine di visualizzazione nel menu. Le categorie non incluse qui vengono mostrate in coda.
+   */
+  categoriePiatti?: (number | CategoriaPiatti)[] | null;
+  /**
+   * Criterio di ordinamento dei piatti all'interno di ogni categoria.
+   */
+  piattiOrderBy?: ('order' | 'nome' | 'prezzo' | 'createdAt') | null;
+  piattiOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare i piatti in sottosezioni all'interno della categoria.
+   */
+  piattiGroupBy?: ('nessuno' | 'sottocategoria') | null;
+  /**
+   * Trascina le tipologie per definire l'ordine di visualizzazione nella carta vini. Le tipologie non incluse vengono mostrate in coda.
+   */
+  tipologieVino?: (number | TipologieVino)[] | null;
+  /**
+   * Criterio di ordinamento dei vini all'interno di ogni tipologia.
+   */
+  viniOrderBy?: ('order' | 'nazione' | 'regione' | 'zona' | 'nome' | 'prezzo' | 'anno') | null;
+  viniOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare i vini in sottosezioni (es. per regione: "Toscana", "Piemonte", ecc.).
+   */
+  viniGroupBy?: ('nessuno' | 'nazione' | 'regione' | 'zona' | 'vitigno') | null;
+  /**
+   * Trascina le tipologie per definire l'ordine di visualizzazione nella carta liquori.
+   */
+  tipologieLiquore?: (number | TipologieLiquore)[] | null;
+  /**
+   * Criterio di ordinamento dei liquori all'interno di ogni tipologia.
+   */
+  liquoriOrderBy?: ('order' | 'nazione' | 'nome' | 'prezzo') | null;
+  liquoriOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare i liquori per nazione di origine.
+   */
+  liquoriGroupBy?: ('nessuno' | 'nazione') | null;
+  /**
+   * Trascina le tipologie per definire l'ordine di visualizzazione nella carta birre.
+   */
+  tipologieBirra?: (number | TipologieBirra)[] | null;
+  /**
+   * Criterio di ordinamento delle birre all'interno di ogni tipologia.
+   */
+  birreOrderBy?: ('order' | 'nome' | 'prezzo') | null;
+  birreOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare le birre in sottosezioni.
+   */
+  birreGroupBy?: ('nessuno' | 'tipologia' | 'nazione') | null;
+  /**
+   * Trascina le tipologie per definire l'ordine di visualizzazione nella carta cocktail.
+   */
+  tipologieCocktail?: (number | TipologieCocktail)[] | null;
+  /**
+   * Criterio di ordinamento dei cocktail all'interno di ogni tipologia.
+   */
+  cocktailOrderBy?: ('order' | 'nome' | 'prezzo') | null;
+  cocktailOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare i cocktail per tipologia.
+   */
+  cocktailGroupBy?: ('nessuno' | 'tipologia') | null;
+  /**
+   * Trascina le tipologie per definire l'ordine di visualizzazione nella carta bevande.
+   */
+  tipologieBevanda?: (number | TipologieBevanda)[] | null;
+  /**
+   * Criterio di ordinamento delle bevande all'interno di ogni tipologia.
+   */
+  bevandeOrderBy?: ('order' | 'nome' | 'prezzo') | null;
+  bevandeOrderDirection?: ('asc' | 'desc') | null;
+  /**
+   * Se raggruppare le bevande per tipologia.
+   */
+  bevandeGroupBy?: ('nessuno' | 'tipologia') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "generali_select".
  */
@@ -2514,6 +2609,40 @@ export interface MenuConfigSelect<T extends boolean = true> {
         end?: T;
       };
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ordinamento-menu_select".
+ */
+export interface OrdinamentoMenuSelect<T extends boolean = true> {
+  noteOrdinamento?: T;
+  categoriePiatti?: T;
+  piattiOrderBy?: T;
+  piattiOrderDirection?: T;
+  piattiGroupBy?: T;
+  tipologieVino?: T;
+  viniOrderBy?: T;
+  viniOrderDirection?: T;
+  viniGroupBy?: T;
+  tipologieLiquore?: T;
+  liquoriOrderBy?: T;
+  liquoriOrderDirection?: T;
+  liquoriGroupBy?: T;
+  tipologieBirra?: T;
+  birreOrderBy?: T;
+  birreOrderDirection?: T;
+  birreGroupBy?: T;
+  tipologieCocktail?: T;
+  cocktailOrderBy?: T;
+  cocktailOrderDirection?: T;
+  cocktailGroupBy?: T;
+  tipologieBevanda?: T;
+  bevandeOrderBy?: T;
+  bevandeOrderDirection?: T;
+  bevandeGroupBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

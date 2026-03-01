@@ -60,6 +60,7 @@ GET /api/vini?sort=order
 ### Globals
 - **`generali`** (`Ristorante impostazioni`): Orari settimanali, fasce pranzo/cena, chiusure e festività.
 - **`menu-config`** (`Ristorante configurazione`): Struttura e visibilità del menu (sezioni, filtri per categoria, visibilità per fascia oraria). Include branding (logo in sidebar, annotazione) e titolo del menu.
+- **`ordinamento-menu`** (`Ristorante configurazione`): Ordine visuale delle categorie/tipologie (manuale, drag & drop) e regole di sort/grouping automatico degli item per ogni sezione del menu.
 
 ## 🌐 Globals
 
@@ -273,6 +274,67 @@ Registrato in `src/app/(payload)/admin/importMap.js` con la chiave `"@/component
 - Le tab sono 3: **Generale** (Tab 1), **Menu Standard** (Tab 2), **Menu Speciale** (Tab 3).
 - **UX Sidebar**: `logo`, `isActive` e `activeRange` sono definiti come campi **root** (fuori dal campo `tabs`) con `admin: { position: 'sidebar' }` — appaiono nella colonna destra dell'editor Payload su tutte le tab. In Payload v3, `position: 'sidebar'` funziona solo a livello root, non dentro un tab annidato.
 - Il campo `title` (Tab 1) è un campo `text` opzionale che rappresenta il titolo del menu digitale mostrato nel frontend.
+
+---
+
+### `ordinamento-menu` — Ordine Visuale e Regole di Sort/Grouping
+
+**File**: `src/globals/OrdinamentoMenu.ts`
+**Slug**: `ordinamento-menu`
+**Tipo**: Global (Payload GlobalConfig)
+**Group**: `Ristorante configurazione`
+**Access**: `menuImpostazioniReadAccess` / `menuImpostazioniUpdateAccess`
+**Versions/Drafts**: ❌ Non abilitato
+
+Questo Global definisce **due livelli di configurazione** per il frontend:
+
+1. **Ordine manuale delle categorie/tipologie**: campi `relationship` con `hasMany: true` che l'editor ordina tramite drag & drop nell'admin UI. La sequenza dell'array determina l'ordine di visualizzazione nel menu.
+2. **Regole automatiche di sort e grouping**: campi `select` che indicano al frontend con quale criterio ordinare gli item e se raggrupparli in sottosezioni.
+
+#### Struttura per Tab
+
+| Tab | Campo Relationship | `orderBy` default | `groupBy` default |
+|---|---|---|---|
+| Piatti | `categoriePiatti` → `categoria-piatti` | `order` | `nessuno` |
+| Vini | `tipologieVino` → `tipologie-vino` | `order` | `regione` |
+| Liquori | `tipologieLiquore` → `tipologie-liquore` | `order` | `nazione` |
+| Birre | `tipologieBirra` → `tipologie-birra` | `order` | `nessuno` |
+| Cocktail | `tipologieCocktail` → `tipologie-cocktail` | `order` | `nessuno` |
+| Bevande | `tipologieBevanda` → `tipologie-bevanda` | `order` | `nessuno` |
+
+I nomi dei campi `select` seguono il pattern `{sezione}OrderBy`, `{sezione}OrderDirection`, `{sezione}GroupBy` (es. `piattiOrderBy`, `viniGroupBy`).
+
+#### Tabelle DB Generate
+
+- `ordinamento_menu` — tabella principale con tutti i campi select
+- `ordinamento_menu_rels` — tabella di join per le relationship `hasMany` (campo `order` per preservare la sequenza drag & drop)
+
+#### Integrazione Frontend
+
+Il frontend deve:
+1. Leggere `GET /api/globals/ordinamento-menu` all'avvio.
+2. Per ogni sezione, usare il campo relationship corrispondente per determinare l'ordine delle categorie/tipologie da mostrare.
+3. Usare `{sezione}OrderBy` e `{sezione}OrderDirection` come parametri `sort` nelle query agli item.
+4. Se `{sezione}GroupBy !== 'nessuno'`, raggruppare gli item per il campo indicato prima di renderizzarli.
+
+```typescript
+// Esempio: come il frontend usa questo global per i vini
+const ordinamento = await fetch('/api/globals/ordinamento-menu').then(r => r.json())
+
+// 1. Ordine tipologie
+const tipologieOrdinate = ordinamento.tipologieVino // array già ordinato
+
+// 2. Query vini con sort dal global
+const sortField = ordinamento.viniOrderBy      // es. 'order'
+const sortDir = ordinamento.viniOrderDirection  // es. 'asc'
+const vini = await fetch(`/api/vino?sort=${sortDir === 'desc' ? '-' : ''}${sortField}`)
+
+// 3. Raggruppamento
+const groupField = ordinamento.viniGroupBy  // es. 'regione'
+if (groupField !== 'nessuno') {
+  // raggruppa vini per il campo `groupField`
+}
+```
 
 ---
 

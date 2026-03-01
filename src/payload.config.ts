@@ -12,6 +12,7 @@ import { OAuth2Plugin } from 'payload-oauth2'
 import { migrations } from './migrations'
 import { Generali } from './globals/Generali'
 import { MenuConfig } from './globals/MenuConfig'
+import { OrdinamentoMenu } from './globals/OrdinamentoMenu'
 import { Users } from './collections/Users'
 import { cancelButtonPlugin } from './plugins/cancelButtonPlugin'
 import { Media } from './collections/Media'
@@ -140,7 +141,7 @@ export default buildConfig({
     Users,
     Media,
   ],
-  globals: [Generali, MenuConfig],
+  globals: [Generali, MenuConfig, OrdinamentoMenu],
   editor: lexicalEditor(),
   i18n: {
     supportedLanguages: { en, it },

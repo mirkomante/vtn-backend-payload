@@ -323,6 +323,7 @@ hooks: {
 ### Storia Recente
 
 **Marzo 2026**:
+- ✅ **Global `OrdinamentoMenu`**: Nuovo Global `ordinamento-menu` nel gruppo `Ristorante configurazione`. Definisce l'ordine drag & drop delle categorie/tipologie (6 tab: Piatti, Vini, Liquori, Birre, Cocktail, Bevande) e le regole di sort/groupBy per il frontend. Sidebar con campo `noteOrdinamento`. Migrazione DB generata: `20260301_150108_create_ordinamento_menu` (tabelle `ordinamento_menu` + `ordinamento_menu_rels`). Documentato in `AGENTS.md` → Globals e `API_REFERENCE.md` → Globals API.
 - ✅ **Ordinamento Manuale (`order` field)**: Aggiunto campo numerico `order` a tutte le collection principali del menu (`Piatti`, `MenuFisso`, `CategoriaPiatti`, `CategoriaMenuFisso`, tutte le `Tipologie*`, tutte le bevande via factory). `defaultSort: 'order'` impostato su ogni collection. Migrazione DB generata: `20260301_131512_add_order_fields`. Documentato in `AGENTS.md` → Domain Model.
 - ✅ **UX Standard Lexical**: Definito standard di progetto per i campi `richText` — Fixed Toolbar obbligatoria, set minimo di feature (Bold, Italic, Underline, UnorderedList, Link). Documentato in `AGENTS.md` → UX Standards.
 - ✅ **Global `menu-config` — Refactoring UI**: Tab "Identità" rinominata "Generale", aggiunto campo `title`, sidebar con `logo`/`isActive`/`activeRange` spostata al root (fuori dai tabs). Campo `annotazione` aggiornato con `UnorderedListFeature` e `LinkFeature`.
@@ -417,6 +418,9 @@ Quando aggiungi funzionalità o fix:
 - `icona sezione` → [AGENTS.md](./AGENTS.md) → sezione menu-config MenuItemArray
 - `order` / `ordinamento` / `sort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
 - `defaultSort` → [AGENTS.md](./AGENTS.md) → sezione Domain Model → Manual Ordering
+- `ordinamento-menu` / `OrdinamentoMenu` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
+- `groupBy` / `orderBy` / `drag and drop categorie` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
+- `ordinamento_menu_rels` → [AGENTS.md](./AGENTS.md) → sezione Globals → ordinamento-menu
 
 ---
 

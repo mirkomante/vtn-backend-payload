@@ -17,6 +17,9 @@ Documentazione completa delle API REST e GraphQL del backend Payload CMS.
   - [Allergeni](#allergeni)
   - [Media](#media)
   - [Media Ristorante](#media-ristorante)
+- [Globals API](#globals-api)
+  - [menu-config](#menu-config)
+  - [ordinamento-menu](#ordinamento-menu)
 - [Querying](#querying)
 - [GraphQL](#graphql)
 - [Webhook & Events](#webhook--events)
@@ -166,33 +169,38 @@ Tutte le collections seguono lo stesso pattern REST:
 | Campo | Tipo | Descrizione | Required |
 |-------|------|-------------|----------|
 | `nome` | `string` | Nome del piatto | ✅ |
-| `descrizione` | `richText` | Descrizione del piatto | ❌ |
+| `descrizione` | `string` | Descrizione del piatto | ❌ |
 | `prezzo` | `number` | Prezzo (max 10 cifre, 2 decimali) | ✅ |
 | `inLista` | `boolean` | Visibile nel menu pubblico | ✅ (default: `true`) |
+| `soloMenuFissi` | `boolean` | Disponibile solo nei menu fissi | ❌ (default: `false`) |
 | `glutenFree` | `boolean` | Senza glutine | ❌ (default: `false`) |
 | `noUovo` | `boolean` | Senza uova | ❌ (default: `false`) |
 | `noLatticini` | `boolean` | Senza latticini | ❌ (default: `false`) |
+| `vegan` | `boolean` | Vegano | ❌ (default: `false`) |
 | `categoria` | `relationship` | Categoria piatto (`categoria-piatti`) | ✅ |
 | `allergeni` | `relationship[]` | Lista allergeni | ❌ |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
+
+> **Nota ordinamento**: Il backend restituisce i piatti ordinati per `order` di default (`defaultSort: 'order'`). Elementi senza `order` vengono restituiti in coda. Per rispettare l'ordinamento editoriale, usa sempre `sort=order` nelle query frontend.
 
 #### Esempi
 
-**Lista piatti pubblicati e visibili**:
+**Lista piatti pubblicati e visibili (con ordinamento editoriale)**:
 
 ```bash
-GET /api/piatti?where[_status][equals]=published&where[inLista][equals]=true&limit=20
+GET /api/piatti?where[_status][equals]=published&where[inLista][equals]=true&sort=order&limit=20
 ```
 
 **Piatti senza glutine**:
 
 ```bash
-GET /api/piatti?where[glutenFree][equals]=true
+GET /api/piatti?where[glutenFree][equals]=true&sort=order
 ```
 
 **Piatti di una categoria specifica**:
 
 ```bash
-GET /api/piatti?where[categoria][equals]=CATEGORIA_ID
+GET /api/piatti?where[categoria][equals]=CATEGORIA_ID&sort=order
 ```
 
 **Crea nuovo piatto** (admin only):
@@ -238,19 +246,20 @@ Content-Type: application/json
 | Campo | Tipo | Descrizione | Required |
 |-------|------|-------------|----------|
 | `nome` | `string` | Nome del menu | ✅ |
-| `descrizione` | `richText` | Descrizione del menu | ❌ |
+| `descrizione` | `string` | Descrizione del menu | ❌ |
 | `prezzo` | `number` | Prezzo totale | ✅ |
 | `inLista` | `boolean` | Visibile nel menu pubblico | ✅ (default: `true`) |
 | `categoria` | `relationship` | Categoria menu (`categoria-menu-fisso`) | ✅ |
 | `piatti` | `relationship[]` | Piatti inclusi | ❌ |
 | `servizi` | `relationship[]` | Servizi accessori inclusi | ❌ |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 #### Esempi
 
-**Lista menu pubblicati**:
+**Lista menu pubblicati (con ordinamento editoriale)**:
 
 ```bash
-GET /api/menu-fisso?where[_status][equals]=published&where[inLista][equals]=true&depth=2
+GET /api/menu-fisso?where[_status][equals]=published&where[inLista][equals]=true&sort=order&depth=2
 ```
 
 **Menu con piatti popolati**:
@@ -296,42 +305,33 @@ GET /api/menu-fisso/MENU_ID?depth=2
 | Campo | Tipo | Descrizione | Required |
 |-------|------|-------------|----------|
 | `nome` | `string` | Nome del vino | ✅ |
-| `descrizione` | `richText` | Descrizione del vino | ❌ |
-| `prezzo` | `number` | Prezzo | ✅ |
-| `inLista` | `boolean` | Visibile nella carta vini | ✅ |
-| `categoria` | `select` | Tipologia vino | ✅ |
-| `produttore` | `string` | Nome produttore | ❌ |
-| `annata` | `number` | Anno di produzione | ❌ |
-| `gradazione` | `number` | Gradazione alcolica | ❌ |
-| `zona` | `relationship` | Zona geografica | ❌ |
-| `regione` | `relationship` | Regione | ❌ |
-| `nazione` | `relationship` | Nazione | ❌ |
-
-#### Categorie Vino
-
-```typescript
-enum CategoriaVino {
-  'bianco' = 'Bianco',
-  'rosso' = 'Rosso',
-  'rosato' = 'Rosato',
-  'bollicine' = 'Bollicine',
-  'passito' = 'Passito',
-  'liquoroso' = 'Liquoroso'
-}
-```
+| `descrizione` | `string` | Descrizione del vino | ❌ |
+| `prezzo` | `number` | Prezzo bottiglia | ✅ |
+| `prezzoCalice` | `number` | Prezzo al calice | ❌ |
+| `inLista` | `boolean` | Visibile nella carta vini | ✅ (default: `true`) |
+| `tipologia` | `relationship` | Tipologia vino (`tipologie-vino`) | ✅ |
+| `cantina` | `string` | Nome cantina produttrice | ❌ |
+| `anno` | `string` | Anno di produzione (es. "2020", "NV") | ❌ |
+| `grado` | `string` | Grado alcolico (es. "13.5%") | ❌ |
+| `capacita` | `string` | Capacità bottiglia (es. "750ml") | ❌ |
+| `certificazione` | `string` | Certificazione (es. DOC, DOCG, IGT) | ❌ |
+| `nazione` | `relationship` | Nazione di produzione (`nazioni`) | ✅ |
+| `regione` | `relationship` | Regione di produzione (`regioni`) | ❌ |
+| `zona` | `relationship` | Zona di produzione (`zone`) | ❌ |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 #### Esempi
 
-**Vini rossi toscani**:
+**Vini con ordinamento editoriale**:
 
 ```bash
-GET /api/vini?where[categoria][equals]=rosso&where[regione.nome][equals]=Toscana&depth=1
+GET /api/vini?where[_status][equals]=published&where[inLista][equals]=true&sort=order&depth=1
 ```
 
 **Vini per fascia di prezzo**:
 
 ```bash
-GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
+GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50&sort=order
 ```
 
 ---
@@ -343,17 +343,17 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
 
 #### Schema
 
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `nome` | `string` | Nome della birra |
-| `descrizione` | `richText` | Descrizione |
-| `prezzo` | `number` | Prezzo |
-| `inLista` | `boolean` | Visibile |
-| `produttore` | `string` | Birrificio |
-| `gradazione` | `number` | Gradazione alcolica |
-| `formato` | `string` | Formato (es. "33cl", "75cl") |
-| `tipologia` | `relationship` | Tipologia birra |
-| `nazione` | `relationship` | Nazione di origine |
+| Campo | Tipo | Descrizione | Required |
+|-------|------|-------------|----------|
+| `nome` | `string` | Nome della birra | ✅ |
+| `descrizione` | `string` | Descrizione | ❌ |
+| `prezzo` | `number` | Prezzo | ✅ |
+| `inLista` | `boolean` | Visibile | ✅ (default: `true`) |
+| `tipologia` | `relationship` | Tipologia birra (`tipologie-birra`) | ✅ |
+| `grado` | `string` | Grado alcolico (es. "5.2%") | ❌ |
+| `capacita` | `string` | Capacità (es. "33cl", "50cl") | ❌ |
+| `nazione` | `relationship` | Nazione di origine (`nazioni`) | ✅ |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ---
 
@@ -364,14 +364,15 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
 
 #### Schema
 
-| Campo | Tipo | Descrizione |
-|-------|------|-------------|
-| `nome` | `string` | Nome cocktail |
-| `descrizione` | `richText` | Descrizione |
-| `prezzo` | `number` | Prezzo |
-| `inLista` | `boolean` | Visibile |
-| `ingredienti` | `text` | Lista ingredienti |
-| `categoria` | `select` | Categoria cocktail |
+| Campo | Tipo | Descrizione | Required |
+|-------|------|-------------|----------|
+| `nome` | `string` | Nome cocktail | ✅ |
+| `descrizione` | `string` | Descrizione | ❌ |
+| `prezzo` | `number` | Prezzo | ✅ |
+| `inLista` | `boolean` | Visibile | ✅ (default: `true`) |
+| `tipologia` | `relationship` | Tipologia cocktail (`tipologie-cocktail`) | ✅ |
+| `nazione` | `relationship` | Nazione di origine (`nazioni`) | ❌ (opzionale) |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
 
 ---
 
@@ -382,13 +383,15 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
 **Slug**: `categoria-piatti`  
 **Endpoint**: `/api/categoria-piatti`
 
-```json
-{
-  "id": "cat1",
-  "nome": "Antipasti",
-  "descrizione": "Stuzzichini e antipasti",
-  "ordine": 1
-}
+| Campo | Tipo | Descrizione | Required |
+|-------|------|-------------|----------|
+| `nome` | `string` | Nome della categoria | ✅ |
+| `descrizione` | `string` | Descrizione opzionale | ❌ |
+| `inLista` | `boolean` | Visibile nel menu pubblico | ✅ (default: `true`) |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
+
+```bash
+GET /api/categoria-piatti?where[_status][equals]=published&sort=order
 ```
 
 #### Categoria Menu Fisso
@@ -396,13 +399,15 @@ GET /api/vini?where[prezzo][greater_than]=20&where[prezzo][less_than]=50
 **Slug**: `categoria-menu-fisso`  
 **Endpoint**: `/api/categoria-menu-fisso`
 
-```json
-{
-  "id": "cat2",
-  "nome": "Menu Degustazione",
-  "descrizione": "Menu completi",
-  "ordine": 1
-}
+| Campo | Tipo | Descrizione | Required |
+|-------|------|-------------|----------|
+| `nome` | `string` | Nome della categoria | ✅ |
+| `descrizione` | `string` | Descrizione opzionale | ❌ |
+| `inLista` | `boolean` | Visibile nel menu | ✅ (default: `true`) |
+| `order` | `number` | Priorità di ordinamento manuale | ❌ |
+
+```bash
+GET /api/categoria-menu-fisso?where[_status][equals]=published&sort=order
 ```
 
 ---
@@ -545,6 +550,237 @@ GET /api/media-ristorante/MEDIA_ID
 
 ---
 
+## Globals API
+
+I Globals sono documenti singleton — esiste una sola istanza per ciascuno. L'endpoint è:
+
+```
+GET /api/globals/{slug}
+```
+
+Nessuna paginazione, nessun `docs[]`: la risposta è direttamente l'oggetto documento.
+
+> **Access**: lettura pubblica (utenti non autenticati vedono solo la versione `published`), scrittura solo admin.
+
+---
+
+### `menu-config`
+
+**Endpoint**: `GET /api/globals/menu-config`
+**Scopo**: Struttura e visibilità del menu — quali sezioni mostrare, con quale titolo, logo e regole di visibilità per fascia oraria.
+
+#### Logica di override (CRITICA per il frontend)
+
+```
+1. Leggi menu-config
+2. Se specialItems.isActive === true
+   E data corrente >= activeRange.start
+   E data corrente <= activeRange.end
+   → usa specialItems come lista sezioni
+3. Altrimenti → usa standardItems
+```
+
+#### Schema risposta
+
+```typescript
+{
+  id: number,
+  title?: string,                  // Titolo del menu digitale
+  annotazione?: object,            // RichText Lexical (bold/italic/underline/list/link)
+  logo?: {                         // Upload → media-ristorante
+    id: number,
+    url: string,
+    alt: string,
+    width: number,
+    height: number,
+  },
+  standardItems: MenuSection[],    // Sezioni sempre attive
+  specialItems: MenuSection[],     // Sezioni override (periodo speciale)
+  isActive: boolean,               // Se il menu speciale è attivo
+  activeRange: {
+    start: string,                 // ISO date
+    end: string,                   // ISO date
+  },
+  updatedAt: string,
+  createdAt: string,
+}
+
+// MenuSection
+{
+  id: string,
+  label: string,                   // Titolo sezione (es. "I Nostri Primi")
+  sourceCollection: string[],      // es. ['piatti'], ['vini'], ['menu-fisso']
+  visibilita: 'always' | 'lunch_only' | 'dinner_only',
+  categoriaFilter?: { id, nome },  // Filtra per categoria specifica (opzionale)
+  icona?: { id, url, alt },        // Icona sezione (opzionale)
+}
+```
+
+#### Esempio
+
+```bash
+GET /api/globals/menu-config?depth=1
+```
+
+```json
+{
+  "id": 1,
+  "title": "Il Nostro Menu",
+  "isActive": false,
+  "standardItems": [
+    {
+      "id": "abc1",
+      "label": "Antipasti",
+      "sourceCollection": ["piatti"],
+      "visibilita": "always",
+      "categoriaFilter": { "id": 3, "nome": "Antipasti" }
+    },
+    {
+      "id": "abc2",
+      "label": "Carta Vini",
+      "sourceCollection": ["vini"],
+      "visibilita": "always"
+    }
+  ],
+  "specialItems": [],
+  "activeRange": { "start": null, "end": null }
+}
+```
+
+---
+
+### `ordinamento-menu`
+
+**Endpoint**: `GET /api/globals/ordinamento-menu`
+**Scopo**: Definisce l'ordine visuale delle categorie/tipologie (drag & drop editoriale) e le regole di sort/grouping automatico degli item per ogni sezione del menu.
+
+Il frontend **deve leggere questo global** per sapere:
+1. In quale sequenza mostrare le categorie/tipologie (array relationship ordinato).
+2. Con quale criterio ordinare gli item dentro ogni sezione (`orderBy` + `orderDirection`).
+3. Se raggruppare gli item in sottosezioni (`groupBy`).
+
+#### Schema risposta
+
+```typescript
+{
+  id: number,
+
+  // ── Piatti ──────────────────────────────────────────────────────────────
+  categoriePiatti: CategoriaPiatti[],          // Ordine editoriale categorie
+  piattiOrderBy: 'order' | 'nome' | 'prezzo' | 'createdAt',
+  piattiOrderDirection: 'asc' | 'desc',
+  piattiGroupBy: 'nessuno' | 'sottocategoria',
+
+  // ── Vini ─────────────────────────────────────────────────────────────────
+  tipologieVino: TipologiaVino[],              // Ordine editoriale tipologie
+  viniOrderBy: 'order' | 'nazione' | 'regione' | 'zona' | 'nome' | 'prezzo' | 'anno',
+  viniOrderDirection: 'asc' | 'desc',
+  viniGroupBy: 'nessuno' | 'nazione' | 'regione' | 'zona' | 'vitigno',
+
+  // ── Liquori ───────────────────────────────────────────────────────────────
+  tipologieLiquore: TipologiaLiquore[],
+  liquoriOrderBy: 'order' | 'nazione' | 'nome' | 'prezzo',
+  liquoriOrderDirection: 'asc' | 'desc',
+  liquoriGroupBy: 'nessuno' | 'nazione',
+
+  // ── Birre ─────────────────────────────────────────────────────────────────
+  tipologieBirra: TipologiaBirra[],
+  birreOrderBy: 'order' | 'nome' | 'prezzo',
+  birreOrderDirection: 'asc' | 'desc',
+  birreGroupBy: 'nessuno' | 'tipologia' | 'nazione',
+
+  // ── Cocktail ──────────────────────────────────────────────────────────────
+  tipologieCocktail: TipologiaCocktail[],
+  cocktailOrderBy: 'order' | 'nome' | 'prezzo',
+  cocktailOrderDirection: 'asc' | 'desc',
+  cocktailGroupBy: 'nessuno' | 'tipologia',
+
+  // ── Bevande ───────────────────────────────────────────────────────────────
+  tipologieBevanda: TipologiaBevanda[],
+  bevandeOrderBy: 'order' | 'nome' | 'prezzo',
+  bevandeOrderDirection: 'asc' | 'desc',
+  bevandeGroupBy: 'nessuno' | 'tipologia',
+
+  noteOrdinamento?: string,                    // Note interne (ignorare nel frontend)
+  updatedAt: string,
+  createdAt: string,
+}
+```
+
+> **Depth**: usa `?depth=1` per ricevere gli oggetti categoria/tipologia popolati (con `id`, `nome`, ecc.) invece dei soli ID numerici.
+
+#### Esempio risposta (depth=1)
+
+```bash
+GET /api/globals/ordinamento-menu?depth=1
+```
+
+```json
+{
+  "id": 1,
+  "categoriePiatti": [
+    { "id": 2, "nome": "Antipasti" },
+    { "id": 5, "nome": "Primi" },
+    { "id": 3, "nome": "Secondi" }
+  ],
+  "piattiOrderBy": "order",
+  "piattiOrderDirection": "asc",
+  "piattiGroupBy": "nessuno",
+  "tipologieVino": [
+    { "id": 1, "nome": "Vini Rossi" },
+    { "id": 2, "nome": "Vini Bianchi" },
+    { "id": 3, "nome": "Bollicine" }
+  ],
+  "viniOrderBy": "order",
+  "viniOrderDirection": "asc",
+  "viniGroupBy": "regione",
+  "tipologieLiquore": [],
+  "liquoriOrderBy": "order",
+  "liquoriOrderDirection": "asc",
+  "liquoriGroupBy": "nazione"
+}
+```
+
+#### Pattern di utilizzo consigliato
+
+```typescript
+// 1. Carica il global all'avvio (una sola volta, cacheable)
+const ordinamento = await fetch('/api/globals/ordinamento-menu?depth=1').then(r => r.json())
+
+// 2. Ordine categorie piatti
+const categorieOrdinate = ordinamento.categoriePiatti  // già nell'ordine corretto
+
+// 3. Per ogni categoria, carica i piatti con il sort corretto
+const sortParam = ordinamento.piattiOrderDirection === 'desc'
+  ? `-${ordinamento.piattiOrderBy}`
+  : ordinamento.piattiOrderBy
+
+const piatti = await fetch(
+  `/api/piatti?where[categoria][equals]=${categoriaId}&where[inLista][equals]=true&sort=${sortParam}&depth=1`
+).then(r => r.json())
+
+// 4. Raggruppamento (se necessario)
+if (ordinamento.piattiGroupBy !== 'nessuno') {
+  const grouped = Object.groupBy(piatti.docs, item => item[ordinamento.piattiGroupBy])
+}
+
+// 5. Stesso pattern per vini (con groupBy regione di default)
+const viniSortParam = ordinamento.viniOrderDirection === 'desc'
+  ? `-${ordinamento.viniOrderBy}`
+  : ordinamento.viniOrderBy
+
+const vini = await fetch(`/api/vino?where[inLista][equals]=true&sort=${viniSortParam}&depth=2`).then(r => r.json())
+
+if (ordinamento.viniGroupBy !== 'nessuno') {
+  // es. groupBy 'regione' → item.regione.nome (depth=2 necessario)
+  const grouped = Object.groupBy(vini.docs, item => item[ordinamento.viniGroupBy]?.nome ?? 'Altro')
+}
+```
+
+> **Caching**: questo global cambia raramente. È consigliabile cacheare la risposta (es. `revalidate: 3600` in Next.js) e invalidare il cache tramite webhook quando viene aggiornato.
+
+---
+
 ## Querying
 
 ### Filtri WHERE
@@ -565,9 +801,12 @@ GET /api/media-ristorante/MEDIA_ID
 ### Ordinamento
 
 ```bash
-GET /api/piatti?sort=-prezzo  # Decrescente
-GET /api/piatti?sort=nome     # Crescente
+GET /api/piatti?sort=-prezzo  # Decrescente per prezzo
+GET /api/piatti?sort=nome     # Crescente per nome
+GET /api/piatti?sort=order    # Ordinamento editoriale manuale (consigliato)
 ```
+
+> **Ordinamento editoriale**: Le collection principali del menu (`piatti`, `menu-fisso`, `vini`, `birre`, `liquori`, `cocktail`, `bevande`, `categoria-piatti`, `categoria-menu-fisso`, `tipologie-*`) hanno `defaultSort: 'order'` — vengono già restituite ordinate per `order` anche senza specificare il parametro `sort`. Tuttavia, è buona pratica includerlo esplicitamente nelle query frontend per chiarezza. Elementi con `order` non impostato (`null`) vengono restituiti in coda (PostgreSQL: `NULLS LAST`).
 
 ### Paginazione
 
