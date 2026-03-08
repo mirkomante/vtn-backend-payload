@@ -1,0 +1,156 @@
+---
+description: Pattern hooks Payload — applicare quando si lavora su src/hooks/ o si aggiungono hooks a collections/globals
+alwaysApply: false
+globs: ["src/hooks/**/*.ts", "src/collections/**/*.ts", "src/globals/**/*.ts"]
+---
+
+# Pattern Hooks — PayloadCMS Backend
+
+## Smart Webhook — architettura Fast/Slow Path
+
+Il file `src/hooks/smartWebhook.ts` gestisce tutta la logica di pubblicazione.
+**Non duplicare mai questa logica — usare sempre `createSmartWebhook()`.**
+
+```
+afterChange su qualsiasi collection/global
+       │
+       ▼
+createSmartWebhook()
+       │
+       ├─ Fast Path ──→ aggrega dati → scrive disponibilita.json su GCS_MENU_BUCKET
+       │                (aggiornamento immediato, nessun rebuild)
+       │
+       └─ Slow Path ──→ pubblica messaggio su Pub/Sub topic 'rebuild-menu'
+                        (rebuild completo del frontend Next.js)
+```
+
+In `NODE_ENV=development`: mock mode — nessuna operazione GCP reale, solo log.
+
+## Utilizzo nelle collections
+
+```typescript
+import { createSmartWebhook } from '../hooks/smartWebhook'
+
+// In CollectionConfig:
+hooks: {
+  afterChange: [createSmartWebhook()],
+},
+```
+
+## Utilizzo nelle globals
+
+```typescript
+// In GlobalConfig — stesso pattern:
+hooks: {
+  afterChange: [createSmartWebhook()],
+},
+```
+
+## Cleanup relazioni orfane
+
+Usare `createCleanupHook` quando una collection è referenziata da altre.
+Previene riferimenti a documenti eliminati.
+
+```typescript
+import { createCleanupHook } from '../hooks/cleanupRelationships'
+
+// Esempio: prima di eliminare un piatto, rimuoverlo da tutti i menu-fisso
+hooks: {
+  beforeDelete: [
+    createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'piatti' }),
+  ],
+},
+
+// Esempio: prima di eliminare un servizio, rimuoverlo da tutti i menu-fisso
+hooks: {
+  beforeDelete: [
+    createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'servizi' }),
+  ],
+},
+```
+
+## Local API negli hook — overrideAccess obbligatorio
+
+Quando si chiama la Local API **per conto di un utente** (es. in un endpoint o hook che riceve `req.user`),
+bisogna sempre passare `overrideAccess: false`. Senza di esso, i permessi vengono ignorati anche se si passa `user`.
+
+```typescript
+// ❌ SECURITY BUG — access control bypassato nonostante user sia passato
+await req.payload.find({
+  collection: 'prenotazioni',
+  user: req.user,
+})
+
+// ✅ CORRETTO — applica i permessi dell'utente
+await req.payload.find({
+  collection: 'prenotazioni',
+  user: req.user,
+  overrideAccess: false,
+})
+
+// ✅ CORRETTO — operazione amministrativa server-side (nessun user, bypass intenzionale)
+await req.payload.find({
+  collection: 'prenotazioni',
+})
+```
+
+Regola: se passi `user` alla Local API, aggiungi sempre `overrideAccess: false`.
+
+## Validazione unicità composita (beforeChange)
+
+Per campi dove l'unicità dipende da una combinazione (es. nome + nazione):
+
+```typescript
+import { APIError } from 'payload'
+
+hooks: {
+  beforeChange: [
+    async ({ data, req, originalDoc }) => {
+      // Controlla unicità (nome, nazione)
+      const existing = await req.payload.find({
+        collection: 'regioni',
+        where: {
+          and: [
+            { nome: { equals: data.nome } },
+            { nazione: { equals: data.nazione } },
+            ...(originalDoc ? [{ id: { not_equals: originalDoc.id } }] : []),
+          ],
+        },
+      })
+      if (existing.totalDocs > 0) {
+        throw new APIError('Regione già esistente per questa nazione', 400)
+      }
+      return data
+    },
+  ],
+},
+```
+
+## Hook per trasformazioni dati (beforeChange)
+
+```typescript
+// Esempio: auto-uppercase su campo sigla (Nazione.ts)
+hooks: {
+  beforeChange: [
+    ({ data }) => {
+      if (data.sigla) data.sigla = data.sigla.toUpperCase()
+      return data
+    },
+  ],
+},
+```
+
+## Regola primo utente admin (Users.ts — non toccare)
+
+```typescript
+// Questo hook è già implementato in Users.ts — non replicare
+hooks: {
+  beforeChange: [
+    async ({ data, req }) => {
+      const count = await req.payload.count({ collection: 'users' })
+      if (count.totalDocs === 0) data.roles = ['admin']
+      return data
+    },
+  ],
+},
+```

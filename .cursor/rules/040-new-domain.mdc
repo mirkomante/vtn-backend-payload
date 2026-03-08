@@ -1,0 +1,86 @@
+---
+description: Istruzioni per aggiungere un nuovo dominio funzionale (affitti brevi, sito ristorante, prenotazioni) — leggere prima di qualsiasi sviluppo su nuovi domini
+alwaysApply: false
+---
+
+# Aggiunta Nuovo Dominio Funzionale — PayloadCMS Backend
+
+## Contesto
+
+Il backend gestisce attualmente **un solo dominio attivo**: menu ristorante.
+Sono pianificati tre nuovi domini:
+
+| Dominio | Stato | Frontend consumer |
+|---|---|---|
+| Menu ristorante | ✅ Attivo | `frontend-menu` (Next.js SSG) |
+| Sito ristorante + prenotazioni | ❌ Da sviluppare | `frontend-ristorante` (da creare) |
+| Sito affitti brevi | ❌ Da sviluppare | `frontend-affitti` (da creare) |
+
+## Separazione delle responsabilità — convenzione gruppi admin
+
+Ogni dominio ha il suo gruppo sidebar nell'admin panel. Non mescolare:
+
+| Dominio | Gruppo admin collections | Gruppo admin impostazioni |
+|---|---|---|
+| Menu ristorante | `Ristorante menu` | `Ristorante impostazioni` |
+| Sito ristorante | `Sito ristorante` (da creare) | `Sito ristorante impostazioni` |
+| Affitti brevi | `Affitti brevi` (da creare) | `Affitti brevi impostazioni` |
+| Prenotazioni | `Prenotazioni` (da creare) | — |
+
+## Checklist per aggiunta nuovo dominio
+
+### 1. Collections e Globals
+- [ ] Creare le collections nel gruppo admin dedicato (`src/collections/`)
+- [ ] Creare le globals di configurazione nel gruppo admin dedicato (`src/globals/`)
+- [ ] Aggiungere `versions: { drafts: true }` a tutte le collection/global pubbliche
+- [ ] Registrare tutto in `payload.config.ts`
+- [ ] Eseguire `pnpm payload migrate:create` per generare la migrazione DB
+
+### 2. Access Control
+- [ ] Valutare se i ruoli `admin` e `user` esistenti sono sufficienti
+- [ ] Se serve un ruolo dedicato (es. `gestore-affitti`): aggiungerlo al select in `Users.ts`
+- [ ] Creare nuove funzioni in `src/access/` seguendo il pattern delle esistenti
+- [ ] Aggiornare `docs/access-control.md`
+
+### 3. Smart Webhook — nuovo target frontend
+- [ ] Aprire `src/hooks/smartWebhook.ts`
+- [ ] Aggiungere il nuovo target all'array `FRONTEND_TARGETS` (attualmente solo `menu` è attivo)
+- [ ] Definire le collection che triggerano rebuild per il nuovo frontend
+- [ ] Verificare che il topic Pub/Sub sia corretto o creare un nuovo topic GCP
+
+### 4. Media / Storage
+- [ ] Decidere se usare i bucket GCS esistenti o creare nuovi bucket dedicati
+- [ ] Se nuovo bucket: aggiungere nuova istanza del plugin `gcsStorage` in `payload.config.ts`
+- [ ] Aggiungere le env vars necessarie (vedi `docs/setup.md`)
+
+### 5. Documentazione
+- [ ] Creare `docs/data-models/<slug>.md` per ogni nuova collection/global
+- [ ] Aggiornare `docs/architecture.md` con il nuovo dominio
+- [ ] Aggiornare `docs/access-control.md`
+- [ ] Aggiornare `docs/setup.md` con le nuove env vars
+- [ ] Aggiornare `docs/CHANGELOG.md`
+- [ ] Aggiornare `docs/STATUS.md`
+
+## Pattern raccomandato per le prenotazioni
+
+Le prenotazioni richiedono logica speciale (slot temporali, notifiche, stato).
+Considerare:
+- Collection `prenotazioni` con campi: `data`, `orario`, `coperti`, `nome`, `telefono`, `email`, `stato` (select: `confermata/annullata/in-attesa`), `note`
+- Global `config-prenotazioni` con: slot disponibili, max coperti per slot, giorni chiusura
+- Custom endpoint `POST /api/prenota` per il form pubblico (senza auth)
+- Hook `afterChange` su `prenotazioni` per notifiche email (da configurare)
+
+## Nota su multi-frontend Pub/Sub
+
+Il sistema supporta già più target. In `src/hooks/smartWebhook.ts`:
+
+```typescript
+// Attualmente attivo:
+const FRONTEND_TARGETS = [
+  { name: 'menu', pubsubTopic: 'rebuild-menu', collections: [...] },
+  // { name: 'corporate', pubsubTopic: 'rebuild-corporate', collections: [...] },  // futuro
+  // { name: 'shop', pubsubTopic: 'rebuild-shop', collections: [...] },            // futuro
+]
+```
+
+Decommentare e adattare quando si aggiunge un nuovo frontend.

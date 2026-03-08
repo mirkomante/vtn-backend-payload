@@ -1,0 +1,158 @@
+---
+description: Pattern per creare o modificare Collections — applicare quando si lavora su src/collections/
+alwaysApply: false
+globs: ["src/collections/**/*.ts"]
+---
+
+# Pattern Collections — PayloadCMS Backend
+
+## Anatomia di una collection standard
+
+```typescript
+import type { CollectionConfig } from 'payload'
+import { menuRistoranteReadAccess, menuRistoranteUpdateAccess, menuRistoranteDeleteAccess } from '../access/menuRistoranteAccess'
+import { createSmartWebhook } from '../hooks/smartWebhook'
+
+export const NomeCollection: CollectionConfig = {
+  slug: 'nome-slug',                    // kebab-case italiano
+  admin: {
+    group: 'Ristorante menu',           // gruppo sidebar admin
+    defaultColumns: ['nome', 'updatedAt'],
+    useAsTitle: 'nome',
+    defaultSort: 'updatedAt',           // MAI 'order' — campo rimosso
+  },
+  versions: {
+    drafts: true,                       // OBBLIGATORIO — vedi 001-stack.mdc
+  },
+  access: {
+    read:   menuRistoranteReadAccess,
+    update: menuRistoranteUpdateAccess,
+    delete: menuRistoranteDeleteAccess,
+  },
+  hooks: {
+    afterChange: [createSmartWebhook()],
+  },
+  fields: [
+    // sidebar — visibilità
+    {
+      name: 'inLista',
+      type: 'checkbox',
+      defaultValue: true,
+      required: true,
+      admin: { position: 'sidebar', description: 'Visibile nel menu pubblico' },
+    },
+    {
+      name: 'nome',
+      type: 'text',
+      required: true,
+      unique: true,
+    },
+    // ... altri campi
+  ],
+}
+```
+
+## Gruppi admin disponibili
+
+| Gruppo | Tipo di collection |
+|---|---|
+| `Ristorante menu` | piatti, bevande, menu fissi, vini, ecc. |
+| `Ristorante configurazione` | categorie, tipologie, allergeni, nazioni/regioni/zone |
+| `Ristorante impostazioni` | media-ristorante |
+| `Admin` | users, media |
+
+## Scelta funzioni di accesso
+
+```typescript
+// Per collection di contenuto menu (piatti, vini, birre, ecc.)
+import { menuRistoranteReadAccess, menuRistoranteUpdateAccess, menuRistoranteDeleteAccess }
+  from '../access/menuRistoranteAccess'
+
+// Per collection di configurazione (categorie, tipologie, allergeni, nazioni, ecc.)
+import { menuImpostazioniReadAccess, menuImpostazioniUpdateAccess, menuImpostazioniDeleteAccess }
+  from '../access/menuImpostazioniAccess'
+```
+
+Regola: le funzioni `*ReadAccess` restituiscono `{ _status: { equals: 'published' } }` per
+utenti non-admin → **obbligatorio `versions: { drafts: true }`** sulla collection.
+
+## Hook afterChange — Smart Webhook
+
+Tutte le collection che impattano il menu pubblico devono triggerare il webhook:
+
+```typescript
+hooks: {
+  afterChange: [createSmartWebhook()],
+},
+```
+
+## Hook beforeDelete — cleanup relazioni orfane
+
+Se una collection è referenziata da altre via relationship, aggiungere il cleanup:
+
+```typescript
+import { createCleanupHook } from '../hooks/cleanupRelationships'
+
+hooks: {
+  beforeDelete: [
+    createCleanupHook({ targetCollection: 'menu-fisso', relationshipField: 'piatti' }),
+  ],
+},
+```
+
+## Campi relationship — convenzioni
+
+```typescript
+// Singola relazione
+{
+  name: 'categoria',
+  type: 'relationship',
+  relationTo: 'categoria-piatti',
+  required: true,
+  hasMany: false,
+  maxDepth: 1,      // depth minima necessaria
+  admin: { position: 'sidebar' },
+}
+
+// Relazione multipla
+{
+  name: 'allergeni',
+  type: 'relationship',
+  relationTo: 'allergeni',
+  hasMany: true,
+  maxDepth: 1,
+}
+
+// Join (sola lettura — lato inverso della relazione)
+{
+  name: 'menuFissi',
+  type: 'join',
+  collection: 'menu-fisso',
+  on: 'piatti',
+  admin: { readOnly: true },
+}
+```
+
+## Campi prezzo — convenzione
+
+```typescript
+{
+  name: 'prezzo',
+  type: 'number',
+  required: true,
+  min: 0,
+  max: 99999999.99,
+  admin: { step: 0.01 },
+}
+```
+
+## Aggiunta nuova collection — checklist
+
+1. Crea `src/collections/NomeCollection.ts`
+2. Registra in `payload.config.ts` nell'array `collections`
+3. Esegui `pnpm payload migrate:create` per generare la migrazione
+4. Verifica che `versions: { drafts: true }` sia presente
+5. Verifica che `afterChange: [createSmartWebhook()]` sia presente se impatta il menu
+6. Aggiorna `docs/data-models/<slug>.md`
+7. Se la collection appartiene a un nuovo dominio funzionale, aggiorna `docs/architecture.md`
+8. Aggiorna `docs/CHANGELOG.md`

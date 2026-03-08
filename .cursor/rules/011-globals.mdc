@@ -1,0 +1,75 @@
+---
+description: Pattern per creare o modificare Globals — applicare quando si lavora su src/globals/
+alwaysApply: false
+globs: ["src/globals/**/*.ts"]
+---
+
+# Pattern Globals — PayloadCMS Backend
+
+## Globals esistenti (non duplicare responsabilità)
+
+| Slug | Responsabilità | Gruppo admin |
+|---|---|---|
+| `generali` | Orari apertura, fasce pranzo/cena, eccezioni/festività | Ristorante impostazioni |
+| `menu-config` | Struttura sezioni menu, visibilità slot/giorno, logo | Ristorante configurazione |
+| `ordinamento-menu` | Ordine categorie (drag&drop), sort/groupBy per sezione | Ristorante configurazione |
+
+Prima di creare una nuova Global, verificare che la responsabilità non ricada già in una delle tre esistenti.
+
+## Anatomia di una Global standard
+
+```typescript
+import type { GlobalConfig } from 'payload'
+import { menuImpostazioniReadAccess, menuImpostazioniUpdateAccess }
+  from '../access/menuImpostazioniAccess'
+
+export const NomeGlobal: GlobalConfig = {
+  slug: 'nome-global',
+  label: 'Label Admin',
+  admin: {
+    group: 'Ristorante configurazione',
+  },
+  versions: {
+    drafts: true,     // OBBLIGATORIO — stesso motivo delle collections
+  },
+  access: {
+    read:   menuImpostazioniReadAccess,
+    update: menuImpostazioniUpdateAccess,
+  },
+  fields: [
+    // campi...
+  ],
+}
+```
+
+## Registrazione obbligatoria
+
+Ogni nuova Global va aggiunta a `payload.config.ts` nell'array `globals`:
+
+```typescript
+globals: [Generali, MenuConfig, OrdinamentoMenu, NuovaGlobal],
+```
+
+## Versioni/Drafts — CRITICO
+
+Le funzioni `menuImpostazioniReadAccess` filtrano su `_status: published` per non-admin.
+Senza `versions: { drafts: true }`, Payload crasha.
+**Non creare mai una Global pubblica senza drafts.**
+
+## Quando usare Global vs Collection
+
+| Usa Global | Usa Collection |
+|---|---|
+| Dati singleton (esiste un solo documento) | Dati multipli (lista di elementi) |
+| Configurazioni di sistema | Contenuti del menu |
+| Impostazioni che cambiano raramente | Elementi che si aggiungono/rimuovono |
+
+## Aggiunta nuova Global — checklist
+
+1. Crea `src/globals/NomeGlobal.ts`
+2. Registra in `payload.config.ts` nell'array `globals`
+3. Verifica `versions: { drafts: true }`
+4. Se impatta il menu pubblico: aggiungi `afterChange` con `createSmartWebhook()`
+5. Aggiorna `docs/data-models/<slug>.md`
+6. Aggiorna `docs/architecture.md` se cambia la struttura generale
+7. Aggiorna `docs/CHANGELOG.md`

@@ -1,0 +1,126 @@
+---
+description: Pattern GCS e media upload — applicare quando si lavora con storage, media, o variabili GCS
+alwaysApply: false
+globs: ["src/collections/Media*.ts", "payload.config.ts"]
+---
+
+# GCS e Media Upload — PayloadCMS Backend
+
+## Architettura doppio bucket
+
+| Collection | Plugin | Env var | Scopo |
+|---|---|---|---|
+| `media` | `gcsPluginMedia` | `GCS_BUCKET` | Media generici sito (uso futuro) |
+| `media-ristorante` | `gcsPluginMenuMedia` | `GCS_MENU_BUCKET` | Logo e icone menu ristorante |
+
+I due plugin sono istanze separate configurate in `payload.config.ts`.
+**Non mescolare i bucket — ogni collection usa il suo plugin dedicato.**
+
+## Configurazione bucket GCS richiesta (produzione)
+
+Per ciascun bucket (`GCS_BUCKET` e `GCS_MENU_BUCKET`):
+- `allUsers` → `Storage Object Viewer` (lettura pubblica)
+- Access control: `Uniform` (non Fine-grained)
+- Public access prevention: `Not enforced`
+
+## Pattern critico — disableLocalStorage nel plugin
+
+```typescript
+// ✅ CORRETTO — valutato a runtime da Node.js
+gcsStorage({
+  collections: {
+    media: gcsEnabled ? { disableLocalStorage: true } : true,
+  },
+  bucket: process.env.GCS_BUCKET || '',
+  options: { projectId: process.env.GCP_PROJECT_ID },
+})
+
+// ❌ SBAGLIATO — compilato nel bundle a build-time
+// In Docker il valore è undefined al build → false hardcoded nel bundle
+upload: {
+  disableLocalStorage: Boolean(process.env.GCS_BUCKET),
+}
+```
+
+## Hook afterRead — URL pubblico GCS
+
+Ogni collection media sovrascrive `doc.url` a ogni lettura usando **il proprio bucket**.
+Non mescolare i bucket: `media` usa `GCS_BUCKET`, `media-ristorante` usa `GCS_MENU_BUCKET`.
+
+```typescript
+// ✅ CORRETTO — collection `media-ristorante` (usa GCS_MENU_BUCKET)
+hooks: {
+  afterRead: [
+    ({ doc }) => {
+      if (doc?.filename) {
+        doc.url = `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`
+      }
+      return doc
+    },
+  ],
+},
+
+// ✅ CORRETTO — collection `media` generica (usa GCS_BUCKET)
+hooks: {
+  afterRead: [
+    ({ doc }) => {
+      if (doc?.filename) {
+        doc.url = `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`
+      }
+      return doc
+    },
+  ],
+},
+
+// ❌ SBAGLIATO — usare GCS_MENU_BUCKET per la collection media generica
+```
+
+Questo è necessario come fallback per **Uniform Bucket Level Access** di GCS.
+
+## adminThumbnail — anteprime nell'admin
+
+Anche qui usare il bucket corretto per ciascuna collection:
+
+```typescript
+// collection `media-ristorante`
+upload: {
+  adminThumbnail: ({ doc }) =>
+    `https://storage.googleapis.com/${process.env.GCS_MENU_BUCKET}/${doc.filename}`,
+},
+
+// collection `media` generica
+upload: {
+  adminThumbnail: ({ doc }) =>
+    `https://storage.googleapis.com/${process.env.GCS_BUCKET}/${doc.filename}`,
+},
+```
+
+## Comportamento in locale (senza GCS)
+
+Se `GCS_BUCKET` / `GCS_MENU_BUCKET` non sono impostati:
+- I media vengono salvati in `/media` locale
+- Il Smart Webhook opera in mock mode (nessuna scrittura su GCS)
+- Il file `disponibilita.json` non viene pubblicato
+
+## Build-time trap Docker — ARG obbligatori
+
+In produzione il Dockerfile passa `GCS_BUCKET` e `GCP_PROJECT_ID` come `ARG` al build
+per garantire che il plugin GCS sia incluso nell'importMap di Next.js.
+Senza questi ARG, l'admin panel mostra una pagina bianca in produzione.
+
+```dockerfile
+# Nel Dockerfile — NON rimuovere
+ARG GCS_BUCKET
+ARG GCP_PROJECT_ID
+ENV GCS_BUCKET=$GCS_BUCKET
+ENV GCP_PROJECT_ID=$GCP_PROJECT_ID
+```
+
+## Aggiunta nuova collection con upload — checklist
+
+1. Decidere quale bucket usare (GCS_BUCKET o GCS_MENU_BUCKET)
+2. Aggiungere la collection al plugin corretto in `payload.config.ts`
+3. Implementare hook `afterRead` per URL pubblico GCS
+4. Implementare `adminThumbnail`
+5. Seguire il pattern `disableLocalStorage` nel plugin (non nella collection)
+6. Aggiornare `docs/data-models/<slug>.md`

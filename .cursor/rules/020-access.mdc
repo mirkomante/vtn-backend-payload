@@ -1,0 +1,79 @@
+---
+description: Pattern RBAC e access control — applicare quando si lavora su src/access/ o si definiscono permessi
+alwaysApply: false
+globs: ["src/access/**/*.ts", "src/collections/**/*.ts", "src/globals/**/*.ts"]
+---
+
+# RBAC e Access Control — PayloadCMS Backend
+
+## Ruoli esistenti
+
+| Ruolo | Accesso |
+|---|---|
+| `admin` | Lettura/scrittura completa — tutti i documenti (draft + published) |
+| `user` | Sola lettura — solo documenti `published` |
+
+Il campo `roles` è salvato nel JWT (`saveToJWT: true`): nessun lookup DB nelle funzioni di accesso.
+
+## Funzioni di accesso disponibili — NON riscrivere da zero
+
+```typescript
+// Per collection e globals del menu ristorante
+import { menuRistoranteReadAccess }   from '../access/menuRistoranteAccess'
+import { menuRistoranteUpdateAccess } from '../access/menuRistoranteAccess'
+import { menuRistoranteDeleteAccess } from '../access/menuRistoranteAccess'
+
+// Per collection e globals di configurazione/impostazioni
+import { menuImpostazioniReadAccess }   from '../access/menuImpostazioniAccess'
+import { menuImpostazioniUpdateAccess } from '../access/menuImpostazioniAccess'
+import { menuImpostazioniDeleteAccess } from '../access/menuImpostazioniAccess'
+```
+
+## Logica interna delle funzioni (per reference)
+
+```typescript
+// menuRistoranteReadAccess — identica a menuImpostazioniReadAccess
+export const menuRistoranteReadAccess: Access = ({ req: { user } }) => {
+  if (user?.roles?.includes('admin')) return true
+  return { _status: { equals: 'published' } }
+}
+
+// *UpdateAccess e *DeleteAccess
+export const menuRistoranteUpdateAccess: Access = ({ req: { user } }) => {
+  return user?.roles?.includes('admin') ?? false
+}
+```
+
+## Tabella di accesso completa
+
+| Risorsa | Non autenticato | user | admin |
+|---|---|---|---|
+| Collections menu | Solo `published` | Solo `published` | Tutti (draft + published) |
+| Collections config | Solo `published` | Solo `published` | Tutti |
+| Globals | Solo `published` | Solo `published` | Tutti |
+| Media / MediaRistorante | Lettura pubblica | Lettura pubblica | CRUD completo |
+| Users | — | — | CRUD completo |
+
+## Autenticazione — solo Google OAuth
+
+```typescript
+// ✅ CORRETTO — disableLocalStrategy è impostato in Users.ts
+// NON abilitare mai il login email/password
+
+// Flusso OAuth:
+// GET /api/users/oauth/google/authorize  → redirect Google
+// GET /api/users/oauth/google/callback   → crea/aggiorna utente → redirect /admin
+```
+
+## Primo utente — regola automatica
+
+Il `beforeChange` hook di `Users.ts` assegna automaticamente il ruolo `admin`
+al primo utente creato. Non toccare questa logica.
+
+## Aggiunta nuovo dominio funzionale — access control
+
+Quando si aggiunge un nuovo dominio (es. affitti brevi, prenotazioni), valutare:
+1. I ruoli `admin` e `user` esistenti sono sufficienti?
+2. Serve un nuovo ruolo dedicato (es. `gestore-affitti`)?
+3. Se sì → aggiungere al select `roles` in `Users.ts` e creare nuove funzioni in `src/access/`
+4. Aggiornare `docs/access-control.md`

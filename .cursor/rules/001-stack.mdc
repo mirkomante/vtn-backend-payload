@@ -1,0 +1,96 @@
+---
+description: Pattern architetturali e convenzioni di progetto — da leggere prima di qualsiasi intervento strutturale
+alwaysApply: false
+globs: ["src/**/*.ts", "payload.config.ts"]
+---
+
+# Stack e pattern architetturali — PayloadCMS Backend
+
+## Ruolo di questo backend
+
+Backend **headless centralizzato** per:
+- Menu digitale ristorante Vietnamonamour (attivo)
+- Sito web ristorante con prenotazioni (da sviluppare)
+- Sito vetrina affitti brevi (da sviluppare)
+
+Non serve HTML direttamente. Pubblica `disponibilita.json` su GCS e triggerа rebuild frontend via Pub/Sub.
+
+## Struttura directory src/
+
+```
+src/
+├── access/          # Funzioni di access control riutilizzabili
+├── collections/     # Una collection per file
+├── endpoints/       # Custom REST endpoints
+├── globals/         # Una global per file
+├── hooks/           # Hook riutilizzabili (smartWebhook, cleanup)
+├── lib/             # Utility e librerie (migration, ecc.)
+├── components/      # Componenti React per admin panel
+└── plugins/         # Plugin Payload custom
+```
+
+## Pattern factory — NON duplicare codice
+
+Le collection simili usano factory functions. Seguire sempre questo pattern:
+
+```typescript
+// ✅ CORRETTO — usa la factory esistente
+import { createBevandaCollection } from './factories/createBevandaCollection'
+export const Vino = createBevandaCollection({ slug: 'vini', nazioneOptional: false, ... })
+
+// ❌ SBAGLIATO — non copiare e incollare un'intera collection
+```
+
+Factory disponibili:
+- `createBevandaCollection` → Vino, Birra, Liquore, Cocktail, Bevanda
+- `createCategoriaCollection` → CategoriaPiatti, CategoriaMenuFisso
+- `createSimpleCollection` → tutte le Tipologie (×5)
+
+## Versioni/Drafts — regola critica
+
+**Tutte le collection e global con accesso pubblico DEVONO avere `versions: { drafts: true }`.**
+
+Motivo: le funzioni `menuRistoranteReadAccess` e `menuImpostazioniReadAccess` restituiscono
+`{ _status: { equals: 'published' } }` per utenti non-admin. Senza drafts, Payload crasha
+con `Cannot find field for path at _status`.
+
+```typescript
+// ✅ OBBLIGATORIO su ogni collection/global con accesso pubblico
+versions: {
+  drafts: true,
+},
+```
+
+## defaultSort — convenzione post-rimozione campo order
+
+Il campo `order` è stato rimosso da tutte le collections (migrazione `20260301_155509_remove_order_fields`).
+Usare sempre `defaultSort: 'updatedAt'` come fallback:
+
+```typescript
+// ✅ CORRETTO
+defaultSort: 'updatedAt',
+
+// ❌ NON usare — campo rimosso
+defaultSort: 'order',
+```
+
+## Registrazione in payload.config.ts
+
+Ogni nuova collection o global DEVE essere registrata in `payload.config.ts`.
+Non dimenticare di aggiungerla anche all'array corretto (`collections` o `globals`).
+
+## Doppio plugin GCS — pattern critico
+
+`disableLocalStorage` va configurato **nel plugin**, mai nella collection:
+
+```typescript
+// ✅ CORRETTO — valutato a runtime
+media: gcsEnabled ? { disableLocalStorage: true } : true,
+
+// ❌ SBAGLIATO — compilato nel bundle a build-time → undefined in Docker
+upload: { disableLocalStorage: Boolean(process.env.GCS_BUCKET) }
+```
+
+I due bucket hanno responsabilità distinte:
+- `GCS_BUCKET` → collection `media` (media generici, uso futuro)
+- `GCS_MENU_BUCKET` → collection `media-ristorante` + file `disponibilita.json`

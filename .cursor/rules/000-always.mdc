@@ -1,0 +1,50 @@
+---
+description: Regole universali — si applicano a OGNI task in questo repository
+alwaysApply: true
+---
+
+# Regole universali — PayloadCMS Backend
+
+## Stack di riferimento (non aggiornare senza istruzione esplicita)
+
+| Componente | Versione |
+|---|---|
+| PayloadCMS | 3.74.0 |
+| Next.js | 15.4.10 (App Router) |
+| Node.js | `^18.20.2 \|\| >=20.9.0` |
+| PostgreSQL | 17 (Cloud SQL in prod, locale in dev) |
+| TypeScript | 5.7.3 (strict mode) |
+| Package manager | pnpm (mai npm o yarn) |
+
+## Lingua e formato
+
+- Tutto il codice in **TypeScript** — zero `any` espliciti
+- Commenti nel codice in **italiano**
+- Nomi di slug e campi in **italiano** (es. `piatti`, `categoria`, `inLista`)
+- Nomi di file e funzioni in **inglese camelCase**
+
+## Regola obbligatoria — aggiornamento /docs
+
+**Il task NON è completato finché /docs non è aggiornato.**
+
+Prima di dichiarare il task completato, esegui obbligatoriamente:
+
+1. **Nuova collection / global / feature** → crea o aggiorna `docs/data-models/<slug>.md`
+2. **API modificata** → aggiorna `docs/api/<endpoint>.md`
+3. **Configurazione modificata** → aggiorna `docs/setup.md` e `docs/architecture.md`
+4. **Access control modificato** → aggiorna `docs/access-control.md`
+5. **Nuovo dominio funzionale aggiunto** → aggiorna `docs/STATUS.md`
+6. **SEMPRE** → aggiorna `docs/CHANGELOG.md` con:
+   - Data (YYYY-MM-DD)
+   - Descrizione sintetica della modifica
+   - File coinvolti
+   - Decisioni architetturali prese
+7. **Documentazione non allineata trovata** → correggila, segnala con `⚠️` nel CHANGELOG
+
+## Cosa non toccare mai senza istruzione esplicita
+
+- `payload.config.ts` — file critico, modifiche hanno effetti a cascata
+- File di migrazione esistenti in `src/migrations/` — mai editare, solo aggiungere
+- Logica di autenticazione OAuth in `src/collections/Users.ts`
+- Hook `src/hooks/smartWebhook.ts` — logica complessa già testata
+- Variabili d'ambiente: non aggiungere `.env` values al codice sorgente

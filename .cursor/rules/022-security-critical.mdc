@@ -1,8 +1,7 @@
 ---
-title: Critical Security Patterns
-description: The three most important security patterns in Payload CMS
-tags: [payload, security, critical, access-control, transactions, hooks]
-priority: high
+description: Pattern di sicurezza critici Payload — applicare sempre quando si lavora su hooks, access control o Local API
+alwaysApply: false
+globs: ["src/hooks/**/*.ts", "src/access/**/*.ts", "src/collections/**/*.ts", "src/globals/**/*.ts", "src/endpoints/**/*.ts"]
 ---
 
 # CRITICAL SECURITY PATTERNS
