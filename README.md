@@ -1,39 +1,79 @@
-# Sistema di Gestione Menu Ristorante (Backend Payload CMS)
+# vtn-backend-payload
 
-Questo progetto è un backend completo basato su **Payload CMS 3.0** e **Next.js 15**, progettato per la gestione di menu digitali, carte dei vini e configurazioni per ristoranti.
+Backend headless per la piattaforma **Vietnamonamour** — gestione menu digitale ristorante, carta vini, configurazioni, autenticazione e webhook intelligente per rebuild frontend.
 
-## 📂 Struttura della Documentazione
+Basato su **Payload CMS 3.74** · **Next.js 15** · **PostgreSQL 17** · **Google Cloud Run**
 
-La documentazione è stata riorganizzata per facilitare la navigazione:
+---
 
-### 👩‍💻 Per Sviluppatori
-- **[Guida allo Sviluppo Locale](./docs/dev/GETTING_STARTED.md)**: Setup, installazione e avvio.
-- **[Riferimento API](./docs/dev/API_REFERENCE.md)**: Dettagli su endpoint REST e GraphQL.
-- **[Troubleshooting](./docs/dev/TROUBLESHOOTING.md)**: Risoluzione problemi comuni (es. pagina bianca su Cloud Run).
-- **[Integrazione Tailwind](./docs/dev/TAILWIND_INTEGRATION.md)**: Guida allo styling dell'admin panel.
-- **[Guide di Migrazione](./docs/dev/MIGRATION_GUIDE.md)**: Storico delle migrazioni e guide.
+## Stack tecnologico
 
-### 🤖 Per Agenti AI
-- **[Context & Regole (AGENTS.md)](./docs/ai/AGENTS.md)**: Contesto del progetto, regole di sviluppo e struttura del database.
-- **[Docs Index](./docs/ai/DOCS_INDEX.md)**: Indice navigabile per l'ingestione automatica.
+| Componente | Versione |
+|---|---|
+| PayloadCMS | 3.74.0 |
+| Next.js | 15.4.10 (App Router) |
+| Node.js | `^18.20.2 \|\| >=20.9.0` |
+| PostgreSQL | 17 (Cloud SQL in prod) |
+| TypeScript | 5.7.3 (strict mode) |
+| Package manager | pnpm |
+| Auth | Google OAuth 2.0 (`payload-oauth2`) |
+| Storage | Google Cloud Storage (doppio bucket) |
+| Messaggistica | Google Cloud Pub/Sub |
 
-### 📦 Archivio
-- **[Archivio Task](./docs/archive/)**: Log di task completati e test passati.
+---
 
-## Stack Tecnologico
+## Documentazione
 
-- **Core**: [Payload CMS 3.74](https://payloadcms.com)
-- **Framework**: [Next.js 15](https://nextjs.org) (App Router)
-- **Database**: PostgreSQL (via Drizzle ORM)
-- **Storage**: Google Cloud Storage per i media
-- **Hosting**: Google Cloud Run
-- **CI/CD**: Cloud Build con GitHub connector
-- **Language**: TypeScript
+### Per sviluppatori
+
+| Documento | Contenuto |
+|---|---|
+| [`docs/SVILUPPO.md`](./docs/SVILUPPO.md) | Setup locale, variabili d'ambiente, comandi pnpm, migrazioni, deploy |
+| [`docs/ARCHITETTURA.md`](./docs/ARCHITETTURA.md) | Stack, infrastruttura GCP, diagramma flusso dati, pattern factory |
+| [`docs/STATO.md`](./docs/STATO.md) | Stato attuale per area, debiti tecnici, roadmap |
+| [`docs/dev/API_REFERENCE.md`](./docs/dev/API_REFERENCE.md) | Endpoint REST e GraphQL, schemi, esempi |
+| [`docs/dev/SMART_WEBHOOK.md`](./docs/dev/SMART_WEBHOOK_IMPLEMENTATION.md) | Sistema webhook Traffic Cop (Fast/Slow Path, GCS, Pub/Sub) |
+| [`docs/dev/TAILWIND_INTEGRATION.md`](./docs/dev/TAILWIND_INTEGRATION.md) | Tailwind CSS v4 nell'admin panel |
+| [`docs/dev/TROUBLESHOOTING.md`](./docs/dev/TROUBLESHOOTING.md) | Risoluzione problemi comuni |
+
+### Per agenti AI
+
+| Documento | Contenuto |
+|---|---|
+| [`docs/ai/AGENTS.md`](./docs/ai/AGENTS.md) | Context progetto, pattern critici, regole di sviluppo Payload |
+| [`docs/ai/DOCS_INDEX.md`](./docs/ai/DOCS_INDEX.md) | Indice navigabile per ingestione automatica |
+| [`KB_BACKEND.md`](./KB_BACKEND.md) | Knowledge base completa — stato verificato del codice |
+
+---
+
+## Avvio rapido
+
+```bash
+# Installa dipendenze
+pnpm install
+
+# Configura variabili d'ambiente
+cp .env.example .env
+# Modifica .env con DATABASE_URL, PAYLOAD_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+
+# Avvia in sviluppo
+pnpm dev
+```
+
+Admin panel: [http://localhost:3000/admin](http://localhost:3000/admin)  
+Login: solo Google OAuth (email/password disabilitato)
+
+Vedi [`docs/SVILUPPO.md`](./docs/SVILUPPO.md) per la guida completa.
+
+---
 
 ## Deploy
 
-Il deploy avviene automaticamente su Google Cloud Run tramite Cloud Build al push sul branch `main`.
-Vedi la [Guida allo Sviluppo](./docs/dev/GETTING_STARTED.md) per dettagli sulle variabili d'ambiente di produzione.
+Deploy automatico su Google Cloud Run via Cloud Build al push su `main`.
+
+Vedi [`docs/SVILUPPO.md`](./docs/SVILUPPO.md) → sezione Deploy.
+
+---
 
 ## Licenza
 

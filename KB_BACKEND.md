@@ -1,7 +1,8 @@
 # KB — PayloadCMS Backend
 
-> Generato il: 2026-03-08  
-> Basato su: lettura completa di `/docs`, `src/`, `package.json`, `Dockerfile`, `docker-compose.yml`
+> Aggiornato il: 2026-03-29 (audit completo del codice sorgente)  
+> Basato su: lettura diretta di tutti i file in `src/`, `docs/`, `package.json`, `Dockerfile`  
+> Versione precedente: 2026-03-08
 
 ---
 
@@ -675,11 +676,18 @@ Non configurate esplicitamente — Payload accetta tutti i tipi di file per defa
 - **Reservations / prenotazioni**: non presenti (il progetto è focalizzato solo sul menu digitale)
 - **Short-rental site content**: non presente (il progetto è solo per ristorante)
 
-### Known issues / TODO nei commenti
+### Known issues / Debiti tecnici (verificati nell'audit 2026-03-29)
 
-- ⚠️ `piattiOrderBy: 'order'` nel global `ordinamento-menu` referenzia un campo rimosso (vedi sopra)
-- Il `docker-compose.yml` usa `node:18-alpine` mentre il Dockerfile di produzione usa `node:22.17.0-alpine` — versioni diverse
-- Il `package.json` ha `"name": ""` (campo name vuoto)
+- ⚠️ **DT-01 [Alta]** `piattiOrderBy: 'order'` (e analoghi per tutte le 6 sezioni) è ancora il `defaultValue` in `OrdinamentoMenu.ts`, ma il campo `order` è stato rimosso con la migrazione `20260301_155509_remove_order_fields`. Il frontend che usa questo valore come parametro `sort` non otterrà ordinamento corretto.
+- ⚠️ **DT-02 [Alta]** Rate limiting documentato in `API_REFERENCE.md` (1000/100 req/min) ma **non implementato** nel codice.
+- ⚠️ **DT-03 [Media]** `LanguageToggle.tsx` esiste ma non è importato da nessun file — componente orfano.
+- ⚠️ **DT-04 [Media]** `GoogleLoginButton.tsx` esiste ma non è usato da `LoginView.tsx` (che ha il bottone inline) — componente orfano o duplicato.
+- ⚠️ **DT-05 [Media]** `docker-compose.yml` usa `node:18-alpine` mentre il Dockerfile di produzione usa `node:22.17.0-alpine`.
+- ⚠️ **DT-06 [Media]** `package.json` ha `"name": ""` (campo name vuoto).
+- ⚠️ **DT-07 [Media]** `docs/ai/DOCS_INDEX.md` cita `generali` come "convertita da Global a Collection" — nel codice è un **Global** (non Collection).
+- ⚠️ **DT-08 [Bassa]** `CancelButton.tsx` — da verificare se usato o sostituito da `SaveDraftButtonWithCancel`.
+- ⚠️ **DT-09 [Bassa]** `custom.scss` usa `!important` su elementi globali (`html`, `body`, headings).
+- ⚠️ **DT-10 [Bassa]** Nessuna configurazione MIME type per upload media.
 
 ---
 
